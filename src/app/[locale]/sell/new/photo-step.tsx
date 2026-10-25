@@ -2,12 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
-import {
-  MAX_DEFECT_PHOTOS,
-  PHOTO_SLOTS,
-  REQUIRED_SLOTS,
-  type PhotoSlot,
-} from "@/lib/car-catalog";
+import { MULTI_PHOTO_SLOTS, PHOTO_SLOTS, REQUIRED_SLOTS, isRequiredSlot, type PhotoSlot } from "@/lib/car-catalog";
 import { compressImage } from "@/lib/image";
 import { createClient } from "@/lib/supabase/client";
 import { SlotPictogram } from "./slot-pictogram";
@@ -71,12 +66,13 @@ export function PhotoStep({
       if (insertError) throw insertError;
 
       const photo = { id: data.id as string, path, preview: URL.createObjectURL(blob) };
-      // 필수 칸은 한 장만: 다시 찍으면 이전 사진을 지운다
-      const previous = slot === "defect" ? [] : (photos[slot] ?? []);
+      // 한 장짜리 칸은 다시 찍으면 이전 사진을 지운다
+      const multi = slot in MULTI_PHOTO_SLOTS;
+      const previous = multi ? [] : (photos[slot] ?? []);
       await Promise.all(previous.map((p) => removePhoto(slot, p)));
       onChange((prev) => ({
         ...prev,
-        [slot]: slot === "defect" ? [...(prev.defect ?? []), photo] : [photo],
+        [slot]: multi ? [...(prev[slot] ?? []), photo] : [photo],
       }));
     } catch {
       setError(t("photos.failed"));
@@ -113,33 +109,37 @@ export function PhotoStep({
         {PHOTO_SLOTS.map((slot) => {
           const slotPhotos = photos[slot] ?? [];
           const filled = slotPhotos.length > 0;
-          const canAdd = slot !== "defect" || slotPhotos.length < MAX_DEFECT_PHOTOS;
+          const max = MULTI_PHOTO_SLOTS[slot];
+          const multi = max !== undefined;
+          const canAdd = !multi || slotPhotos.length < max;
           return (
             <div
               key={slot}
               className={`flex flex-col overflow-hidden rounded-xl border bg-white ${
                 filled ? "border-success" : "border-ink/10"
-              } ${slot === "defect" ? "col-span-2" : ""}`}
+              } ${multi ? "col-span-2" : ""}`}
             >
               <div className="flex items-center justify-between px-3 pt-2">
                 <span className="text-body font-semibold">{t(`slots.${slot}.label`)}</span>
-                {slot === "defect" ? (
-                  <span className="text-caption text-ink/50">{t("photos.optional")}</span>
-                ) : filled ? (
-                  <span className="text-caption font-semibold text-success">✓</span>
-                ) : (
+                {filled ? (
+                  <span className="text-caption font-semibold text-success">
+                    ✓{multi && ` ${slotPhotos.length}/${max}`}
+                  </span>
+                ) : isRequiredSlot(slot) ? (
                   <span className="text-caption text-danger">{t("photos.required")}</span>
+                ) : (
+                  <span className="text-caption text-ink/50">{t("photos.optional")}</span>
                 )}
               </div>
 
               {filled ? (
-                <div className={`grid gap-1 p-2 ${slot === "defect" ? "grid-cols-4" : ""}`}>
+                <div className={`grid gap-1 p-2 ${multi ? "grid-cols-4" : ""}`}>
                   {slotPhotos.map((photo) => (
                     <div key={photo.id} className="relative aspect-[4/3]">
                       {/* 업로드 직후 미리보기(blob URL)라 next/image를 쓰지 않는다 */}
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={photo.preview} alt="" className="size-full rounded-lg object-cover" />
-                      {slot === "defect" && (
+                      {multi && (
                         <button
                           type="button"
                           onClick={() => removePhoto(slot, photo)}
@@ -169,7 +169,7 @@ export function PhotoStep({
                 >
                   {uploading === slot
                     ? t("photos.uploading")
-                    : filled && slot !== "defect"
+                    : filled && !multi
                       ? t("photos.retake")
                       : t("photos.add")}
                 </button>

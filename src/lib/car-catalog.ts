@@ -28,20 +28,13 @@ export type Fuel = (typeof FUELS)[number];
 export type Transmission = (typeof TRANSMISSIONS)[number];
 export type Steering = (typeof STEERINGS)[number];
 
-// S4 촬영 가이드 칸. defect를 뺀 7칸이 필수 (DB start_auction과 같은 규칙)
-export const PHOTO_SLOTS = [
-  "front",
-  "rear",
-  "left",
-  "right",
-  "interior",
-  "dashboard",
-  "trunk",
-  "defect",
-] as const;
+// S4 촬영 가이드 칸. 앞 7칸이 필수 (DB start_auction과 같은 규칙), 나머지는 선택
+export const REQUIRED_SLOTS = ["front", "rear", "left", "right", "interior", "dashboard", "trunk"] as const;
+export const PHOTO_SLOTS = [...REQUIRED_SLOTS, "engine", "tires", "rear_seat", "defect"] as const;
 export type PhotoSlot = (typeof PHOTO_SLOTS)[number];
-export const REQUIRED_SLOTS = PHOTO_SLOTS.filter((slot) => slot !== "defect");
-export const MAX_DEFECT_PHOTOS = 4;
+export const isRequiredSlot = (slot: PhotoSlot) => (REQUIRED_SLOTS as readonly string[]).includes(slot);
+// 여러 장 올리는 칸 (나머지는 한 장, 다시 찍으면 교체)
+export const MULTI_PHOTO_SLOTS: Partial<Record<PhotoSlot, number>> = { tires: 4, defect: 4 };
 
 export const MIN_YEAR = 1980;
 

@@ -67,6 +67,25 @@ const pictograms: Record<PhotoSlot, React.ReactNode> = {
       <path d="M50 22V10" strokeDasharray="2 3" />
     </>
   ),
+  engine: (
+    <>
+      <rect x="16" y="12" width="32" height="18" rx="2" />
+      <path d="M22 12V8h20v4M10 18h6M48 18h6M24 21h16" />
+    </>
+  ),
+  tires: (
+    <>
+      <circle cx="32" cy="20" r="14" />
+      <circle cx="32" cy="20" r="6" />
+      <path d="M32 6v8M32 26v8M18 20h8M38 20h8" />
+    </>
+  ),
+  rear_seat: (
+    <>
+      <path d="M12 32V14a4 4 0 0 1 4-4h32a4 4 0 0 1 4 4v18" />
+      <path d="M12 24h40M32 10v14" />
+    </>
+  ),
   defect: (
     <>
       <circle cx="28" cy="18" r="10" />

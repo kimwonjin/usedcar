@@ -10,6 +10,7 @@ import { createPublicClient } from "@/lib/supabase/public";
 export const revalidate = 300;
 
 type Sale = { make: string; model: string; year: number; mileage_km: number; price: number; completed_at: string };
+type Review = { rating: number; review: string; car: string; dealer: string; reviewed_at: string };
 type Stats = { live_auctions: number; approved_dealers: number; completed_deals: number };
 
 export default async function LandingPage({ params }: PageProps<"/[locale]">) {
@@ -20,12 +21,14 @@ export default async function LandingPage({ params }: PageProps<"/[locale]">) {
 
   // 공개 함수는 GET으로 불러야 Next 캐시에 담긴다
   const supabase = createPublicClient();
-  const [salesResult, statsResult] = supabase
+  const [salesResult, statsResult, reviewsResult] = supabase
     ? await Promise.all([
         supabase.rpc("recent_sales", { p_limit: 6 }, { get: true }),
         supabase.rpc("public_stats", undefined, { get: true }),
+        supabase.rpc("recent_reviews", { p_limit: 3 }, { get: true }),
       ])
-    : [null, null];
+    : [null, null, null];
+  const reviews = (reviewsResult?.data ?? []) as Review[];
   const sales = (salesResult?.data ?? []) as Sale[];
   const stats = (statsResult?.data?.[0] ?? null) as Stats | null;
 
@@ -94,6 +97,27 @@ export default async function LandingPage({ params }: PageProps<"/[locale]">) {
                   </p>
                 </div>
                 <span className="price shrink-0 text-subtitle font-bold text-gold">{formatTenge(sale.price)}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {reviews.length > 0 && (
+        <section className="flex flex-col gap-3">
+          <h2 className="text-subtitle font-semibold">{t("reviewsTitle")}</h2>
+          <ul className="flex flex-col gap-2">
+            {reviews.map((r) => (
+              <li key={`${r.reviewed_at}-${r.car}`} className="flex flex-col gap-1 rounded-xl bg-white p-4 shadow-sm">
+                <div className="flex items-center justify-between gap-2 text-caption text-ink/60">
+                  <span>
+                    <span className="text-gold">{"★".repeat(r.rating)}</span>
+                    <span className="text-ink/20">{"★".repeat(5 - r.rating)}</span> · {r.car}
+                  </span>
+                  <span className="shrink-0">{formatDate(r.reviewed_at, locale)}</span>
+                </div>
+                <p className="text-body">“{r.review}”</p>
+                <p className="text-caption text-ink/50">{t("reviewDealer", { dealer: r.dealer })}</p>
               </li>
             ))}
           </ul>
