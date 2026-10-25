@@ -1,4 +1,4 @@
-// 전화번호: 카자흐스탄 휴대폰만 받는다. 화면에서는 +7 뒤 10자리만 입력하고, 저장·로그인은 7XXXXXXXXXX(11자리).
+// 전화번호: 카자흐스탄 휴대폰만 받는다. 화면에서는 10자리(701 234-56-78)만 쓰고, 저장·로그인은 7XXXXXXXXXX(11자리).
 
 // 입력값에서 +7 뒤 10자리만 꺼낸다. "8 701…", "+7 701…", "7701…"처럼 앞자리를 붙여 넣어도 정리한다
 export function kzLocalDigits(input: string): string {
@@ -23,9 +23,9 @@ export function normalizePhone(input: string): string | null {
   return /^7\d{9}$/.test(local) ? `7${local}` : null;
 }
 
-// 저장된 번호 표시용: +7 701 234-56-78 (예전 개발 계정의 다른 형식은 그대로)
+// 저장된 번호 표시용: 701 234-56-78 (예전 개발 계정의 다른 형식은 그대로)
 export function formatPhoneInput(stored: string): string {
   const digits = stored.replace(/\D/g, "");
-  if (/^7\d{10}$/.test(digits)) return `+7 ${formatKzLocal(digits.slice(1))}`;
+  if (/^7\d{10}$/.test(digits)) return formatKzLocal(digits.slice(1));
   return stored;
 }
