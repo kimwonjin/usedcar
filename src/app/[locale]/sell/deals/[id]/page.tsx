@@ -6,6 +6,7 @@ import { ClaimCard } from "@/components/deal/claim-card";
 import { DealChat } from "@/components/deal/deal-chat";
 import { ReportButton } from "@/components/deal/report-button";
 import { MeetingForm } from "@/components/deal/meeting-form";
+import { TransferGuide } from "@/components/deal/transfer-guide";
 import { PageHeader } from "@/components/page-header";
 import { Stars } from "@/components/stars";
 import { StatusBadge } from "@/components/status-badge";
@@ -86,6 +87,7 @@ export default async function SellerDealPage({ params }: PageProps<"/[locale]/se
       )}
 
       <MeetingForm dealId={deal.id} meetingAt={deal.meeting_at} meetingPlace={deal.meeting_place} editable={active} />
+      {deal.status !== "cancelled" && <TransferGuide dealId={deal.id} role="seller" />}
 
       {claims.length > 0 && (
         <section className="flex flex-col gap-3">

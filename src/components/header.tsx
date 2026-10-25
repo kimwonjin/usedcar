@@ -10,7 +10,7 @@ export function Header() {
   const current = useLocale();
 
   return (
-    <header className="bg-navy text-white">
+    <header className="bg-navy text-white print:hidden">
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-3 sm:px-4">
         <Link href="/" className="text-subtitle font-bold tracking-tight sm:text-title">
           {t("appName")}

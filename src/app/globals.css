@@ -43,3 +43,14 @@ html:lang(kk) body {
 html:lang(ko) body {
   word-break: keep-all;
 }
+
+/* 계약서 등 인쇄 화면 */
+@media print {
+  body {
+    background: #ffffff;
+  }
+  @page {
+    size: A4;
+    margin: 16mm;
+  }
+}
