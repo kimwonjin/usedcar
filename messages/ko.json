@@ -1,0 +1,52 @@
+{
+  "common": {
+    "appName": "Satu",
+    "verifiedDealer": "승인 딜러",
+    "depreciationReview": "감가 심사",
+    "timeLeft": "남은 시간",
+    "logout": "로그아웃",
+    "setupRequired": "Supabase 환경변수(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY)를 설정하면 데이터가 표시됩니다."
+  },
+  "landing": {
+    "headline": "흥정 없이, 여러 딜러의 최고가로",
+    "sub": "사진만 올리면 승인된 알마티 딜러들이 48시간 동안 경쟁 입찰합니다. 수수료 무료.",
+    "cta": "내 차 팔기",
+    "dealerCta": "딜러로 시작하기",
+    "step1": "차량 정보와 사진 등록",
+    "step2": "48시간 딜러 경쟁 입찰",
+    "step3": "상위 3곳 중 골라 판매",
+    "promise": "연락은 내가 고른 딜러 한 곳에게만 공개됩니다."
+  },
+  "login": {
+    "title": "휴대폰 번호로 시작하기",
+    "phone": "휴대폰 번호",
+    "sendCode": "인증번호 받기",
+    "code": "인증번호 6자리",
+    "verify": "확인",
+    "sent": "문자로 인증번호를 보냈습니다.",
+    "error": "다시 시도해 주세요."
+  },
+  "seller": {
+    "title": "내 차 팔기",
+    "start": "내 차 팔기 시작",
+    "myAuctions": "진행 중인 경매",
+    "empty": "아직 등록한 차량이 없습니다.",
+    "topBid": "현재 최고가",
+    "bidders": "{count}명 입찰"
+  },
+  "dealer": {
+    "title": "경매 목록",
+    "empty": "진행 중인 경매가 없습니다.",
+    "pending": "가입 심사 중입니다. 승인되면 입찰할 수 있습니다.",
+    "year": "{year}년식"
+  },
+  "admin": {
+    "title": "관리자 대시보드",
+    "today": "오늘 등록",
+    "live": "진행 중",
+    "ended": "판매 결정 대기",
+    "accepted": "낙찰",
+    "pendingDealers": "승인 대기 딜러",
+    "pendingClaims": "감가 심사 대기"
+  }
+}

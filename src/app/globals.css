@@ -1,0 +1,45 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+@import "tailwindcss";
+
+/* 디자인 컨셉 리포트의 컬러 팔레트. 금색(gold)은 최고가·낙찰에만 쓴다. */
+@theme {
+  --color-navy: #14213d;
+  --color-steppe: #00a3c4;
+  --color-gold: #f5b700;
+  --color-surface: #f7f8fa;
+  --color-ink: #1f2933;
+  --color-success: #1e9e5a;
+  --color-danger: #d64545;
+
+  --font-sans: "Pretendard Variable", var(--font-inter), system-ui, sans-serif;
+  --font-cyrillic: var(--font-inter), system-ui, sans-serif;
+
+  --text-price: 32px;
+  --text-title: 22px;
+  --text-subtitle: 17px;
+  --text-body: 15px;
+  --text-caption: 13px;
+}
+
+body {
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-size: var(--text-body);
+}
+
+/* 러시아어·카자흐어는 키릴 문자 지원 글꼴(Inter) 우선 */
+html:lang(ru) body,
+html:lang(kk) body {
+  font-family: var(--font-cyrillic);
+}
+
+/* 입찰가가 바뀌어도 숫자 폭이 흔들리지 않게 */
+.price {
+  font-family: var(--font-inter), system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 한국어는 단어 중간에서 줄바꿈하지 않는다 */
+html:lang(ko) body {
+  word-break: keep-all;
+}
