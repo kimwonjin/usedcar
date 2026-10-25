@@ -2,6 +2,12 @@
 
 > 웹 공개 자료 기반 1차 검토입니다. 법률 자문이 아니며, 출시 전 현지 변호사 확인이 필요합니다.
 
+## 결정 (2026-10-25)
+- **개발 기간에는 현재 구조(Supabase 해외 리전 + Vercel)를 유지한다.** 실제 고객 데이터는 받지 않는다.
+- **실제 고객 데이터를 받기 전, 문자 인증(OTP) 전환과 같은 시기에 카자흐스탄 데이터센터로 DB를 옮긴다.**
+  방식: Supabase(오픈소스)를 현지 서버에 직접 설치하고 `supabase/migrations/`를 순서대로 적용한 뒤,
+  앱은 접속 주소(`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `src/lib/supabase/env.ts` 기본값)만 바꾼다.
+
 ## 결론
 - **현행법상 카자흐스탄 국민의 개인정보는 카자흐스탄 영토 안의 서버에 저장해야 한다.**
   근거: 「개인정보 및 그 보호에 관한 법률」(№ 94-V, 2013.5.21) 제12조. 2015년 개정으로 도입, 여러 차례 개정에도 유지,
@@ -25,6 +31,16 @@
    Servercore(알마티, 관리형 PostgreSQL), Kazteleport 기반 VPS 등. 앱 코드는 Supabase 접속 주소만 바꾸면 된다.
 2. **하이브리드**: 개인정보(전화번호·이름·채팅·딜러 정보)만 국내 DB에 두고 나머지는 해외 유지 — 구조가 복잡해져 비권장.
 3. **완화 정부령 채택 대기**: 채택 시 국외 저장이 가능해질 수 있으나 일정 불확실.
+
+## 이전 시 체크리스트 (출시 직전)
+- [ ] 현지 호스팅 선정(관리형 PostgreSQL 또는 VM + Docker로 Supabase 자체 설치), 백업 위치도 국내인지 확인
+- [ ] Supabase 자체 설치: Postgres·Auth·Storage·Realtime·pg_cron·pg_net 포함, 도메인·HTTPS 설정
+- [ ] `supabase/migrations/` 전체 순서대로 적용, `app_config`(푸시 발송 주소·비밀값) 다시 입력
+- [ ] Storage 버킷(car-photos, dealer-docs, claim-photos) 생성 확인
+- [ ] Vercel 환경변수의 Supabase 주소·키 교체, `src/lib/supabase/env.ts` 기본값 교체, `next.config.ts` 이미지 도메인 추가
+- [ ] 문자 인증 업체 연결 + `NEXT_PUBLIC_AUTH_MODE=phone`
+- [ ] 개발용 테스트 계정·데이터는 옮기지 않는다 (새 DB로 깨끗하게 시작)
+- [ ] 개인정보처리방침 5항(서버 위치) 갱신
 
 ## 다음 할 일
 - [ ] 현지 변호사에게 제12조 적용 범위(차량 사진·번호판 포함 여부, 비거주 법인 적용 여부)와 완화령 진행 상황 확인

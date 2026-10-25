@@ -115,5 +115,6 @@ Docker가 있는 환경이면 `npm run db:start`로 로컬 Supabase를 띄울 �
 - [x] 알림: 앱 안 알림함(🔔) + 웹 푸시 20종 (새 매물, 1위 뺏김, 마감 1시간 전, 낙찰, 경매 종료, 감가, 딜러 심사 등)
 - [ ] 수수료 정책 확정 (`src/lib/fees.ts` 임시 구간표)
 - [x] 이용약관·개인정보처리방침·FAQ (3개 언어 초안, `src/content/legal.ts` — [대괄호] 운영사 정보 입력 + 법률 검토 필요)
+- [ ] 출시 직전: 카자흐스탄 데이터센터로 DB 이전 (Supabase 자체 설치, `docs/kz-data-localization.md` 체크리스트)
 - [ ] 휴대폰 OTP 로그인 켜기: SMS 업체 연결 + Vercel에 `NEXT_PUBLIC_AUTH_MODE=phone` (최종 단계)
 - [ ] 러시아어·카자흐어 번역 원어민 검수 (현재는 초안)
