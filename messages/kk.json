@@ -760,6 +760,14 @@
     "desired_reached": {
       "title": "Қалаған бағаға жетті! 🎯",
       "body": "{car} · ең жоғары ставка {amount}"
+    },
+    "meeting_reminder": {
+      "title": "2 сағаттан кейін кездесу 🚗",
+      "body": "{car} · {at}{place}"
+    },
+    "complete_nudge": {
+      "title": "Мәміле өтті ме?",
+      "body": "{car} · Ақша алынып, көлік берілсе, «Ақша алынды, мәміле аяқталды» батырмасын басыңыз"
     }
   },
   "notificationCenter": {

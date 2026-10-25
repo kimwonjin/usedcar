@@ -760,6 +760,14 @@
     "desired_reached": {
       "title": "Желаемая цена достигнута! 🎯",
       "body": "{car} · лучшая ставка {amount}"
+    },
+    "meeting_reminder": {
+      "title": "Встреча через 2 часа 🚗",
+      "body": "{car} · {at}{place}"
+    },
+    "complete_nudge": {
+      "title": "Сделка состоялась?",
+      "body": "{car} · Если деньги получены и авто передано, нажмите «Деньги получены, сделка завершена»"
     }
   },
   "notificationCenter": {

@@ -760,6 +760,14 @@
     "desired_reached": {
       "title": "희망가를 넘었어요! 🎯",
       "body": "{car} · 현재 최고가 {amount}"
+    },
+    "meeting_reminder": {
+      "title": "2시간 뒤 만남이 있어요 🚗",
+      "body": "{car} · {at}{place}"
+    },
+    "complete_nudge": {
+      "title": "거래를 마치셨나요?",
+      "body": "{car} · 대금을 받고 차를 넘겼다면 '대금 받고 거래 완료'를 눌러 주세요"
     }
   },
   "notificationCenter": {
