@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Badge } from "@/components/badge";
 import { Countdown } from "@/components/countdown";
+import { MarketReference, vsMarket, type MarketEstimate } from "@/components/market-reference";
 import { DealerProfileButton } from "@/components/dealer-profile";
 import { Stars } from "@/components/stars";
 import { useRouter } from "@/i18n/navigation";
@@ -24,13 +25,16 @@ export function ResultPicker({
   auctionId,
   bids,
   desiredPrice,
+  estimate,
   deadline,
 }: {
   auctionId: string;
   bids: TopBid[];
   desiredPrice: number | null;
+  estimate: MarketEstimate | null;
   deadline: string;
 }) {
+  const tm = useTranslations("market");
   const t = useTranslations("sellerAuction");
   const router = useRouter();
   const [selected, setSelected] = useState(bids[0]?.bid_id ?? null);
@@ -77,6 +81,8 @@ export function ResultPicker({
         </span>
       </div>
 
+      <MarketReference estimate={estimate} />
+
       <ul className="flex flex-col gap-2">
         {bids.map((bid, i) => {
           const diff = desiredPrice ? bid.amount - desiredPrice : null;
@@ -98,6 +104,11 @@ export function ResultPicker({
                     <Stars rating={bid.dealer_rating} />
                     <span>{t("dealerDeals", { count: bid.completed_deals })}</span>
                   </p>
+                  {vsMarket(bid.amount, estimate) !== null && (
+                    <p className="price text-caption text-ink/60">
+                      {tm("vsMarket", { pct: `${vsMarket(bid.amount, estimate)! >= 0 ? "+" : ""}${vsMarket(bid.amount, estimate)}` })}
+                    </p>
+                  )}
                   {diff !== null && (
                     <p className={`price text-caption ${diff >= 0 ? "text-success" : "text-danger"}`}>
                       {t("vsDesired")} {diff >= 0 ? "+" : "−"}

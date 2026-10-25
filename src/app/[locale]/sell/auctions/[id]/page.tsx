@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AuctionInterest } from "@/components/auction-interest";
 import { AuctionQa } from "@/components/auction-qa";
+import { MarketReference, type MarketEstimate } from "@/components/market-reference";
 import { PageHeader } from "@/components/page-header";
 import { PriceChart, type BidEvent } from "@/components/price-chart";
 import { StatusBadge } from "@/components/status-badge";
@@ -60,12 +61,19 @@ export default async function SellerAuctionPage({ params }: PageProps<"/[locale]
     return ((data ?? [])[0] ?? { viewers: 0, favorites: 0 }) as { viewers: number; favorites: number };
   };
 
+  // 비슷한 차 평균 낙찰가 (판매 결정 참고용)
+  const loadEstimate = async () => {
+    const { data } = await supabase.rpc("estimate_price", { p_make: car.make, p_model: car.model, p_year: car.year });
+    return ((data ?? [])[0] ?? null) as MarketEstimate | null;
+  };
+
   let body: React.ReactNode;
   if (auction.status === "live") {
-    const [{ data: stats }, events, interest] = await Promise.all([
+    const [{ data: stats }, events, interest, estimate] = await Promise.all([
       supabase.rpc("auction_stats", { p_auction_id: id }),
       loadEvents(),
       loadInterest(),
+      loadEstimate(),
     ]);
     const initial = (stats?.[0] ?? { bid_count: 0, top_amount: null }) as { bid_count: number; top_amount: number | null };
     body = (
@@ -78,15 +86,17 @@ export default async function SellerAuctionPage({ params }: PageProps<"/[locale]
           initialEvents={events}
           desiredPrice={car.desired_price}
         />
+        <MarketReference estimate={estimate} />
         <AuctionInterest viewers={interest.viewers} favorites={interest.favorites} />
         <AuctionQa auctionId={id} role="seller" canAnswer />
         <LiveEdits carId={auction.car_id} userId={user.id} defects={car.defects} damage={car.damage ?? {}} />
       </>
     );
   } else if (auction.status === "ended") {
-    const [{ data: top }, events] = await Promise.all([
+    const [{ data: top }, events, estimate] = await Promise.all([
       supabase.rpc("auction_top_bids", { p_auction_id: id }),
       loadEvents(),
+      loadEstimate(),
     ]);
     body = (
       <>
@@ -95,6 +105,7 @@ export default async function SellerAuctionPage({ params }: PageProps<"/[locale]
         auctionId={id}
         bids={(top ?? []) as TopBid[]}
         desiredPrice={car.desired_price}
+        estimate={estimate}
         deadline={decisionDeadline(auction.ends_at)}
         />
       </>
