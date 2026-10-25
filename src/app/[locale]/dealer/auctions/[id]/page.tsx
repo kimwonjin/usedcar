@@ -2,6 +2,7 @@ import type { Locale } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Badge } from "@/components/badge";
+import { AuctionQa } from "@/components/auction-qa";
 import { BidBlockNotice } from "@/components/bid-block-notice";
 import { ConditionSummary, type CarCondition } from "@/components/condition-summary";
 import { Countdown } from "@/components/countdown";
@@ -139,6 +140,8 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
         <h2 className="mb-1 text-subtitle font-semibold">{t("sellerDefects")}</h2>
         <p className="text-body whitespace-pre-line">{car.defects || tf("defects.none")}</p>
       </section>
+
+      <AuctionQa auctionId={id} role="dealer" canAsk={isLive && dealer?.status === "approved"} />
 
       {isLive && blockedUntil && <BidBlockNotice until={blockedUntil} />}
       {isLive && !blockedUntil && (

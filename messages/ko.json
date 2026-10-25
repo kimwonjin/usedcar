@@ -685,6 +685,14 @@
     "transfer_overdue_admin": {
       "title": "명의 이전 기한 초과",
       "body": "{car}"
+    },
+    "question_asked": {
+      "title": "딜러가 문의를 남겼어요",
+      "body": "{car} · {text}"
+    },
+    "question_answered": {
+      "title": "판매자가 답변했어요",
+      "body": "{car} · {text}"
     }
   },
   "notificationCenter": {
@@ -1117,5 +1125,20 @@
     "endNow": "지금 내리기",
     "live": "게시 중",
     "ended": "종료"
+  },
+  "qa": {
+    "title": "딜러 문의 {count}",
+    "sellerHint": "딜러들이 차에 대해 묻습니다. 답변은 이 차를 보는 모든 딜러에게 공개되며, 정확히 답할수록 입찰이 늘어납니다.",
+    "dealerHint": "판매자에게 궁금한 점을 물어보세요. 질문과 답변은 모든 딜러에게 공개되고, 질문한 딜러 이름은 보이지 않습니다.",
+    "empty": "아직 문의가 없습니다.",
+    "mine": "내 질문",
+    "waiting": "판매자 답변 대기",
+    "answerPlaceholder": "답변 입력",
+    "answer": "답변",
+    "askPlaceholder": "예: 타이밍벨트는 언제 교체했나요?",
+    "ask": "질문",
+    "tooMany": "한 경매에 질문은 5개까지 할 수 있습니다.",
+    "failed": "보내지 못했습니다.",
+    "unanswered": "답변 필요 {count}"
   }
 }

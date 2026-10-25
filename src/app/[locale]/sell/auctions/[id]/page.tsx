@@ -1,6 +1,7 @@
 import type { Locale } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { AuctionQa } from "@/components/auction-qa";
 import { PageHeader } from "@/components/page-header";
 import { PriceChart, type BidEvent } from "@/components/price-chart";
 import { StatusBadge } from "@/components/status-badge";
@@ -69,6 +70,7 @@ export default async function SellerAuctionPage({ params }: PageProps<"/[locale]
           initialEvents={events}
           desiredPrice={car.desired_price}
         />
+        <AuctionQa auctionId={id} role="seller" canAnswer />
         <LiveEdits carId={auction.car_id} userId={user.id} defects={car.defects} damage={car.damage ?? {}} />
       </>
     );
