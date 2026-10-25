@@ -7,7 +7,7 @@ import { routing } from "@/i18n/routing";
 import { getCurrentUser, getDealer, getUserId } from "@/lib/auth";
 import { formatPhoneInput } from "@/lib/phone";
 import { createClient } from "@/lib/supabase/server";
-import { AlertPrefs, DeleteAccount, LogoutButton, NameForm, PriceWatches } from "./account-forms";
+import { AlertPrefs, DeleteAccount, LogoutButton, NameForm, PriceWatches, PushPrefs } from "./account-forms";
 
 const localeNames = { ko: "한국어", ru: "Русский", kk: "Қазақша" } as const;
 
@@ -22,7 +22,7 @@ export default async function AccountPage({ params }: PageProps<"/[locale]/accou
   const supabase = await createClient();
   const [user, { data: profile }, dealer, { data: watches }] = await Promise.all([
     getCurrentUser(),
-    supabase.from("profiles").select("full_name, notify_new_auction, notify_makes, notify_year_from, notify_year_to, notify_max_km, notify_no_accident").eq("id", userId).maybeSingle(),
+    supabase.from("profiles").select("full_name, notify_new_auction, notify_makes, notify_year_from, notify_year_to, notify_max_km, notify_no_accident, push_muted, push_quiet_night").eq("id", userId).maybeSingle(),
     getDealer(userId),
     supabase.from("price_watches").select("id, make, model, year").order("created_at"),
   ]);
@@ -60,6 +60,11 @@ export default async function AccountPage({ params }: PageProps<"/[locale]/accou
       </section>
 
       <PushToggle />
+
+      <PushPrefs
+        muted={(profile?.push_muted as string[] | undefined) ?? []}
+        quietNight={Boolean(profile?.push_quiet_night)}
+      />
 
       <PriceWatches watches={(watches ?? []) as { id: string; make: string; model: string; year: number }[]} />
 

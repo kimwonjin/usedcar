@@ -288,3 +288,67 @@ export function PriceWatches({ watches }: { watches: { id: string; make: string;
     </section>
   );
 }
+
+const PUSH_CATEGORIES = ["auction", "chat", "price"] as const;
+
+// 푸시 알림 설정: 종류별 끄기, 밤 시간 끄기 (알림함에는 그대로 남는다)
+export function PushPrefs({ muted: initialMuted, quietNight: initialQuiet }: { muted: string[]; quietNight: boolean }) {
+  const t = useTranslations("pushPrefs");
+  const [muted, setMuted] = useState(initialMuted);
+  const [quiet, setQuiet] = useState(initialQuiet);
+  const [state, setState] = useState<"idle" | "saved" | "failed">("idle");
+
+  async function save(nextMuted: string[], nextQuiet: boolean) {
+    const supabase = createClient();
+    const { data } = await supabase.auth.getUser();
+    const { error } = data.user
+      ? await supabase.from("profiles").update({ push_muted: nextMuted, push_quiet_night: nextQuiet }).eq("id", data.user.id)
+      : { error: true };
+    setState(error ? "failed" : "saved");
+  }
+
+  return (
+    <section className="flex flex-col gap-3 rounded-xl bg-white p-4 shadow-sm">
+      <div>
+        <p className="text-body font-semibold">{t("title")}</p>
+        <p className="text-caption text-ink/60">{t("hint")}</p>
+      </div>
+      {PUSH_CATEGORIES.map((category) => (
+        <label key={category} className="flex items-center justify-between gap-3">
+          <span>
+            <span className="block text-body">{t(`categories.${category}.label`)}</span>
+            <span className="text-caption text-ink/60">{t(`categories.${category}.hint`)}</span>
+          </span>
+          <input
+            type="checkbox"
+            checked={!muted.includes(category)}
+            onChange={(e) => {
+              const next = e.target.checked ? muted.filter((c) => c !== category) : [...muted, category];
+              setMuted(next);
+              save(next, quiet);
+            }}
+            className="size-5 shrink-0 accent-navy"
+          />
+        </label>
+      ))}
+      <label className="flex items-center justify-between gap-3 border-t border-ink/10 pt-3">
+        <span>
+          <span className="block text-body">🌙 {t("quietNight")}</span>
+          <span className="text-caption text-ink/60">{t("quietNightHint")}</span>
+        </span>
+        <input
+          type="checkbox"
+          checked={quiet}
+          onChange={(e) => {
+            setQuiet(e.target.checked);
+            save(muted, e.target.checked);
+          }}
+          className="size-5 shrink-0 accent-navy"
+        />
+      </label>
+      <p className="text-caption text-ink/50">{t("alwaysOn")}</p>
+      {state === "saved" && <p className="text-caption text-success">✓ {t("saved")}</p>}
+      {state === "failed" && <p className="text-caption text-danger">{t("failed")}</p>}
+    </section>
+  );
+}
