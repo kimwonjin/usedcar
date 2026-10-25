@@ -5,7 +5,11 @@ import { useRef, useState } from "react";
 import { MULTI_PHOTO_SLOTS, PHOTO_SLOTS, REQUIRED_SLOTS, isRequiredSlot, type PhotoSlot } from "@/lib/car-catalog";
 import { compressImage } from "@/lib/image";
 import { createClient } from "@/lib/supabase/client";
+import { PlateMaskEditor } from "./plate-mask-editor";
 import { SlotPictogram } from "./slot-pictogram";
+
+// 번호판이 찍히는 칸: 올리기 전에 번호판 가리기 화면을 띄운다
+const PLATE_SLOTS: PhotoSlot[] = ["front", "rear"];
 
 export type UploadedPhoto = { id: string; path: string; preview: string };
 export type PhotoMap = Partial<Record<PhotoSlot, UploadedPhoto[]>>;
@@ -26,6 +30,7 @@ export function PhotoStep({
   const t = useTranslations("carForm");
   const [uploading, setUploading] = useState<PhotoSlot | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [masking, setMasking] = useState<{ slot: PhotoSlot; blob: Blob } | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const targetSlot = useRef<PhotoSlot>("front");
 
@@ -46,10 +51,20 @@ export function PhotoStep({
 
   async function upload(file: File) {
     const slot = targetSlot.current;
-    setUploading(slot);
     setError(null);
     try {
       const blob = await compressImage(file);
+      if (PLATE_SLOTS.includes(slot)) setMasking({ slot, blob });
+      else await save(slot, blob);
+    } catch {
+      setError(t("photos.failed"));
+    }
+  }
+
+  async function save(slot: PhotoSlot, blob: Blob) {
+    setUploading(slot);
+    setError(null);
+    try {
       const supabase = createClient();
       // 경로의 첫 폴더가 본인 id여야 Storage 정책을 통과한다
       const path = `${userId}/${carId}/${slot}-${crypto.randomUUID()}.jpg`;
@@ -104,6 +119,18 @@ export function PhotoStep({
       />
 
       {error && <p className="text-caption text-danger">{error}</p>}
+
+      {masking && (
+        <PlateMaskEditor
+          blob={masking.blob}
+          onCancel={() => setMasking(null)}
+          onDone={(blob) => {
+            const slot = masking.slot;
+            setMasking(null);
+            save(slot, blob);
+          }}
+        />
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         {PHOTO_SLOTS.map((slot) => {
