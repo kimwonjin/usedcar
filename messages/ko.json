@@ -414,5 +414,102 @@
       "rejected": "거절",
       "suspended": "정지"
     }
+  },
+  "notifications": {
+    "new_auction": {
+      "title": "새 매물이 올라왔어요",
+      "body": "{car} · 지금 입찰할 수 있습니다"
+    },
+    "outbid": {
+      "title": "1위를 빼앗겼어요",
+      "body": "{car} · 다른 딜러가 더 높게 입찰했습니다"
+    },
+    "ending_soon": {
+      "title": "마감 1시간 전",
+      "body": "{car} · 입찰가를 확인하세요"
+    },
+    "auction_won": {
+      "title": "낙찰되었습니다! 🎉",
+      "body": "{car} · {amount}. 판매자에게 연락해 일정을 잡으세요"
+    },
+    "auction_closed": {
+      "title": "경매 결과",
+      "body": "{car} · 이번 경매는 낙찰되지 않았습니다"
+    },
+    "first_bid": {
+      "title": "첫 입찰이 들어왔어요",
+      "body": "{car} · {amount}"
+    },
+    "auction_ended": {
+      "title": "경매가 끝났어요",
+      "body": "{car} · 상위 3곳 중 판매할 딜러를 골라 주세요"
+    },
+    "auction_no_bids": {
+      "title": "입찰 없이 경매가 끝났어요",
+      "body": "{car} · 다시 경매에 올릴 수 있습니다"
+    },
+    "auction_cancelled": {
+      "title": "경매가 취소되었습니다",
+      "body": "{car}"
+    },
+    "meeting_updated": {
+      "title": "만남 일정이 바뀌었어요",
+      "body": "{car} · 일정을 확인하세요"
+    },
+    "deal_completed": {
+      "title": "거래가 완료되었습니다",
+      "body": "{car} · 최종 {amount}"
+    },
+    "deal_cancelled": {
+      "title": "거래가 취소되었습니다",
+      "body": "{car}"
+    },
+    "claim_submitted": {
+      "title": "감가 청구가 들어왔어요",
+      "body": "{car} · −{amount}. 의견을 남길 수 있습니다"
+    },
+    "claim_approved": {
+      "title": "감가 심사 결과: 승인",
+      "body": "{car} · −{amount}"
+    },
+    "claim_rejected": {
+      "title": "감가 심사 결과: 거절",
+      "body": "{car} · −{amount} 청구가 거절되었습니다"
+    },
+    "admin_claim": {
+      "title": "감가 심사 요청",
+      "body": "{car} · −{amount}"
+    },
+    "admin_dealer_applied": {
+      "title": "딜러 가입 신청",
+      "body": "{name}"
+    },
+    "dealer_approved": {
+      "title": "딜러 가입이 승인되었습니다",
+      "body": "지금부터 경매에 입찰할 수 있습니다"
+    },
+    "dealer_rejected": {
+      "title": "딜러 가입이 거절되었습니다",
+      "body": "사유를 확인하고 다시 신청해 주세요"
+    },
+    "dealer_suspended": {
+      "title": "입찰이 정지되었습니다",
+      "body": "고객센터로 문의해 주세요"
+    }
+  },
+  "notificationCenter": {
+    "title": "알림",
+    "bell": "알림",
+    "empty": "아직 알림이 없습니다.",
+    "markAllRead": "모두 읽음",
+    "pushTitle": "휴대폰 푸시 알림",
+    "pushHint": "새 매물, 입찰 결과, 경매 마감을 바로 알려드립니다.",
+    "enablePush": "푸시 알림 켜기",
+    "pushOn": "이 기기에서 푸시 알림을 받고 있습니다",
+    "disablePush": "끄기",
+    "pushDenied": "브라우저에서 알림이 차단되어 있습니다. 브라우저 설정에서 허용해 주세요.",
+    "pushUnsupported": "이 브라우저는 푸시 알림을 지원하지 않습니다.",
+    "iosHint": "아이폰은 Safari 공유 버튼 → '홈 화면에 추가'로 앱을 설치한 뒤 켤 수 있습니다.",
+    "pushFailed": "푸시 알림을 켜지 못했습니다. 다시 시도해 주세요."
   }
 }

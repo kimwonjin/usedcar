@@ -1,6 +1,7 @@
 import type { Locale } from "@/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Countdown } from "@/components/countdown";
+import { PushToggle } from "@/components/push-toggle";
 import { SetupNotice } from "@/components/setup-notice";
 import { StatusBadge } from "@/components/status-badge";
 import { Link, redirect } from "@/i18n/navigation";
@@ -56,6 +57,7 @@ export default async function SellerHome({ params }: PageProps<"/[locale]/sell">
   return (
     <div className="flex flex-1 flex-col gap-6">
       <h1 className="text-title font-bold text-navy">{t("title")}</h1>
+      {auctions.length > 0 && <PushToggle compact />}
 
       {auctions.length === 0 && (
         <div className="rounded-xl bg-white p-6 text-center shadow-sm">

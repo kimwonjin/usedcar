@@ -414,5 +414,102 @@
       "rejected": "Отклонён",
       "suspended": "Заблокирован"
     }
+  },
+  "notifications": {
+    "new_auction": {
+      "title": "Новый автомобиль на аукционе",
+      "body": "{car} · можно делать ставки"
+    },
+    "outbid": {
+      "title": "Вашу ставку перебили",
+      "body": "{car} · другой дилер предложил больше"
+    },
+    "ending_soon": {
+      "title": "До конца 1 час",
+      "body": "{car} · проверьте свою ставку"
+    },
+    "auction_won": {
+      "title": "Вы победили! 🎉",
+      "body": "{car} · {amount}. Свяжитесь с продавцом"
+    },
+    "auction_closed": {
+      "title": "Итоги аукциона",
+      "body": "{car} · в этот раз вы не победили"
+    },
+    "first_bid": {
+      "title": "Первая ставка",
+      "body": "{car} · {amount}"
+    },
+    "auction_ended": {
+      "title": "Аукцион завершён",
+      "body": "{car} · выберите дилера из топ-3"
+    },
+    "auction_no_bids": {
+      "title": "Аукцион завершён без ставок",
+      "body": "{car} · можно выставить снова"
+    },
+    "auction_cancelled": {
+      "title": "Аукцион отменён",
+      "body": "{car}"
+    },
+    "meeting_updated": {
+      "title": "Встреча изменена",
+      "body": "{car} · проверьте время и место"
+    },
+    "deal_completed": {
+      "title": "Сделка завершена",
+      "body": "{car} · итог {amount}"
+    },
+    "deal_cancelled": {
+      "title": "Сделка отменена",
+      "body": "{car}"
+    },
+    "claim_submitted": {
+      "title": "Запрос на уценку",
+      "body": "{car} · −{amount}. Можно оставить комментарий"
+    },
+    "claim_approved": {
+      "title": "Уценка одобрена",
+      "body": "{car} · −{amount}"
+    },
+    "claim_rejected": {
+      "title": "Уценка отклонена",
+      "body": "{car} · запрос −{amount} отклонён"
+    },
+    "admin_claim": {
+      "title": "Проверка уценки",
+      "body": "{car} · −{amount}"
+    },
+    "admin_dealer_applied": {
+      "title": "Заявка дилера",
+      "body": "{name}"
+    },
+    "dealer_approved": {
+      "title": "Регистрация одобрена",
+      "body": "Теперь вы можете делать ставки"
+    },
+    "dealer_rejected": {
+      "title": "Регистрация отклонена",
+      "body": "Проверьте причину и подайте заявку снова"
+    },
+    "dealer_suspended": {
+      "title": "Ставки заблокированы",
+      "body": "Обратитесь в поддержку"
+    }
+  },
+  "notificationCenter": {
+    "title": "Уведомления",
+    "bell": "Уведомления",
+    "empty": "Уведомлений пока нет.",
+    "markAllRead": "Прочитать все",
+    "pushTitle": "Push-уведомления",
+    "pushHint": "Сразу сообщим о новых авто, итогах ставок и окончании аукционов.",
+    "enablePush": "Включить push",
+    "pushOn": "Push-уведомления на этом устройстве включены",
+    "disablePush": "Выключить",
+    "pushDenied": "Уведомления заблокированы в браузере. Разрешите их в настройках.",
+    "pushUnsupported": "Этот браузер не поддерживает push-уведомления.",
+    "iosHint": "На iPhone: Safari → «Поделиться» → «На экран Домой», затем включите уведомления в приложении.",
+    "pushFailed": "Не удалось включить push. Попробуйте ещё раз."
   }
 }

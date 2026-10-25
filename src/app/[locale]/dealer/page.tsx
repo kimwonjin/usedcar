@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Badge } from "@/components/badge";
 import { Countdown } from "@/components/countdown";
 import { DealerTabs } from "@/components/dealer-tabs";
+import { PushToggle } from "@/components/push-toggle";
 import { SetupNotice } from "@/components/setup-notice";
 import { Link, redirect } from "@/i18n/navigation";
 import { getCurrentUser, getDealer } from "@/lib/auth";
@@ -85,6 +86,8 @@ export default async function DealerAuctions({ params, searchParams }: PageProps
   return (
     <div className="flex flex-col gap-3">
       <DealerTabs />
+      {/* 새 매물 알림을 받으려면 푸시가 필요하다 */}
+      <PushToggle compact />
 
       <div className="flex gap-2 overflow-x-auto pb-1">
         <FilterChip href={filterHref({ make: null })} active={!make}>

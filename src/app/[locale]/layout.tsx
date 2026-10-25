@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
@@ -15,6 +15,12 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "Satu — 알마티 내 차 팔기 경매",
   description: "승인된 알마티 딜러들의 48시간 경쟁 입찰로 내 차를 최고가에 파세요.",
+  appleWebApp: { capable: true, title: "Satu", statusBarStyle: "default" },
+  icons: { icon: "/icon-192.png", apple: "/apple-touch-icon.png" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#14213D",
 };
 
 export function generateStaticParams() {

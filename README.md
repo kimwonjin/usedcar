@@ -86,6 +86,8 @@ Docker가 있는 환경이면 `npm run db:start`로 로컬 Supabase를 띄울 �
 ### 3. Vercel 배포
 1. Vercel → Add New Project → GitHub `usedcar` 저장소 선택 (프레임워크 자동 인식)
 2. Environment Variables에 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` 입력
+   - 푸시 알림: `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `PUSH_DISPATCH_SECRET` (키 생성: `npx web-push generate-vapid-keys`)
+   - Supabase SQL: `insert into app_config values ('push_dispatch_url', 'https://<도메인>/api/push'), ('push_dispatch_secret', '<PUSH_DISPATCH_SECRET과 같은 값>');`
 3. Deploy. 이후 브랜치에 push할 때마다 미리보기 URL이 생성된다
 4. Supabase → Authentication → URL Configuration의 Site URL에 Vercel 도메인 입력
 
@@ -109,7 +111,7 @@ Docker가 있는 환경이면 `npm run db:start`로 로컬 Supabase를 띄울 �
 - [x] D1 딜러 가입·재신청, D2 경매 목록(사진·필터·정렬), D3 차량 상세, D4 블라인드 입찰, D5 낙찰·감가 청구, D6 내 활동·수수료·평판
 - [x] A1 대시보드, A2 딜러 승인·거절·경고·정지, A3 경매 관리·강제 종료, A4 감가 심사(사진 비교)
 - [ ] 촬영 가이드 예시 그림을 실제 예시 사진으로 교체
-- [ ] 알림: 딜러 새 매물·판매자 경매 마감 (Web Push / SMS)
+- [x] 알림: 앱 안 알림함(🔔) + 웹 푸시 20종 (새 매물, 1위 뺏김, 마감 1시간 전, 낙찰, 경매 종료, 감가, 딜러 심사 등)
 - [ ] 수수료 정책 확정 (`src/lib/fees.ts` 임시 구간표)
 - [ ] 휴대폰 OTP 로그인 켜기: SMS 업체 연결 + Vercel에 `NEXT_PUBLIC_AUTH_MODE=phone` (최종 단계)
 - [ ] 러시아어·카자흐어 번역 원어민 검수 (현재는 초안)
