@@ -10,7 +10,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { redirect } from "@/i18n/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { loadDeal } from "@/lib/deals";
-import { dealerFee } from "@/lib/fees";
+import { dealerFee, loadFeeBands } from "@/lib/fees";
 import { formatTenge } from "@/lib/format";
 import { ClaimForm } from "./claim-form";
 import { DealerCancelButton } from "./dealer-cancel-button";
@@ -28,6 +28,7 @@ export default async function DealerDealPage({ params }: PageProps<"/[locale]/de
   if (!loaded || loaded.deal.dealer_id !== user.id) notFound();
   const { deal, claims, messages, counterpartName } = loaded;
   const car = deal.auctions.cars;
+  const feeBands = await loadFeeBands(loaded.supabase);
   const active = deal.status === "scheduled" || deal.status === "depreciation_review";
   const price = deal.final_price ?? deal.agreed_price;
 
@@ -41,7 +42,7 @@ export default async function DealerDealPage({ params }: PageProps<"/[locale]/de
         <p className="text-caption text-ink/60">{deal.final_price ? t("finalPrice") : t("agreedPrice")}</p>
         <p className="price text-price font-bold text-gold">{formatTenge(price)}</p>
         <p className="mt-1 text-caption text-ink/60">
-          {t("plate")} <span className="price">{car.plate_number}</span> · {t("fee")} {formatTenge(dealerFee(price))}
+          {t("plate")} <span className="price">{car.plate_number}</span> · {t("fee")} {formatTenge(dealerFee(price, feeBands))}
         </p>
       </section>
 

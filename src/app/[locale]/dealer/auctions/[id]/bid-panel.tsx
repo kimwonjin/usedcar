@@ -51,6 +51,8 @@ export function BidPanel({
           ? t("mustRaise")
           : error.message.includes("blocked")
             ? t("blocked")
+            : error.message.includes("overdue")
+              ? t("overdue")
           : error.message.includes("not live")
             ? t("closed")
             : t("failed"),

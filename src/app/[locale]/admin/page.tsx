@@ -5,7 +5,7 @@ import { AdminOnly } from "@/components/admin-only";
 import { Link } from "@/i18n/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { dealerFee } from "@/lib/fees";
+import { dealerFee, loadFeeBands } from "@/lib/fees";
 import { formatTenge } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { startOfAlmatyDay } from "@/lib/time";
@@ -20,6 +20,7 @@ export default async function AdminDashboard({ params }: PageProps<"/[locale]/ad
   if (!(await requireAdmin(locale))) return <AdminOnly />;
 
   const supabase = await createClient();
+  const feeBands = await loadFeeBands(supabase);
   const startOfDay = startOfAlmatyDay();
 
   const count = async (table: string, column: string, value: string) => {
@@ -53,7 +54,7 @@ export default async function AdminDashboard({ params }: PageProps<"/[locale]/ad
     const m = months.get(key) ?? { count: 0, gmv: 0, fees: 0 };
     m.count += 1;
     m.gmv += price;
-    m.fees += dealerFee(price);
+    m.fees += dealerFee(price, feeBands);
     months.set(key, m);
   }
   const monthly = [...months.entries()].sort(([a], [b]) => b.localeCompare(a)).slice(0, 6);

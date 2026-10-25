@@ -9,6 +9,7 @@ import { PushToggle } from "@/components/push-toggle";
 import { SetupNotice } from "@/components/setup-notice";
 import { Link, redirect } from "@/i18n/navigation";
 import { getCurrentUser, getDealer } from "@/lib/auth";
+import { overduePayments } from "@/lib/payments";
 import { formatKm, formatTenge } from "@/lib/format";
 import { signedUrlMap } from "@/lib/storage";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -50,6 +51,7 @@ export default async function DealerAuctions({ params, searchParams }: PageProps
     if (dealer.status !== "approved") return <DealerStatusCard status={dealer.status} reason={dealer.rejection_reason} />;
     if (dealer.bid_blocked_until && new Date(dealer.bid_blocked_until) > new Date()) blockedUntil = dealer.bid_blocked_until;
   }
+  const overdue = user.role === "admin" ? [] : await overduePayments(user.id);
 
   const query = await searchParams;
   const param = (key: string) => (typeof query[key] === "string" && query[key] ? (query[key] as string) : null);
@@ -127,6 +129,11 @@ export default async function DealerAuctions({ params, searchParams }: PageProps
       {/* 새 매물 알림을 받으려면 푸시가 필요하다 */}
       <PushToggle compact />
       {blockedUntil && <BidBlockNotice until={blockedUntil} />}
+      {overdue.length > 0 && (
+        <Link href="/dealer/billing" className="rounded-xl border border-danger/30 bg-danger/5 p-4 text-body font-semibold text-danger">
+          ⛔ {t("overdueNotice", { count: overdue.length })} →
+        </Link>
+      )}
 
       <div className="flex gap-2 overflow-x-auto pb-1">
         <FilterChip href={filterHref({ fav: filters.favorites ? null : "1" })} active={filters.favorites}>

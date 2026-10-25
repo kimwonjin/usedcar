@@ -8,6 +8,7 @@ export function DealerTabs() {
       tabs={[
         { href: "/dealer", label: t("tabAuctions"), exact: true },
         { href: "/dealer/activity", label: t("tabActivity") },
+        { href: "/dealer/billing", label: t("tabBilling") },
       ]}
     />
   );

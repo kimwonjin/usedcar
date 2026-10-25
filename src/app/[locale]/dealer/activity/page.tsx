@@ -8,7 +8,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { Link, redirect } from "@/i18n/navigation";
 import { getCurrentUser, getDealer } from "@/lib/auth";
 import { formatDateTime } from "@/lib/datetime";
-import { dealerFee } from "@/lib/fees";
+import { dealerFee, loadFeeBands } from "@/lib/fees";
 import { formatTenge } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 
@@ -44,6 +44,7 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
   if (!dealer) return redirect({ href: "/dealer/apply", locale });
 
   const supabase = await createClient();
+  const feeBands = await loadFeeBands(supabase);
   const { data: penaltyRows } = await supabase
     .from("dealer_penalties")
     .select("id, reason, action, created_at")
@@ -79,7 +80,7 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
   const rankOf = new Map(liveBids.map((b, i) => [b.id, ranks[i]]));
 
   const completed = deals.filter((d) => d.status === "completed");
-  const totalFees = completed.reduce((sum, d) => sum + dealerFee(d.final_price ?? d.agreed_price), 0);
+  const totalFees = completed.reduce((sum, d) => sum + dealerFee(d.final_price ?? d.agreed_price, feeBands), 0);
 
   const bidResult = (bid: MyBid) => {
     if (bid.auctions.status === "live") return <Badge tone="review">{t("rank", { rank: rankOf.get(bid.id) ?? "-" })}</Badge>;
@@ -137,7 +138,7 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
                   {deal.auctions.cars.make} {deal.auctions.cars.model} · {deal.auctions.cars.year}
                 </p>
                 <p className="price text-caption text-ink/60">
-                  {formatTenge(price)} · {t("fee")} {formatTenge(dealerFee(price))}
+                  {formatTenge(price)} · {t("fee")} {formatTenge(dealerFee(price, feeBands))}
                 </p>
               </div>
               <StatusBadge kind="deal" status={deal.status} />

@@ -7,7 +7,7 @@ import { routing } from "@/i18n/routing";
 import { getCurrentUser, getDealer } from "@/lib/auth";
 import { formatPhoneInput } from "@/lib/phone";
 import { createClient } from "@/lib/supabase/server";
-import { LogoutButton, NameForm } from "./account-forms";
+import { AlertPrefs, DeleteAccount, LogoutButton, NameForm } from "./account-forms";
 
 const localeNames = { ko: "한국어", ru: "Русский", kk: "Қазақша" } as const;
 
@@ -21,7 +21,7 @@ export default async function AccountPage({ params }: PageProps<"/[locale]/accou
   if (!user) return redirect({ href: "/login", locale });
   const supabase = await createClient();
   const [{ data: profile }, dealer] = await Promise.all([
-    supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("full_name, notify_new_auction, notify_makes").eq("id", user.id).maybeSingle(),
     getDealer(user.id),
   ]);
 
@@ -58,6 +58,13 @@ export default async function AccountPage({ params }: PageProps<"/[locale]/accou
 
       <PushToggle />
 
+      {dealer?.status === "approved" && (
+        <AlertPrefs
+          enabled={(profile?.notify_new_auction as boolean | undefined) ?? true}
+          makes={(profile?.notify_makes as string[] | undefined) ?? []}
+        />
+      )}
+
       <section className="flex items-center justify-between rounded-xl bg-white p-4 shadow-sm">
         <div>
           <p className="text-caption text-ink/60">{t("dealer")}</p>
@@ -75,6 +82,7 @@ export default async function AccountPage({ params }: PageProps<"/[locale]/accou
       </section>
 
       <LogoutButton />
+      <DeleteAccount />
     </div>
   );
 }
