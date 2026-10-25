@@ -110,6 +110,23 @@ export default async function AdminDashboard({ params }: PageProps<"/[locale]/ad
         </div>
         <p className="text-caption text-ink/50">{t("feesNote")}</p>
       </section>
+      <section className="flex flex-col gap-2">
+        <h2 className="text-subtitle font-semibold">{t("exportTitle")}</h2>
+        <div className="flex flex-wrap gap-2">
+          {(["deals", "payments", "users"] as const).map((type) => (
+            // 파일 내려받기라 Link 대신 일반 a 태그
+            <a
+              key={type}
+              href={`/api/admin/export?type=${type}`}
+              download
+              className="rounded-lg border border-navy px-4 py-2 text-body font-semibold text-navy"
+            >
+              ⬇ {t(`export.${type}`)}
+            </a>
+          ))}
+        </div>
+        <p className="text-caption text-ink/50">{t("exportNote")}</p>
+      </section>
     </div>
   );
 }
