@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { PriceInput } from "@/components/price-input";
 import { useRouter } from "@/i18n/navigation";
-import { formatTenge } from "@/lib/format";
+import { formatAmount, formatTenge } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
 
 const STEPS = [100_000, 300_000, 1_000_000];
@@ -82,7 +82,7 @@ export function BidPanel({
         )}
       </div>
 
-      <PriceInput value={amount} onChange={setAmount} placeholder={shownAmount ? formatTenge(shownAmount + 100_000).replace(" ₸", "") : undefined} />
+      <PriceInput value={amount} onChange={setAmount} placeholder={shownAmount ? formatAmount(shownAmount + 100_000) : undefined} />
       <div className="flex gap-2">
         {STEPS.map((step) => (
           <button
@@ -91,7 +91,7 @@ export function BidPanel({
             onClick={() => setAmount(String((Number(amount) || shownAmount || 0) + step))}
             className="price flex-1 rounded-lg border border-ink/15 py-2 text-caption font-semibold"
           >
-            +{formatTenge(step).replace(" ₸", "")}
+            +{formatAmount(step)}
           </button>
         ))}
       </div>

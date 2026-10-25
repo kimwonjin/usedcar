@@ -76,11 +76,11 @@ export default async function AccountPage({ params }: PageProps<"/[locale]/accou
         />
       )}
 
-      <section className="flex items-center justify-between rounded-xl bg-white p-4 shadow-sm">
-        <div>
+      <section className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 rounded-xl bg-white p-4 shadow-sm">
+        <div className="min-w-0">
           <p className="text-caption text-ink/60">{t("dealer")}</p>
           {dealer ? (
-            <p className="flex items-center gap-2 text-body font-semibold">
+            <p className="flex flex-wrap items-center gap-x-2 text-body font-semibold">
               {dealer.business_name} <StatusBadge kind="dealer" status={dealer.status} />
             </p>
           ) : (

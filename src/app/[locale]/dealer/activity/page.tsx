@@ -212,7 +212,7 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
 function Stat({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="rounded-xl bg-white p-3 text-center shadow-sm">
-      <p className="text-caption text-ink/60">{label}</p>
+      <p className="text-caption leading-tight hyphens-auto text-ink/60 [overflow-wrap:anywhere]">{label}</p>
       <div className="mt-1">{children}</div>
     </div>
   );
