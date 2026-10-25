@@ -179,7 +179,8 @@
     "cancelPayment": "청구 취소",
     "confirmPaid": "입금을 확인했나요? 납부 완료로 처리합니다.",
     "confirmCancelPayment": "이 청구를 취소할까요?",
-    "sellerCondition": "판매자가 입력한 차량 상태 보기"
+    "sellerCondition": "판매자가 입력한 차량 상태 보기",
+    "tabSupport": "1:1 문의"
   },
   "carForm": {
     "back": "이전",
@@ -608,6 +609,14 @@
     "fee_invoice": {
       "title": "낙찰 수수료가 청구되었습니다",
       "body": "{car} · {amount}"
+    },
+    "support_reply": {
+      "title": "문의에 답변이 왔어요",
+      "body": "{text}"
+    },
+    "support_new": {
+      "title": "새 1:1 문의",
+      "body": "{text}"
     }
   },
   "notificationCenter": {
@@ -663,7 +672,8 @@
       "active_auctions": "진행 중이거나 판매 결정을 기다리는 경매가 있습니다. 먼저 정리해 주세요.",
       "active_deals": "진행 중인 거래가 있습니다. 완료하거나 취소한 뒤 탈퇴할 수 있습니다.",
       "unpaid_payments": "미납 청구가 있습니다. 납부한 뒤 탈퇴할 수 있습니다."
-    }
+    },
+    "support": "1:1 문의"
   },
   "penalty": {
     "blockedTitle": "입찰이 제한되었습니다",
@@ -686,7 +696,8 @@
     "faq": "자주 묻는 질문",
     "moreHelp": "원하는 답이 없으면 고객센터로 문의해 주세요.",
     "consentLogin": "시작하면 <terms>이용약관</terms>과 <privacy>개인정보처리방침</privacy>에 동의하는 것으로 봅니다.",
-    "consentDealer": "신청하면 <terms>이용약관</terms>(딜러 의무·수수료·패널티 포함)과 <privacy>개인정보처리방침</privacy>에 동의하는 것으로 봅니다."
+    "consentDealer": "신청하면 <terms>이용약관</terms>(딜러 의무·수수료·패널티 포함)과 <privacy>개인정보처리방침</privacy>에 동의하는 것으로 봅니다.",
+    "support": "고객센터"
   },
   "favorites": {
     "add": "관심 차량에 추가",
@@ -935,5 +946,43 @@
     "contractIntro": "카자흐스탄에서 일반적으로 쓰는 러시아어 자동차 매매 계약서입니다. 차량 정보와 금액은 미리 채워져 있고, 이름·신분증 번호는 인쇄 후 직접 적어 주세요(서버에 저장하지 않습니다). 2부 인쇄해 한 부씩 나눠 가지세요.",
     "print": "인쇄 / PDF 저장",
     "back": "거래 화면으로"
+  },
+  "support": {
+    "title": "고객센터 1:1 문의",
+    "intro": "궁금한 점이나 불편한 점을 남겨 주시면 운영팀이 답변해 드립니다. 답변이 오면 알림으로 알려드려요.",
+    "checkFaq": "자주 묻는 질문 먼저 보기",
+    "myTickets": "내 문의",
+    "newTitle": "새 문의",
+    "category": "문의 유형",
+    "subject": "제목",
+    "body": "내용",
+    "bodyPlaceholder": "경매·거래와 관련된 문의라면 차량명을 함께 적어 주세요. 비밀번호·카드번호 등은 적지 마세요.",
+    "submit": "문의 보내기",
+    "failed": "보내지 못했습니다. 다시 시도해 주세요.",
+    "send": "보내기",
+    "replyPlaceholder": "추가로 남길 내용",
+    "replyPlaceholderAdmin": "답변 입력",
+    "operator": "Satu 운영팀",
+    "customer": "고객",
+    "me": "나",
+    "closedHint": "종료된 문의입니다. 추가 문의는 새로 남겨 주세요.",
+    "waitingHint": "운영팀이 확인 중입니다. 보통 영업일 기준 하루 안에 답변드립니다.",
+    "adminTitle": "1:1 문의",
+    "adminEmpty": "문의가 없습니다.",
+    "close": "문의 종료",
+    "reopen": "다시 열기",
+    "status": {
+      "open": "답변 대기",
+      "answered": "답변 완료",
+      "closed": "종료"
+    },
+    "categories": {
+      "account": "계정·로그인",
+      "selling": "내 차 팔기",
+      "buying": "딜러·입찰",
+      "payment": "수수료·결제",
+      "bug": "오류 신고",
+      "other": "기타"
+    }
   }
 }

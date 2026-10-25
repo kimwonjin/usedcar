@@ -12,6 +12,7 @@ export function SiteFooter() {
           {t("privacy")}
         </Link>
         <Link href="/faq">{t("faq")}</Link>
+        <Link href="/support">{t("support")}</Link>
       </div>
     </footer>
   );

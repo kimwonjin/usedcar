@@ -83,6 +83,11 @@ export default async function AccountPage({ params }: PageProps<"/[locale]/accou
         </Link>
       </section>
 
+      <Link href="/support" className="flex items-center justify-between rounded-xl bg-white p-4 shadow-sm">
+        <span className="text-body font-semibold">💬 {t("support")}</span>
+        <span className="text-ink/40">›</span>
+      </Link>
+
       <LogoutButton />
       <DeleteAccount />
     </div>

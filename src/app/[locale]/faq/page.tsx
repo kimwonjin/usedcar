@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { legalContent } from "@/content/legal";
 import type { Locale } from "@/i18n/routing";
 
@@ -35,7 +36,10 @@ export default async function FaqPage({ params }: PageProps<"/[locale]/faq">) {
           </div>
         </section>
       ))}
-      <p className="text-caption text-ink/60">{t("moreHelp")}</p>
+      <Link href="/support" className="flex items-center justify-between rounded-xl bg-white p-4 shadow-sm">
+        <span className="text-body text-ink/70">{t("moreHelp")}</span>
+        <span className="shrink-0 text-body font-semibold text-steppe">{t("support")} →</span>
+      </Link>
     </div>
   );
 }
