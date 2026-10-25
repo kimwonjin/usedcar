@@ -7,6 +7,7 @@ const PUBLIC_PATHS = [
   { path: "", priority: 1, changeFrequency: "daily" },
   { path: "/price", priority: 0.8, changeFrequency: "daily" },
   { path: "/faq", priority: 0.6, changeFrequency: "monthly" },
+  { path: "/notices", priority: 0.4, changeFrequency: "weekly" },
   { path: "/terms", priority: 0.3, changeFrequency: "yearly" },
   { path: "/privacy", priority: 0.3, changeFrequency: "yearly" },
 ] as const;
