@@ -30,6 +30,7 @@ type LiveAuction = {
     fuel: string | null;
     transmission: string | null;
     accident: string | null;
+    body_type: string | null;
     car_photos: { slot: string; storage_path: string }[];
   };
 };
@@ -58,6 +59,7 @@ export default async function DealerAuctions({ params, searchParams }: PageProps
     fuel: param("fuel"),
     transmission: param("transmission"),
     steering: param("steering"),
+    bodyType: param("bodyType"),
     noAccident: param("noAccident") === "1",
     favorites: param("fav") === "1",
   };
@@ -70,7 +72,7 @@ export default async function DealerAuctions({ params, searchParams }: PageProps
     overduePayments(userId),
     supabase
       .from("auctions")
-      .select("id, ends_at, created_at, cars(make, model, year, mileage_km, steering, fuel, transmission, accident, car_photos(slot, storage_path))")
+      .select("id, ends_at, created_at, cars(make, model, year, mileage_km, steering, fuel, transmission, accident, body_type, car_photos(slot, storage_path))")
       .eq("status", "live")
       .gt("ends_at", new Date().toISOString())
       .order(sort === "ending" ? "ends_at" : "created_at", { ascending: sort === "ending" })
@@ -100,6 +102,7 @@ export default async function DealerAuctions({ params, searchParams }: PageProps
     if (filters.transmission && c.transmission !== filters.transmission) return false;
     if (filters.steering && c.steering !== filters.steering) return false;
     if (filters.noAccident && c.accident !== "none") return false;
+    if (filters.bodyType && c.body_type !== filters.bodyType) return false;
     if (filters.favorites && !favorites.has(a.id)) return false;
     return true;
   });

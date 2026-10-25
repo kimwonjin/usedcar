@@ -32,6 +32,10 @@ type AuctionDetail = {
     transmission: string | null;
     steering: string;
     customs_cleared: boolean;
+    body_type: string | null;
+    color: string | null;
+    engine_volume: number | null;
+    vin: string | null;
     defects: string | null;
     car_photos: { slot: string; storage_path: string; sort_order: number }[];
   };
@@ -55,7 +59,7 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
       supabase
         .from("auctions")
         .select(
-          "id, status, ends_at, winning_bid_id, cars(make, model, year, mileage_km, fuel, transmission, steering, customs_cleared, defects, options, accident, owners, damage, car_photos(slot, storage_path, sort_order))",
+          "id, status, ends_at, winning_bid_id, cars(make, model, year, mileage_km, fuel, transmission, steering, customs_cleared, body_type, color, engine_volume, vin, defects, options, accident, owners, damage, car_photos(slot, storage_path, sort_order))",
         )
         .eq("id", id)
         .maybeSingle()
@@ -92,6 +96,10 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
     ],
     [tf("details.steering"), tf(`steering.${car.steering}` as Parameters<typeof tf>[0])],
     [tf("details.customs"), tf(car.customs_cleared ? "customs.yes" : "customs.no")],
+    [tf("specs.bodyType"), car.body_type ? tf(`bodyType.${car.body_type}` as Parameters<typeof tf>[0]) : "—"],
+    [tf("specs.color"), car.color ? tf(`color.${car.color}` as Parameters<typeof tf>[0]) : "—"],
+    [tf("specs.engineShort"), car.engine_volume ? `${Number(car.engine_volume).toFixed(1)} L` : "—"],
+    ["VIN", car.vin ?? "—"],
   ];
 
   return (

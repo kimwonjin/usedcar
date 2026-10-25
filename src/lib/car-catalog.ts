@@ -20,6 +20,13 @@ export const POPULAR_MAKES: Record<string, string[]> = {
   Geely: ["Coolray", "Monjaro", "Atlas"],
 };
 
+export const BODY_TYPES = ["sedan", "suv", "hatchback", "wagon", "minivan", "pickup", "coupe"] as const;
+export const COLORS = ["white", "black", "silver", "gray", "blue", "red", "brown", "green", "other"] as const;
+export type BodyType = (typeof BODY_TYPES)[number];
+export type CarColor = (typeof COLORS)[number];
+// VIN: 17자, I·O·Q 없음 (오래된 일본 내수차는 차대번호 형식이 달라 비워 둘 수 있다)
+export const VIN_PATTERN = /^[A-HJ-NPR-Z0-9]{17}$/;
+
 export const FUELS = ["petrol", "diesel", "gas", "hybrid", "electric"] as const;
 export const TRANSMISSIONS = ["automatic", "manual"] as const;
 export const STEERINGS = ["left", "right"] as const;

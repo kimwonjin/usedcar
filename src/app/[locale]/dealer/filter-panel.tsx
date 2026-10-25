@@ -1,5 +1,5 @@
 import { useTranslations } from "next-intl";
-import { FUELS, STEERINGS, TRANSMISSIONS } from "@/lib/car-catalog";
+import { BODY_TYPES, FUELS, STEERINGS, TRANSMISSIONS } from "@/lib/car-catalog";
 
 type Values = {
   make: string | null;
@@ -10,6 +10,7 @@ type Values = {
   fuel: string | null;
   transmission: string | null;
   steering: string | null;
+  bodyType: string | null;
   noAccident: boolean;
   favorites: boolean;
 };
@@ -73,7 +74,18 @@ export function FilterPanel({ action, values, activeCount }: { action: string; v
             ))}
           </select>
         </label>
-        <label className="col-span-2 flex flex-col gap-1 text-caption text-ink/60">
+        <label className="flex flex-col gap-1 text-caption text-ink/60">
+          {tf("specs.bodyType")}
+          <select name="bodyType" defaultValue={values.bodyType ?? ""} className={select}>
+            <option value="">{t("any")}</option>
+            {BODY_TYPES.map((v) => (
+              <option key={v} value={v}>
+                {tf(`bodyType.${v}`)}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="flex flex-col gap-1 text-caption text-ink/60">
           {tf("details.steering")}
           <select name="steering" defaultValue={values.steering ?? ""} className={select}>
             <option value="">{t("any")}</option>

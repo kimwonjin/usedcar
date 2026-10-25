@@ -346,6 +346,39 @@
       "apply": "가리고 올리기",
       "skip": "가리지 않고 올리기",
       "cancel": "다시 찍기"
+    },
+    "specs": {
+      "title": "차체·색상·배기량",
+      "hint": "VIN(차대번호)을 넣으면 딜러가 이력을 확인하고 더 자신 있게 입찰합니다.",
+      "bodyType": "차체",
+      "color": "색상",
+      "engineVolume": "배기량 (선택)",
+      "engineInvalid": "0.6~9.9 사이로 입력해 주세요.",
+      "engineShort": "배기량",
+      "vin": "VIN 차대번호 (선택)",
+      "vinHint": "등록증(техпаспорт)에 있는 17자리 번호",
+      "vinInvalid": "VIN은 영문·숫자 17자리입니다 (I, O, Q 제외).",
+      "short": "차체·색상"
+    },
+    "bodyType": {
+      "sedan": "세단",
+      "suv": "SUV",
+      "hatchback": "해치백",
+      "wagon": "왜건",
+      "minivan": "미니밴",
+      "pickup": "픽업",
+      "coupe": "쿠페"
+    },
+    "color": {
+      "white": "흰색",
+      "black": "검정",
+      "silver": "은색",
+      "gray": "회색",
+      "blue": "파랑",
+      "red": "빨강",
+      "brown": "갈색",
+      "green": "초록",
+      "other": "기타"
     }
   },
   "dealerApply": {

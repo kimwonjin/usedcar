@@ -6,7 +6,9 @@ import { useRouter } from "@/i18n/navigation";
 import { DamageDiagram, DamageLegend } from "@/components/damage-diagram";
 import {
   ACCIDENTS,
+  BODY_TYPES,
   CAR_OPTIONS,
+  COLORS,
   DAMAGE_KINDS,
   FUELS,
   MIN_YEAR,
@@ -14,7 +16,10 @@ import {
   REQUIRED_SLOTS,
   STEERINGS,
   TRANSMISSIONS,
+  VIN_PATTERN,
   type Accident,
+  type BodyType,
+  type CarColor,
   type CarOption,
   type DamageMap,
   type Fuel,
@@ -37,6 +42,10 @@ type Draft = {
   transmission: Transmission;
   steering: Steering;
   customsCleared: boolean;
+  bodyType: BodyType | "";
+  color: CarColor | "";
+  engineVolume: string;
+  vin: string;
   accident: Accident | "";
   owners: string;
   damage: DamageMap;
@@ -45,7 +54,7 @@ type Draft = {
   desiredPrice: string;
 };
 
-const STEPS = ["plate", "make", "model", "year", "mileage", "details", "history", "damage", "options", "defects", "photos", "review"] as const;
+const STEPS = ["plate", "make", "model", "year", "mileage", "details", "specs", "history", "damage", "options", "defects", "photos", "review"] as const;
 type Step = (typeof STEPS)[number];
 
 const initialDraft: Draft = {
@@ -58,6 +67,10 @@ const initialDraft: Draft = {
   transmission: "automatic",
   steering: "left",
   customsCleared: true,
+  bodyType: "",
+  color: "",
+  engineVolume: "",
+  vin: "",
   accident: "",
   owners: "",
   damage: {},
@@ -108,6 +121,8 @@ export function CarWizard({
   };
 
   const year = Number(draft.year);
+  const engine = Number(draft.engineVolume);
+  const engineOk = draft.engineVolume === "" || draft.fuel === "electric" || (engine >= 0.6 && engine <= 9.9);
   const photosComplete = REQUIRED_SLOTS.every((slot) => photos[slot]?.length);
   const canContinue: Record<Step, boolean> = {
     plate: /^[0-9A-Z]{5,10}$/.test(draft.plate),
@@ -116,6 +131,7 @@ export function CarWizard({
     year: year >= MIN_YEAR && year <= currentYear + 1,
     mileage: draft.mileage.length > 0,
     details: true,
+    specs: draft.bodyType !== "" && (draft.vin === "" || VIN_PATTERN.test(draft.vin)) && engineOk,
     history: draft.accident !== "" && draft.owners !== "",
     damage: true,
     options: true,
@@ -138,6 +154,10 @@ export function CarWizard({
       transmission: draft.transmission,
       steering: draft.steering,
       customs_cleared: draft.customsCleared,
+      body_type: draft.bodyType || null,
+      color: draft.color || null,
+      engine_volume: draft.engineVolume && draft.fuel !== "electric" ? engine : null,
+      vin: draft.vin || null,
       accident: draft.accident || null,
       owners: Number(draft.owners) || null,
       damage: draft.damage,
@@ -345,6 +365,51 @@ export function CarWizard({
         </Question>
       )}
 
+      {step === "specs" && (
+        <Question title={t("specs.title")} hint={t("specs.hint")}>
+          <ChoiceGroup label={t("specs.bodyType")}>
+            {BODY_TYPES.map((value) => (
+              <Chip key={value} selected={draft.bodyType === value} onClick={() => set("bodyType", value)}>
+                {t(`bodyType.${value}`)}
+              </Chip>
+            ))}
+          </ChoiceGroup>
+          <ChoiceGroup label={t("specs.color")}>
+            {COLORS.map((value) => (
+              <Chip key={value} selected={draft.color === value} onClick={() => set("color", value)}>
+                {t(`color.${value}`)}
+              </Chip>
+            ))}
+          </ChoiceGroup>
+          {draft.fuel !== "electric" && (
+            <label className="flex flex-col gap-1 text-caption text-ink/60">
+              {t("specs.engineVolume")}
+              <div className="relative">
+                <input
+                  inputMode="decimal"
+                  value={draft.engineVolume}
+                  onChange={(e) => set("engineVolume", e.target.value.replace(",", ".").replace(/[^0-9.]/g, "").slice(0, 3))}
+                  placeholder="2.5"
+                  className={`${inputClass} price w-full pr-10`}
+                />
+                <span className="absolute top-1/2 right-4 -translate-y-1/2 text-ink/50">L</span>
+              </div>
+              {!engineOk && <span className="text-danger">{t("specs.engineInvalid")}</span>}
+            </label>
+          )}
+          <label className="flex flex-col gap-1 text-caption text-ink/60">
+            {t("specs.vin")}
+            <input
+              value={draft.vin}
+              onChange={(e) => set("vin", e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 17))}
+              placeholder="JTMHV05J804012345"
+              className={`${inputClass} price tracking-wider uppercase`}
+            />
+            <span>{draft.vin && !VIN_PATTERN.test(draft.vin) ? <span className="text-danger">{t("specs.vinInvalid")}</span> : t("specs.vinHint")}</span>
+          </label>
+        </Question>
+      )}
+
       {step === "history" && (
         <Question title={tc("history.title")} hint={tc("history.hint")}>
           <ChoiceGroup label={tc("accident")}>
@@ -465,6 +530,16 @@ export function CarWizard({
                 t(`steering.${draft.steering}`),
                 t(draft.customsCleared ? "customs.yes" : "customs.no"),
               ].join(" · ")}
+            </ReviewRow>
+            <ReviewRow label={t("specs.short")} onEdit={() => goTo("specs")} editLabel={t("review.edit")}>
+              {[
+                draft.bodyType && t(`bodyType.${draft.bodyType}`),
+                draft.color && t(`color.${draft.color}`),
+                draft.engineVolume && draft.fuel !== "electric" && `${draft.engineVolume} L`,
+                draft.vin && `VIN ${draft.vin}`,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
             </ReviewRow>
             <ReviewRow label={tc("history.short")} onEdit={() => goTo("history")} editLabel={t("review.edit")}>
               {draft.accident ? tc(`accidents.${draft.accident}`) : "—"} ·{" "}
