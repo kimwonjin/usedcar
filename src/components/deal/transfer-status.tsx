@@ -50,6 +50,20 @@ export function TransferStatus({
     setBusy(false);
   }
 
+  // 제출 전에는 잘못 찍은 사진을 저장소에서도 지운다
+  async function removePhoto(index: number) {
+    setBusy(true);
+    setError(false);
+    const { error } = await createClient().storage.from("transfer-docs").remove([paths[index]]);
+    if (error) setError(true);
+    else {
+      URL.revokeObjectURL(previews[index]);
+      setPaths((prev) => prev.filter((_, i) => i !== index));
+      setPreviews((prev) => prev.filter((_, i) => i !== index));
+    }
+    setBusy(false);
+  }
+
   async function submit() {
     setBusy(true);
     setError(false);
@@ -98,9 +112,20 @@ export function TransferStatus({
           <p className="text-caption text-ink/60">{t("uploadHint")}</p>
           {previews.length > 0 && (
             <div className="flex gap-2 overflow-x-auto">
-              {previews.map((src) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img key={src} src={src} alt="" className="h-20 w-24 shrink-0 rounded-lg object-cover" />
+              {previews.map((src, i) => (
+                <div key={src} className="relative shrink-0">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={src} alt="" className="h-20 w-24 rounded-lg object-cover" />
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => removePhoto(i)}
+                    aria-label={t("removePhoto")}
+                    className="absolute top-1 right-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-caption text-white"
+                  >
+                    ✕
+                  </button>
+                </div>
               ))}
             </div>
           )}
