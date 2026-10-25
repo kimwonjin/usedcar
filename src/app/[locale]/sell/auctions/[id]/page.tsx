@@ -1,6 +1,7 @@
 import type { Locale } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { AuctionInterest } from "@/components/auction-interest";
 import { AuctionQa } from "@/components/auction-qa";
 import { PageHeader } from "@/components/page-header";
 import { PriceChart, type BidEvent } from "@/components/price-chart";
@@ -53,11 +54,18 @@ export default async function SellerAuctionPage({ params }: PageProps<"/[locale]
     return (data ?? []) as BidEvent[];
   };
 
+  // 관심도 (판매자 본인만 읽힌다)
+  const loadInterest = async () => {
+    const { data } = await supabase.rpc("auction_interest", { p_auction_id: id });
+    return ((data ?? [])[0] ?? { viewers: 0, favorites: 0 }) as { viewers: number; favorites: number };
+  };
+
   let body: React.ReactNode;
   if (auction.status === "live") {
-    const [{ data: stats }, events] = await Promise.all([
+    const [{ data: stats }, events, interest] = await Promise.all([
       supabase.rpc("auction_stats", { p_auction_id: id }),
       loadEvents(),
+      loadInterest(),
     ]);
     const initial = (stats?.[0] ?? { bid_count: 0, top_amount: null }) as { bid_count: number; top_amount: number | null };
     body = (
@@ -70,6 +78,7 @@ export default async function SellerAuctionPage({ params }: PageProps<"/[locale]
           initialEvents={events}
           desiredPrice={car.desired_price}
         />
+        <AuctionInterest viewers={interest.viewers} favorites={interest.favorites} />
         <AuctionQa auctionId={id} role="seller" canAnswer />
         <LiveEdits carId={auction.car_id} userId={user.id} defects={car.defects} damage={car.damage ?? {}} />
       </>
@@ -100,11 +109,19 @@ export default async function SellerAuctionPage({ params }: PageProps<"/[locale]
       </Link>
     );
   } else {
+    const interest = await loadInterest();
     body = (
-      <div className="flex flex-col gap-4 rounded-xl bg-white p-5 shadow-sm">
-        <p className="text-body">{t(`closedMessage.${auction.status}` as Parameters<typeof t>[0])}</p>
-        <RelistButton carId={auction.car_id} />
-      </div>
+      <>
+        <div className="flex flex-col gap-4 rounded-xl bg-white p-5 shadow-sm">
+          <p className="text-body">{t(`closedMessage.${auction.status}` as Parameters<typeof t>[0])}</p>
+          <RelistButton carId={auction.car_id} />
+        </div>
+        <AuctionInterest
+          viewers={interest.viewers}
+          favorites={interest.favorites}
+          tip={auction.status === "no_bids" ? "noBids" : null}
+        />
+      </>
     );
   }
 

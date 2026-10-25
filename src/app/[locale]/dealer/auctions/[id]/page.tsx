@@ -70,6 +70,8 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
       supabase.from("deals").select("id").eq("auction_id", id).eq("dealer_id", userId).maybeSingle(),
       getDealer(userId),
       supabase.from("dealer_favorites").select("auction_id").eq("dealer_id", userId).eq("auction_id", id).maybeSingle(),
+      // 판매자에게 보여줄 "본 딜러 수" 기록 (진행 중 경매·승인 딜러만 DB에서 반영)
+      supabase.rpc("record_auction_view", { p_auction_id: id }),
     ]);
   if (!auction) notFound();
 
