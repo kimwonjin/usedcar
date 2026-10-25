@@ -9,6 +9,7 @@ import { MeetingForm } from "@/components/deal/meeting-form";
 import { TransferGuide } from "@/components/deal/transfer-guide";
 import { TransferStatus } from "@/components/deal/transfer-status";
 import { PageHeader } from "@/components/page-header";
+import { SaleProgress } from "@/components/sale-progress";
 import { Stars } from "@/components/stars";
 import { StatusBadge } from "@/components/status-badge";
 import { redirect } from "@/i18n/navigation";
@@ -45,6 +46,11 @@ export default async function SellerDealPage({ params }: PageProps<"/[locale]/se
       <PageHeader title={`${car.make} ${car.model} · ${car.year}`} backHref="/sell" backLabel={t("backToHome")}>
         <StatusBadge kind="deal" status={deal.status} />
       </PageHeader>
+      {deal.status !== "cancelled" && (
+        <SaleProgress
+          current={deal.status !== "completed" ? "handover" : deal.transfer_submitted_at ? "done" : "transfer"}
+        />
+      )}
 
       <section className="rounded-xl bg-white p-4 shadow-sm">
         <p className="text-caption text-ink/60">{deal.final_price ? t("finalPrice") : t("expectedPrice")}</p>

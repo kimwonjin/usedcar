@@ -5,6 +5,7 @@ import { AuctionInterest } from "@/components/auction-interest";
 import { AuctionQa } from "@/components/auction-qa";
 import { MarketReference, type MarketEstimate } from "@/components/market-reference";
 import { PageHeader } from "@/components/page-header";
+import { SaleProgress } from "@/components/sale-progress";
 import { PriceChart, type BidEvent } from "@/components/price-chart";
 import { StatusBadge } from "@/components/status-badge";
 import { Link, redirect } from "@/i18n/navigation";
@@ -141,6 +142,9 @@ export default async function SellerAuctionPage({ params }: PageProps<"/[locale]
       <PageHeader title={`${car.make} ${car.model} · ${car.year}`} backHref="/sell" backLabel={t("back")}>
         <StatusBadge kind="auction" status={auction.status} />
       </PageHeader>
+      {(auction.status === "live" || auction.status === "ended") && (
+        <SaleProgress current={auction.status === "live" ? "auction" : "decision"} />
+      )}
       {body}
     </div>
   );
