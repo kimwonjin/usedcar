@@ -9,3 +9,8 @@ export function startOfAlmatyDay(now: number = Date.now()): Date {
 export function almatyYear(now: number = Date.now()): number {
   return new Date(now + ALMATY_OFFSET_MS).getUTCFullYear();
 }
+
+// n일 전 시각 (ISO). 화면 함수 안에서 Date.now()를 직접 부르지 않도록 분리
+export function daysAgoIso(days: number): string {
+  return new Date(Date.now() - days * 86_400_000).toISOString();
+}

@@ -202,7 +202,8 @@
     "transferDue": "기한",
     "transferSubmitted": "제출",
     "transfersEmpty": "해당 거래가 없습니다.",
-    "tabNotices": "공지"
+    "tabNotices": "공지",
+    "tabInsights": "지표"
   },
   "carForm": {
     "back": "이전",
@@ -1140,5 +1141,40 @@
     "tooMany": "한 경매에 질문은 5개까지 할 수 있습니다.",
     "failed": "보내지 못했습니다.",
     "unanswered": "답변 필요 {count}"
+  },
+  "insights": {
+    "title": "운영 지표",
+    "period": {
+      "7": "7일",
+      "30": "30일",
+      "90": "90일",
+      "all": "전체"
+    },
+    "funnelTitle": "판매 퍼널",
+    "funnel": {
+      "cars": "차량 등록",
+      "auctions": "경매 시작",
+      "withBids": "입찰 1건 이상",
+      "accepted": "판매 결정",
+      "completed": "거래 완료"
+    },
+    "funnelHint": "괄호는 바로 앞 단계 대비 전환율. 선택한 기간에 등록·시작된 건 기준이며, 아래 경매 품질 지표는 판매자가 취소한 경매를 뺀 값입니다.",
+    "quality": {
+      "avgBidders": "경매당 평균 입찰 딜러",
+      "noBidRate": "입찰 없이 끝난 경매",
+      "acceptRate": "판매 결정률",
+      "vsDesired": "낙찰가 vs 희망가",
+      "gmv": "거래액 (완료)",
+      "avgPrice": "평균 거래가"
+    },
+    "rankingTitle": "딜러 순위 (입찰한 경매 수)",
+    "ranking": {
+      "dealer": "딜러",
+      "auctions": "입찰 경매",
+      "won": "낙찰",
+      "winRate": "낙찰률",
+      "completed": "거래 완료"
+    },
+    "empty": "이 기간에 입찰이 없습니다."
   }
 }
