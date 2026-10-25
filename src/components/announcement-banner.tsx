@@ -16,7 +16,7 @@ function readDismissed(): string[] {
   }
 }
 
-// 상단 공지 배너: 게시 중인 고정 공지 중 이 화면 대상(딜러 화면 → 딜러, 그 외 → 판매자)이고 닫지 않은 최신 1건
+// 상단 공지 배너: 게시 중인 고정 공지 중 닫지 않은 1건. 이 화면 대상(딜러 화면 → 딜러, 그 외 → 판매자) 공지 우선, 없으면 전체 공지
 export function AnnouncementBanner() {
   const t = useTranslations("notices");
   const locale = useLocale();
@@ -44,7 +44,9 @@ export function AnnouncementBanner() {
 
   if (pathname.startsWith("/admin")) return null;
   const audience = pathname.startsWith("/dealer") ? "dealers" : "sellers";
-  const notice = items.find((n) => (n.audience === "all" || n.audience === audience) && !dismissed.includes(n.id));
+  // 이 화면 대상에게만 쓴 공지를 전체 공지보다 먼저 보여준다
+  const open = items.filter((n) => !dismissed.includes(n.id));
+  const notice = open.find((n) => n.audience === audience) ?? open.find((n) => n.audience === "all");
   if (!notice) return null;
 
   function dismiss(id: string) {
