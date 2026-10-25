@@ -3,12 +3,32 @@ import { setRequestLocale } from "next-intl/server";
 import { SetupNotice } from "@/components/setup-notice";
 import { redirect } from "@/i18n/navigation";
 import { getCurrentUser } from "@/lib/auth";
+import type { PhotoSlot } from "@/lib/car-catalog";
+import { signedUrlMap } from "@/lib/storage";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
+import { createClient } from "@/lib/supabase/server";
 import { almatyYear } from "@/lib/time";
-import { CarWizard } from "./car-wizard";
+import { CarWizard, type WizardInitial } from "./car-wizard";
 
-// S3~S5 차량 등록
-export default async function NewCarPage({ params }: PageProps<"/[locale]/sell/new">) {
+type DraftCar = {
+  id: string;
+  plate_number: string;
+  make: string;
+  model: string;
+  year: number;
+  mileage_km: number;
+  fuel: WizardInitial["draft"]["fuel"] | null;
+  transmission: WizardInitial["draft"]["transmission"] | null;
+  steering: WizardInitial["draft"]["steering"];
+  customs_cleared: boolean;
+  defects: string | null;
+  desired_price: number | null;
+  car_photos: { id: string; slot: PhotoSlot; storage_path: string; sort_order: number }[];
+  auctions: { id: string }[];
+};
+
+// S3~S5 차량 등록. ?car=id 이면 작성 중이던 차량을 이어서 등록한다.
+export default async function NewCarPage({ params, searchParams }: PageProps<"/[locale]/sell/new">) {
   const locale = (await params).locale as Locale; // layout에서 검증됨
   setRequestLocale(locale);
   if (!isSupabaseConfigured) return <SetupNotice />;
@@ -16,5 +36,45 @@ export default async function NewCarPage({ params }: PageProps<"/[locale]/sell/n
   const user = await getCurrentUser();
   if (!user) return redirect({ href: "/login?next=/sell", locale });
 
-  return <CarWizard userId={user.id} currentYear={almatyYear()} />;
+  const { car: carId } = await searchParams;
+  let initial: WizardInitial | undefined;
+  if (typeof carId === "string") {
+    const supabase = await createClient();
+    const { data: car } = await supabase
+      .from("cars")
+      .select(
+        "id, plate_number, make, model, year, mileage_km, fuel, transmission, steering, customs_cleared, defects, desired_price, car_photos(id, slot, storage_path, sort_order), auctions(id)",
+      )
+      .eq("id", carId)
+      .eq("seller_id", user.id)
+      .maybeSingle()
+      .overrideTypes<DraftCar, { merge: false }>();
+    // 이미 경매에 올린 차량은 이어서 등록할 수 없다
+    if (!car || car.auctions.length > 0) return redirect({ href: "/sell", locale });
+
+    const urls = await signedUrlMap(supabase, "car-photos", car.car_photos.map((p) => p.storage_path));
+    const photos: WizardInitial["photos"] = {};
+    for (const photo of [...car.car_photos].sort((a, b) => a.sort_order - b.sort_order)) {
+      (photos[photo.slot] ??= []).push({ id: photo.id, path: photo.storage_path, preview: urls[photo.storage_path] ?? "" });
+    }
+    initial = {
+      carId: car.id,
+      photos,
+      draft: {
+        plate: car.plate_number,
+        make: car.make,
+        model: car.model,
+        year: String(car.year),
+        mileage: String(car.mileage_km),
+        fuel: car.fuel ?? "petrol",
+        transmission: car.transmission ?? "automatic",
+        steering: car.steering,
+        customsCleared: car.customs_cleared,
+        defects: car.defects ?? "",
+        desiredPrice: car.desired_price ? String(car.desired_price) : "",
+      },
+    };
+  }
+
+  return <CarWizard userId={user.id} currentYear={almatyYear()} initial={initial} />;
 }

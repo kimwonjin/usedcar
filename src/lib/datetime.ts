@@ -9,6 +9,13 @@ export function formatDateTime(iso: string, locale: string): string {
   }).format(new Date(iso));
 }
 
+export function formatDate(iso: string, locale: string): string {
+  return new Intl.DateTimeFormat(intlLocales[locale as keyof typeof intlLocales] ?? locale, {
+    timeZone: "Asia/Almaty",
+    dateStyle: "medium",
+  }).format(new Date(iso));
+}
+
 // <input type="datetime-local"> 값 ↔ ISO (브라우저 현지 시간 기준)
 export function toLocalInputValue(iso: string | null): string {
   if (!iso) return "";

@@ -51,14 +51,29 @@ const initialDraft: Draft = {
 
 const digitsOnly = (value: string) => value.replace(/\D/g, "");
 
+export type WizardInitial = { carId: string; draft: Draft; photos: PhotoMap };
+
 // S3 차량 정보 입력 → S4 사진 촬영 가이드 → S5 등록 확인. 한 화면에 질문 하나.
-export function CarWizard({ userId, currentYear }: { userId: string; currentYear: number }) {
+export function CarWizard({
+  userId,
+  currentYear,
+  initial,
+}: {
+  userId: string;
+  currentYear: number;
+  initial?: WizardInitial;
+}) {
   const t = useTranslations("carForm");
   const router = useRouter();
-  const [stepIndex, setStepIndex] = useState(0);
-  const [draft, setDraft] = useState<Draft>(initialDraft);
-  const [carId, setCarId] = useState<string | null>(null);
-  const [photos, setPhotos] = useState<PhotoMap>({});
+  // 이어서 등록할 때는 사진 단계(사진이 다 있으면 확인 단계)부터 시작한다
+  const [stepIndex, setStepIndex] = useState(() => {
+    if (!initial) return 0;
+    const complete = REQUIRED_SLOTS.every((slot) => initial.photos[slot]?.length);
+    return STEPS.indexOf(complete ? "review" : "photos");
+  });
+  const [draft, setDraft] = useState<Draft>(initial?.draft ?? initialDraft);
+  const [carId, setCarId] = useState<string | null>(initial?.carId ?? null);
+  const [photos, setPhotos] = useState<PhotoMap>(initial?.photos ?? {});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showOtherMake, setShowOtherMake] = useState(false);

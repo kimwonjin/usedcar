@@ -2,6 +2,7 @@ import type { Locale } from "@/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { SetupNotice } from "@/components/setup-notice";
 import { AdminOnly } from "@/components/admin-only";
+import { Link } from "@/i18n/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
@@ -40,26 +41,27 @@ export default async function AdminDashboard({ params }: PageProps<"/[locale]/ad
     count("depreciation_claims", "status", "submitted"),
   ]);
 
+  // 숫자를 누르면 해당 상태로 걸러진 목록으로 이동한다
   const cards = [
-    [t("today"), today],
-    [t("live"), live],
-    [t("ended"), ended],
-    [t("accepted"), accepted],
-    [t("pendingDealers"), pendingDealers],
-    [t("pendingClaims"), pendingClaims],
+    [t("today"), today, "/admin/auctions"],
+    [t("live"), live, "/admin/auctions?status=live"],
+    [t("ended"), ended, "/admin/auctions?status=ended"],
+    [t("accepted"), accepted, "/admin/auctions?status=accepted"],
+    [t("pendingDealers"), pendingDealers, "/admin/dealers?status=pending"],
+    [t("pendingClaims"), pendingClaims, "/admin/claims?status=submitted"],
   ] as const;
 
   return (
     <div className="flex flex-col gap-4">
       <h1 className="text-title font-bold text-navy">{t("title")}</h1>
-      <dl className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {cards.map(([label, value]) => (
-          <div key={label} className="rounded-xl bg-white p-4 shadow-sm">
-            <dt className="text-caption text-ink/60">{label}</dt>
-            <dd className="price text-title font-bold">{value}</dd>
-          </div>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {cards.map(([label, value, href]) => (
+          <Link key={label} href={href} className="rounded-xl bg-white p-4 shadow-sm hover:ring-2 hover:ring-steppe">
+            <p className="text-caption text-ink/60">{label}</p>
+            <p className="price text-title font-bold">{value}</p>
+          </Link>
         ))}
-      </dl>
+      </div>
     </div>
   );
 }

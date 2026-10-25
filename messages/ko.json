@@ -17,7 +17,11 @@
     "step1": "차량 정보와 사진 등록",
     "step2": "48시간 딜러 경쟁 입찰",
     "step3": "상위 3곳 중 골라 판매",
-    "promise": "연락은 내가 고른 딜러 한 곳에게만 공개됩니다."
+    "promise": "연락은 내가 고른 딜러 한 곳에게만 공개됩니다.",
+    "statLive": "진행 중 경매",
+    "statDealers": "승인 딜러",
+    "statSold": "거래 완료",
+    "recentSales": "최근 낙찰 사례"
   },
   "login": {
     "title": "휴대폰 번호로 시작하기",
@@ -42,7 +46,11 @@
     "needsDecision": "판매 결정이 필요해요",
     "seeResult": "결과 보기",
     "deals": "거래 진행",
-    "past": "지난 경매"
+    "past": "지난 경매",
+    "drafts": "작성 중인 차량",
+    "continueDraft": "이어서 등록",
+    "deleteDraft": "삭제",
+    "deleteDraftConfirm": "작성 중인 차량을 삭제할까요? 올린 사진도 함께 지워집니다."
   },
   "dealer": {
     "title": "경매 목록",

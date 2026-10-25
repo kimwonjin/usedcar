@@ -10,6 +10,7 @@ import { formatTenge } from "@/lib/format";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { firstRow } from "@/lib/supabase/rows";
 import { createClient } from "@/lib/supabase/server";
+import { DeleteDraftButton } from "./delete-draft-button";
 
 type DealSummary = { id: string; status: string; agreed_price: number; final_price: number | null };
 
@@ -40,6 +41,15 @@ export default async function SellerHome({ params }: PageProps<"/[locale]/sell">
     .overrideTypes<SellerAuction[], { merge: false }>();
   const auctions = data ?? [];
 
+  // 경매에 한 번도 올리지 않은 차량 = 등록하다 멈춘 차량
+  const { data: carRows } = await supabase
+    .from("cars")
+    .select("id, make, model, year, auctions(id)")
+    .eq("seller_id", user.id)
+    .order("created_at", { ascending: false })
+    .overrideTypes<{ id: string; make: string; model: string; year: number; auctions: { id: string }[] }[], { merge: false }>();
+  const drafts = (carRows ?? []).filter((car) => car.auctions.length === 0);
+
   const live = auctions.filter((a) => a.status === "live");
   const ended = auctions.filter((a) => a.status === "ended");
   const dealing = auctions.filter((a) => a.status === "accepted");
@@ -59,7 +69,25 @@ export default async function SellerHome({ params }: PageProps<"/[locale]/sell">
       <h1 className="text-title font-bold text-navy">{t("title")}</h1>
       {auctions.length > 0 && <PushToggle compact />}
 
-      {auctions.length === 0 && (
+      {drafts.length > 0 && (
+        <Section title={t("drafts")}>
+          {drafts.map((car) => (
+            <div key={car.id} className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-steppe bg-white p-4">
+              <span className="text-subtitle font-semibold">
+                {car.make} {car.model} · {car.year}
+              </span>
+              <div className="flex shrink-0 items-center gap-3">
+                <DeleteDraftButton carId={car.id} />
+                <Link href={`/sell/new?car=${car.id}`} className="text-body font-semibold text-steppe">
+                  {t("continueDraft")} →
+                </Link>
+              </div>
+            </div>
+          ))}
+        </Section>
+      )}
+
+      {auctions.length === 0 && drafts.length === 0 && (
         <div className="rounded-xl bg-white p-6 text-center shadow-sm">
           <p className="text-ink/60">{t("empty")}</p>
         </div>
