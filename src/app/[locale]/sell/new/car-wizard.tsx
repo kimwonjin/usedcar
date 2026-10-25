@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { DamageDiagram, DamageLegend } from "@/components/damage-diagram";
 import {
@@ -106,6 +106,9 @@ export function CarWizard({
   });
   const [draft, setDraft] = useState<Draft>(initial?.draft ?? { ...initialDraft, ...prefill });
   const [carId, setCarId] = useState<string | null>(initial?.carId ?? null);
+  // 차량이 DB에 저장되기 전(하자 단계 이전)까지는 입력 내용을 이 기기에 임시 보관한다
+  const localKey = `satu-car-draft:${userId}`;
+  const [restorable, setRestorable] = useState<{ draft: Draft; stepIndex: number } | null>(null);
   const [photos, setPhotos] = useState<PhotoMap>(initial?.photos ?? {});
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -205,8 +208,70 @@ export function CarWizard({
     setBusy(false);
   }
 
+  // 새 등록을 열면, 이 기기에 남은 작성 내용이 있는지 확인한다
+  useEffect(() => {
+    if (initial || prefill?.make) return;
+    try {
+      const saved = JSON.parse(localStorage.getItem(localKey) ?? "null") as { draft: Draft; stepIndex: number } | null;
+      // 외부 저장소에서 읽은 값을 화면에 반영한다
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      if (saved?.draft && saved.stepIndex > 0) setRestorable(saved);
+    } catch {}
+    // 처음 한 번만 확인
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // DB 저장 전 단계에서는 입력이 바뀔 때마다 임시 보관, 저장된 뒤에는 지운다
+  useEffect(() => {
+    if (initial || restorable) return;
+    try {
+      if (carId) localStorage.removeItem(localKey);
+      else if (stepIndex > 0) localStorage.setItem(localKey, JSON.stringify({ draft, stepIndex }));
+    } catch {}
+  }, [draft, stepIndex, carId, initial, restorable, localKey]);
+
   const models = POPULAR_MAKES[draft.make] ?? [];
   const makeIsOther = draft.make !== "" && !(draft.make in POPULAR_MAKES);
+
+  if (restorable) {
+    const saved = restorable.draft;
+    return (
+      <div className="flex flex-1 flex-col gap-4 pt-4">
+        <h1 className="text-title font-bold text-navy">{t("restore.title")}</h1>
+        <div className="rounded-xl bg-white p-4 shadow-sm">
+          <p className="text-subtitle font-semibold">
+            {[saved.make, saved.model, saved.year].filter(Boolean).join(" ") || saved.plate}
+          </p>
+          <p className="text-caption text-ink/60">
+            {t("restore.progress", { step: restorable.stepIndex + 1, total: STEPS.length })}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            setDraft({ ...initialDraft, ...saved });
+            setStepIndex(Math.min(restorable.stepIndex, STEPS.indexOf("defects")));
+            setRestorable(null);
+          }}
+          className="h-14 rounded-xl bg-navy text-subtitle font-bold text-white"
+        >
+          {t("restore.continue")}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            try {
+              localStorage.removeItem(localKey);
+            } catch {}
+            setRestorable(null);
+          }}
+          className="h-12 text-body text-ink/60"
+        >
+          {t("restore.startOver")}
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-1 flex-col gap-5">

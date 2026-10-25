@@ -26,7 +26,8 @@
     "priceTitle": "무료 내 차 시세 조회",
     "priceSub": "로그인 없이 비슷한 차의 실제 낙찰가 보기",
     "reviewsTitle": "판매자 후기",
-    "reviewDealer": "{dealer}에 판매"
+    "reviewDealer": "{dealer}에 판매",
+    "guideLink": "판매 진행 방법 자세히 보기"
   },
   "login": {
     "title": "휴대폰 번호로 시작하기",
@@ -379,6 +380,12 @@
       "brown": "갈색",
       "green": "초록",
       "other": "기타"
+    },
+    "restore": {
+      "title": "작성하던 차량이 있어요",
+      "progress": "{total}단계 중 {step}단계까지 입력했습니다.",
+      "continue": "이어서 작성하기",
+      "startOver": "처음부터 새로 작성"
     }
   },
   "dealerApply": {
@@ -814,7 +821,8 @@
     "consentLogin": "시작하면 <terms>이용약관</terms>과 <privacy>개인정보처리방침</privacy>에 동의하는 것으로 봅니다.",
     "consentDealer": "신청하면 <terms>이용약관</terms>(딜러 의무·수수료·패널티 포함)과 <privacy>개인정보처리방침</privacy>에 동의하는 것으로 봅니다.",
     "support": "고객센터",
-    "notices": "공지사항"
+    "notices": "공지사항",
+    "guide": "판매 가이드"
   },
   "favorites": {
     "add": "관심 차량에 추가",

@@ -6,6 +6,7 @@ import { siteUrl } from "@/lib/integrations/config";
 const PUBLIC_PATHS = [
   { path: "", priority: 1, changeFrequency: "daily" },
   { path: "/price", priority: 0.8, changeFrequency: "daily" },
+  { path: "/guide", priority: 0.7, changeFrequency: "monthly" },
   { path: "/faq", priority: 0.6, changeFrequency: "monthly" },
   { path: "/notices", priority: 0.4, changeFrequency: "weekly" },
   { path: "/terms", priority: 0.3, changeFrequency: "yearly" },

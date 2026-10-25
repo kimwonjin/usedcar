@@ -82,6 +82,10 @@ export default async function LandingPage({ params }: PageProps<"/[locale]">) {
         ))}
       </ol>
 
+      <Link href="/guide" className="text-center text-body font-semibold text-steppe">
+        {t("guideLink")} →
+      </Link>
+
       {sales.length > 0 && (
         <section className="flex flex-col gap-3">
           <h2 className="text-subtitle font-semibold">{t("recentSales")}</h2>

@@ -11,6 +11,7 @@ export function SiteFooter() {
         <Link href="/privacy" className="font-semibold">
           {t("privacy")}
         </Link>
+        <Link href="/guide">{t("guide")}</Link>
         <Link href="/faq">{t("faq")}</Link>
         <Link href="/notices">{t("notices")}</Link>
         <Link href="/support">{t("support")}</Link>
