@@ -75,22 +75,54 @@ export function LogoutButton() {
   );
 }
 
-// 딜러 새 매물 알림 설정: 끄기, 원하는 제조사만 (아무것도 고르지 않으면 전체)
-export function AlertPrefs({ enabled, makes }: { enabled: boolean; makes: string[] }) {
+export type AlertConditions = { yearFrom: string; yearTo: string; maxKm: string; noAccident: boolean };
+
+// 딜러 새 매물 알림 설정: 끄기, 원하는 제조사만 (아무것도 고르지 않으면 전체), 연식·주행거리·무사고 조건
+export function AlertPrefs({
+  enabled,
+  makes,
+  conditions: initialConditions,
+}: {
+  enabled: boolean;
+  makes: string[];
+  conditions: AlertConditions;
+}) {
   const t = useTranslations("account");
   const [on, setOn] = useState(enabled);
   const [selected, setSelected] = useState<string[]>(makes);
-  const [state, setState] = useState<"idle" | "busy" | "saved">("idle");
+  const [conditions, setConditions] = useState(initialConditions);
+  const [state, setState] = useState<"idle" | "busy" | "saved" | "failed">("idle");
 
-  async function save(nextOn: boolean, nextMakes: string[]) {
+  async function save(nextOn: boolean, nextMakes: string[], next: AlertConditions = conditions) {
     setState("busy");
     const supabase = createClient();
     const { data } = await supabase.auth.getUser();
-    if (data.user) {
-      await supabase.from("profiles").update({ notify_new_auction: nextOn, notify_makes: nextMakes }).eq("id", data.user.id);
-    }
-    setState("saved");
+    const num = (v: string) => (v ? Number(v) : null);
+    const { error } = data.user
+      ? await supabase
+          .from("profiles")
+          .update({
+            notify_new_auction: nextOn,
+            notify_makes: nextMakes,
+            notify_year_from: num(next.yearFrom),
+            notify_year_to: num(next.yearTo),
+            notify_max_km: num(next.maxKm),
+            notify_no_accident: next.noAccident,
+          })
+          .eq("id", data.user.id)
+      : { error: true };
+    setState(error ? "failed" : "saved");
   }
+
+  const setCondition = (patch: Partial<AlertConditions>, saveNow = false) => {
+    const next = { ...conditions, ...patch };
+    setConditions(next);
+    setState("idle");
+    if (saveNow) save(on, selected, next);
+  };
+  const digits = (v: string, max: number) => v.replace(/\D/g, "").slice(0, max);
+  const yearOk = (v: string) => !v || (Number(v) >= 1960 && Number(v) <= 2100);
+  const conditionsValid = yearOk(conditions.yearFrom) && yearOk(conditions.yearTo);
 
   const toggleMake = (make: string) => {
     const next = selected.includes(make) ? selected.filter((m) => m !== make) : [...selected, make];
@@ -133,9 +165,41 @@ export function AlertPrefs({ enabled, makes }: { enabled: boolean; makes: string
               </button>
             ))}
           </div>
+          <p className="mt-2 text-caption text-ink/60">{t("conditionsHint")}</p>
+          <div className="grid grid-cols-3 gap-2">
+            {(
+              [
+                ["yearFrom", t("yearFrom"), 4, "2015"],
+                ["yearTo", t("yearTo"), 4, "2024"],
+                ["maxKm", t("maxKm"), 7, "150000"],
+              ] as const
+            ).map(([key, label, max, placeholder]) => (
+              <label key={key} className="flex flex-col gap-1 text-caption text-ink/60">
+                {label}
+                <input
+                  inputMode="numeric"
+                  value={conditions[key]}
+                  placeholder={placeholder}
+                  onChange={(e) => setCondition({ [key]: digits(e.target.value, max) })}
+                  onBlur={() => conditionsValid && save(on, selected)}
+                  className="price h-10 rounded-lg border border-ink/15 px-2 text-body text-ink"
+                />
+              </label>
+            ))}
+          </div>
+          <label className="flex items-center gap-2 text-body">
+            <input
+              type="checkbox"
+              checked={conditions.noAccident}
+              onChange={(e) => setCondition({ noAccident: e.target.checked }, true)}
+              className="size-5 accent-navy"
+            />
+            {t("noAccidentOnly")}
+          </label>
         </div>
       )}
       {state === "saved" && <p className="text-caption text-success">✓ {t("prefsSaved")}</p>}
+      {state === "failed" && <p className="text-caption text-danger">{t("prefsFailed")}</p>}
     </section>
   );
 }

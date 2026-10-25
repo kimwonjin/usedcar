@@ -387,7 +387,12 @@
     "rank": "진행 중 · {rank}위",
     "won": "낙찰",
     "waiting": "판매자 결정 대기",
-    "lost": "미낙찰"
+    "lost": "미낙찰",
+    "performance": "입찰 성과",
+    "bidCount": "입찰",
+    "winRate": "낙찰률",
+    "avgWon": "평균 낙찰가",
+    "performanceHint": "최근 입찰 50건 중 결과가 난 {decided}건에서 {won}건 낙찰"
   },
   "sellerAuction": {
     "back": "내 차 팔기",
@@ -713,7 +718,13 @@
       "active_deals": "진행 중인 거래가 있습니다. 완료하거나 취소한 뒤 탈퇴할 수 있습니다.",
       "unpaid_payments": "미납 청구가 있습니다. 납부한 뒤 탈퇴할 수 있습니다."
     },
-    "support": "1:1 문의"
+    "support": "1:1 문의",
+    "conditionsHint": "조건 (비우면 전체)",
+    "yearFrom": "연식 부터",
+    "yearTo": "연식 까지",
+    "maxKm": "최대 주행거리 km",
+    "noAccidentOnly": "무사고 차량만 알림",
+    "prefsFailed": "저장하지 못했습니다."
   },
   "penalty": {
     "blockedTitle": "입찰이 제한되었습니다",

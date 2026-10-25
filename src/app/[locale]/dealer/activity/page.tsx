@@ -84,6 +84,12 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
   const rankOf = new Map(liveBids.map((b, i) => [b.id, ranks[i]]));
 
   const completed = deals.filter((d) => d.status === "completed");
+
+  // 입찰 성과 (최근 입찰 50건 기준): 결과가 난 경매 중 낙찰 비율, 낙찰가 평균
+  const decided = bids.filter((b) => !["live", "ended"].includes(b.auctions.status));
+  const wonBids = decided.filter((b) => b.auctions.winning_bid_id === b.id);
+  const winRate = decided.length ? Math.round((wonBids.length / decided.length) * 100) : null;
+  const avgWon = wonBids.length ? wonBids.reduce((sum, b) => sum + b.amount, 0) / wonBids.length : null;
   const totalFees = completed.reduce((sum, d) => sum + dealerFee(d.final_price ?? d.agreed_price, feeBands), 0);
 
   const bidResult = (bid: MyBid) => {
@@ -111,6 +117,25 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
             {dealer.warning_count}
           </span>
         </Stat>
+      </section>
+
+      <section className="flex flex-col gap-2 rounded-xl bg-white p-4 shadow-sm">
+        <h2 className="text-subtitle font-semibold">{t("performance")}</h2>
+        <dl className="grid grid-cols-3 gap-2 text-center">
+          <div>
+            <dt className="text-caption text-ink/60">{t("bidCount")}</dt>
+            <dd className="price text-title font-bold">{bids.length}</dd>
+          </div>
+          <div>
+            <dt className="text-caption text-ink/60">{t("winRate")}</dt>
+            <dd className="price text-title font-bold">{winRate === null ? "—" : `${winRate}%`}</dd>
+          </div>
+          <div>
+            <dt className="text-caption text-ink/60">{t("avgWon")}</dt>
+            <dd className="price text-body font-bold">{avgWon === null ? "—" : formatTenge(avgWon)}</dd>
+          </div>
+        </dl>
+        <p className="text-caption text-ink/50">{t("performanceHint", { won: wonBids.length, decided: decided.length })}</p>
       </section>
 
       {penalties.length > 0 && (

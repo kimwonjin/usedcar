@@ -22,7 +22,7 @@ export default async function AccountPage({ params }: PageProps<"/[locale]/accou
   const supabase = await createClient();
   const [user, { data: profile }, dealer] = await Promise.all([
     getCurrentUser(),
-    supabase.from("profiles").select("full_name, notify_new_auction, notify_makes").eq("id", userId).maybeSingle(),
+    supabase.from("profiles").select("full_name, notify_new_auction, notify_makes, notify_year_from, notify_year_to, notify_max_km, notify_no_accident").eq("id", userId).maybeSingle(),
     getDealer(userId),
   ]);
   if (!user) return redirect({ href: "/login", locale });
@@ -64,6 +64,12 @@ export default async function AccountPage({ params }: PageProps<"/[locale]/accou
         <AlertPrefs
           enabled={(profile?.notify_new_auction as boolean | undefined) ?? true}
           makes={(profile?.notify_makes as string[] | undefined) ?? []}
+          conditions={{
+            yearFrom: profile?.notify_year_from ? String(profile.notify_year_from) : "",
+            yearTo: profile?.notify_year_to ? String(profile.notify_year_to) : "",
+            maxKm: profile?.notify_max_km ? String(profile.notify_max_km) : "",
+            noAccident: Boolean(profile?.notify_no_accident),
+          }}
         />
       )}
 
