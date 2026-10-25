@@ -1,0 +1,33 @@
+# 코드 검사: 브랜치에 push하거나 PR을 열면 lint·타입 검사·빌드를 돌린다 (Vercel 배포 전에 오류를 잡기 위함)
+name: CI
+
+on:
+  push:
+    branches: [main, "claude/**"]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx next typegen
+      - run: npm run lint
+      - run: npm run typecheck
+      # 3개 언어 문구 키가 서로 같은지 확인
+      - name: Check message keys
+        run: |
+          node -e '
+            const keys = (o, p = "") => Object.entries(o).flatMap(([k, v]) => v && typeof v === "object" ? keys(v, p + k + ".") : [p + k]);
+            const [ko, ru, kk] = ["ko", "ru", "kk"].map((l) => new Set(keys(require(`./messages/${l}.json`))));
+            const diff = (a, b) => [...a].filter((k) => !b.has(k));
+            const missing = [...diff(ko, ru), ...diff(ru, ko), ...diff(ko, kk), ...diff(kk, ko)];
+            if (missing.length) { console.error("Message keys differ:", missing); process.exit(1); }
+          '
+      - run: npm run build

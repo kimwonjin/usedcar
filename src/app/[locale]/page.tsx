@@ -138,7 +138,7 @@ export default async function LandingPage({ params }: PageProps<"/[locale]">) {
         >
           {t("cta")}
         </Link>
-        <Link href="/login?next=/dealer" className="py-2 text-center text-caption text-steppe">
+        <Link href="/dealers" className="py-2 text-center text-caption text-steppe">
           {t("dealerCta")}
         </Link>
       </div>
