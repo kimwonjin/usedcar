@@ -7,7 +7,8 @@
     "logout": "로그아웃",
     "setupRequired": "Supabase 환경변수(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY)를 설정하면 데이터가 표시됩니다.",
     "navSell": "내 차 팔기",
-    "navDealer": "딜러"
+    "navDealer": "딜러",
+    "account": "내 정보"
   },
   "landing": {
     "headline": "흥정 없이, 여러 딜러의 최고가로",
@@ -127,7 +128,9 @@
     "note": "심사 메모",
     "notePlaceholder": "심사 메모 (판매자·딜러에게 보입니다)",
     "approveClaim": "감가 승인",
-    "rejectClaim": "감가 거절"
+    "rejectClaim": "감가 거절",
+    "blockedUntil": "입찰 제한",
+    "clearPenalty": "패널티 초기화"
   },
   "carForm": {
     "back": "이전",
@@ -297,7 +300,8 @@
     "failed": "입찰하지 못했습니다. 다시 시도해 주세요.",
     "ruleBlind": "다른 딜러의 입찰가는 공개되지 않습니다.",
     "ruleRaiseOnly": "입찰가는 마감 전까지 올릴 수만 있습니다.",
-    "ruleTop3": "판매자에게는 상위 3위까지만 보이고, 판매자가 고른 딜러 한 곳만 연락처를 받습니다."
+    "ruleTop3": "판매자에게는 상위 3위까지만 보이고, 판매자가 고른 딜러 한 곳만 연락처를 받습니다.",
+    "blocked": "입찰 제한 기간이라 입찰할 수 없습니다."
   },
   "activity": {
     "rating": "평점",
@@ -386,7 +390,7 @@
     "adminNote": "심사 결과",
     "commentPlaceholder": "감가 사유에 대한 의견 (관리자 심사에 참고됩니다)",
     "sendComment": "의견 보내기",
-    "step1": "딜러와 만남 일정을 정하세요.",
+    "step1": "채팅으로 딜러와 만남 일정을 정하세요. 통화가 필요하면 '내 번호 보내기'를 누르세요.",
     "step2": "딜러가 차량 상태를 확인합니다. 다른 점이 있으면 감가가 청구될 수 있습니다.",
     "step3": "대금이 입금된 것을 확인한 뒤 차량과 서류를 넘기세요.",
     "step4": "인도가 끝나면 거래 완료를 누르세요.",
@@ -399,7 +403,20 @@
     "rateTitle": "거래한 딜러는 어땠나요?",
     "reviewPlaceholder": "한 줄 후기 (선택)",
     "submitRating": "평가 보내기",
-    "rated": "평가 완료"
+    "rated": "평가 완료",
+    "seller": "판매자",
+    "cancelledReason": "취소 사유",
+    "reasons": {
+      "dealer_no_show": "딜러가 약속에 나타나지 않음(노쇼)",
+      "dealer_cancelled": "딜러 사정으로 취소",
+      "seller_changed_mind": "판매자 사정(판매 안 함)",
+      "other": "기타"
+    },
+    "cancelReasonTitle": "취소 사유를 골라 주세요",
+    "noShowHint": "딜러 노쇼는 딜러에게 패널티가 부과됩니다. 판매자에게는 불이익이 없습니다.",
+    "dealerCancel": "거래 취소",
+    "dealerCancelConfirm": "딜러 사정으로 거래를 취소하면 패널티가 쌓입니다 (1회 경고, 2회 7일 입찰 제한, 3회 입찰 정지). 취소할까요?",
+    "dealerCancelHint": "딜러 사정 취소는 패널티 대상입니다"
   },
   "status": {
     "auction": {
@@ -517,6 +534,18 @@
     "auction_expired": {
       "title": "결정 기한이 지나 경매가 종료되었어요",
       "body": "{car} · 다시 경매에 올릴 수 있습니다"
+    },
+    "new_message": {
+      "title": "새 메시지",
+      "body": "{car} · {text}"
+    },
+    "penalty_warning": {
+      "title": "거래 취소 경고",
+      "body": "{car} · 1회 더 쌓이면 7일 동안 입찰이 제한됩니다"
+    },
+    "penalty_blocked": {
+      "title": "7일 동안 입찰이 제한되었습니다",
+      "body": "{car} · 1회 더 쌓이면 입찰이 정지됩니다"
     }
   },
   "notificationCenter": {
@@ -533,5 +562,46 @@
     "pushUnsupported": "이 브라우저는 푸시 알림을 지원하지 않습니다.",
     "iosHint": "아이폰은 Safari 공유 버튼 → '홈 화면에 추가'로 앱을 설치한 뒤 켤 수 있습니다.",
     "pushFailed": "푸시 알림을 켜지 못했습니다. 다시 시도해 주세요."
+  },
+  "chat": {
+    "privacy": "실제 전화번호는 서로에게 보이지 않습니다",
+    "sharePhone": "내 번호 보내기",
+    "sharePhoneConfirm": "내 전화번호를 상대에게 보낼까요? 보낸 번호는 취소할 수 없습니다.",
+    "empty": "채팅으로 만남 일정을 정해 보세요",
+    "myPhoneSent": "내 번호를 보냈습니다",
+    "theirPhone": "상대가 번호를 보냈습니다 · 눌러서 전화",
+    "placeholder": "메시지 입력",
+    "send": "보내기",
+    "closed": "취소된 거래라 채팅이 닫혔습니다",
+    "failed": "보내지 못했습니다. 다시 시도해 주세요."
+  },
+  "account": {
+    "title": "내 정보",
+    "name": "이름",
+    "namePlaceholder": "예: 김민준",
+    "nameHint": "거래 채팅에서 상대에게 보이는 이름입니다",
+    "save": "저장",
+    "phone": "전화번호",
+    "phoneHidden": "거래 상대에게는 보이지 않습니다. 직접 보낼 때만 공개됩니다.",
+    "language": "언어",
+    "dealer": "딜러",
+    "notDealer": "딜러로 가입하지 않았습니다",
+    "dealerActivity": "내 활동",
+    "becomeDealer": "딜러 가입"
+  },
+  "penalty": {
+    "blockedTitle": "입찰이 제한되었습니다",
+    "blockedUntil": "{date}까지 입찰할 수 없습니다 (거래 취소·노쇼 2회 누적)",
+    "historyTitle": "패널티 이력",
+    "ladder": "노쇼·딜러 사정 취소 1회 경고 → 2회 7일 입찰 제한 → 3회 입찰 정지",
+    "reasons": {
+      "dealer_no_show": "노쇼",
+      "dealer_cancelled": "딜러 사정 취소"
+    },
+    "actions": {
+      "warning": "경고",
+      "blocked_7d": "7일 입찰 제한",
+      "suspended": "입찰 정지"
+    }
   }
 }

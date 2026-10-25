@@ -1,11 +1,13 @@
 import type { Locale } from "@/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Badge } from "@/components/badge";
+import { BidBlockNotice } from "@/components/bid-block-notice";
 import { DealerTabs } from "@/components/dealer-tabs";
 import { Stars } from "@/components/stars";
 import { StatusBadge } from "@/components/status-badge";
 import { Link, redirect } from "@/i18n/navigation";
 import { getCurrentUser, getDealer } from "@/lib/auth";
+import { formatDateTime } from "@/lib/datetime";
 import { dealerFee } from "@/lib/fees";
 import { formatTenge } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
@@ -42,6 +44,15 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
   if (!dealer) return redirect({ href: "/dealer/apply", locale });
 
   const supabase = await createClient();
+  const { data: penaltyRows } = await supabase
+    .from("dealer_penalties")
+    .select("id, reason, action, created_at")
+    .eq("dealer_id", user.id)
+    .order("created_at", { ascending: false });
+  const penalties = (penaltyRows ?? []) as { id: string; reason: string; action: string; created_at: string }[];
+  const blockedUntil =
+    dealer.bid_blocked_until && new Date(dealer.bid_blocked_until) > new Date() ? dealer.bid_blocked_until : null;
+  const tp = await getTranslations("penalty");
   const [{ data: bidRows }, { data: dealRows }] = await Promise.all([
     supabase
       .from("bids")
@@ -81,6 +92,8 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
     <div className="flex flex-col gap-4 pb-6">
       <DealerTabs />
 
+      {blockedUntil && <BidBlockNotice until={blockedUntil} />}
+
       <section className="grid grid-cols-3 gap-2">
         <Stat label={t("rating")}>
           <Stars rating={dealer.rating} />
@@ -94,6 +107,23 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
           </span>
         </Stat>
       </section>
+
+      {penalties.length > 0 && (
+        <section className="flex flex-col gap-2 rounded-xl bg-white p-4 shadow-sm">
+          <h2 className="text-subtitle font-semibold">{tp("historyTitle")}</h2>
+          <p className="text-caption text-ink/60">{tp("ladder")}</p>
+          <ul className="flex flex-col gap-1 text-caption">
+            {penalties.map((p) => (
+              <li key={p.id} className="flex justify-between gap-2">
+                <span>
+                  {tp(`reasons.${p.reason}` as Parameters<typeof tp>[0])} → <b>{tp(`actions.${p.action}` as Parameters<typeof tp>[0])}</b>
+                </span>
+                <span className="shrink-0 text-ink/50">{formatDateTime(p.created_at, locale)}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className="flex flex-col gap-2">
         <h2 className="text-subtitle font-semibold">{t("deals")}</h2>

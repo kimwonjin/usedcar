@@ -28,7 +28,7 @@ export default async function AdminDealers({ params, searchParams }: PageProps<"
   const supabase = await createClient();
   const { data } = await supabase
     .from("dealers")
-    .select("id, business_name, bin, address, shop_photo_paths, status, rejection_reason, rating, warning_count, created_at, profiles!dealers_id_fkey(phone)")
+    .select("id, business_name, bin, address, shop_photo_paths, status, rejection_reason, rating, warning_count, bid_blocked_until, created_at, profiles!dealers_id_fkey(phone)")
     .eq("status", status)
     .order("created_at", { ascending: status !== "pending" ? false : true })
     .overrideTypes<DealerRow[], { merge: false }>();
@@ -73,6 +73,12 @@ export default async function AdminDealers({ params, searchParams }: PageProps<"
                 <dd>{formatDateTime(dealer.created_at, locale)}</dd>
                 <dt className="text-ink/60">{t("warnings")}</dt>
                 <dd className={dealer.warning_count ? "font-semibold text-danger" : ""}>{dealer.warning_count}</dd>
+                {dealer.bid_blocked_until && new Date(dealer.bid_blocked_until) > new Date() && (
+                  <>
+                    <dt className="text-ink/60">{t("blockedUntil")}</dt>
+                    <dd className="font-semibold text-danger">{formatDateTime(dealer.bid_blocked_until, locale)}</dd>
+                  </>
+                )}
                 {dealer.rejection_reason && (
                   <>
                     <dt className="text-ink/60">{t("rejectionReason")}</dt>
@@ -91,7 +97,12 @@ export default async function AdminDealers({ params, searchParams }: PageProps<"
                 )}
               </div>
             </div>
-            <DealerActions dealerId={dealer.id} status={dealer.status} warningCount={dealer.warning_count} />
+            <DealerActions
+              dealerId={dealer.id}
+              status={dealer.status}
+              warningCount={dealer.warning_count}
+              blocked={Boolean(dealer.bid_blocked_until && new Date(dealer.bid_blocked_until) > new Date())}
+            />
           </article>
         ))}
       </div>

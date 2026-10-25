@@ -2,12 +2,13 @@ import type { Locale } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Badge } from "@/components/badge";
+import { BidBlockNotice } from "@/components/bid-block-notice";
 import { Countdown } from "@/components/countdown";
 import { PageHeader } from "@/components/page-header";
 import { PhotoGallery } from "@/components/photo-gallery";
 import { StatusBadge } from "@/components/status-badge";
 import { Link, redirect } from "@/i18n/navigation";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, getDealer } from "@/lib/auth";
 import { PHOTO_SLOTS } from "@/lib/car-catalog";
 import { formatKm, formatTenge } from "@/lib/format";
 import { signedUrlMap } from "@/lib/storage";
@@ -62,13 +63,16 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
         PHOTO_SLOTS.indexOf(b.slot as (typeof PHOTO_SLOTS)[number]) || a.sort_order - b.sort_order,
   );
 
-  const [urls, { data: stats }, { data: rank }, { data: myBid }, { data: deal }] = await Promise.all([
+  const [urls, { data: stats }, { data: rank }, { data: myBid }, { data: deal }, dealer] = await Promise.all([
     signedUrlMap(supabase, "car-photos", photos.map((p) => p.storage_path)),
     supabase.rpc("auction_stats", { p_auction_id: id }),
     supabase.rpc("my_bid_rank", { p_auction_id: id }),
     supabase.from("bids").select("id, amount").eq("auction_id", id).eq("dealer_id", user.id).maybeSingle(),
     supabase.from("deals").select("id").eq("auction_id", id).eq("dealer_id", user.id).maybeSingle(),
+    getDealer(user.id),
   ]);
+  const blockedUntil =
+    dealer?.bid_blocked_until && new Date(dealer.bid_blocked_until) > new Date() ? dealer.bid_blocked_until : null;
   const bidCount = (stats?.[0]?.bid_count as number | undefined) ?? 0;
   const isLive = auction.status === "live";
 
@@ -126,7 +130,8 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
         <p className="text-body whitespace-pre-line">{car.defects || tf("defects.none")}</p>
       </section>
 
-      {isLive && (
+      {isLive && blockedUntil && <BidBlockNotice until={blockedUntil} />}
+      {isLive && !blockedUntil && (
         <BidPanel
           auctionId={id}
           myAmount={(myBid?.amount as number | undefined) ?? null}

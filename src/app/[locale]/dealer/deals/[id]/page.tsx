@@ -2,6 +2,7 @@ import type { Locale } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ClaimCard } from "@/components/deal/claim-card";
+import { DealChat } from "@/components/deal/deal-chat";
 import { MeetingForm } from "@/components/deal/meeting-form";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
@@ -11,6 +12,7 @@ import { loadDeal } from "@/lib/deals";
 import { dealerFee } from "@/lib/fees";
 import { formatTenge } from "@/lib/format";
 import { ClaimForm } from "./claim-form";
+import { DealerCancelButton } from "./dealer-cancel-button";
 
 // D5 낙찰·거래: 판매자 연락처, 만남 일정, 감가 사유·사진 제출
 export default async function DealerDealPage({ params }: PageProps<"/[locale]/dealer/deals/[id]">) {
@@ -23,10 +25,8 @@ export default async function DealerDealPage({ params }: PageProps<"/[locale]/de
   if (!user) return redirect({ href: "/login?next=/dealer", locale });
   const loaded = await loadDeal(id);
   if (!loaded || loaded.deal.dealer_id !== user.id) notFound();
-  const { deal, claims, supabase } = loaded;
+  const { deal, claims, messages, counterpartName } = loaded;
   const car = deal.auctions.cars;
-
-  const { data: seller } = await supabase.from("profiles").select("phone, full_name").eq("id", deal.seller_id).maybeSingle();
   const active = deal.status === "scheduled" || deal.status === "depreciation_review";
   const price = deal.final_price ?? deal.agreed_price;
 
@@ -44,17 +44,14 @@ export default async function DealerDealPage({ params }: PageProps<"/[locale]/de
         </p>
       </section>
 
-      <section className="flex items-center justify-between rounded-xl bg-white p-4 shadow-sm">
-        <div>
-          <p className="text-caption text-ink/60">{t("sellerContact")}</p>
-          <p className="price text-subtitle font-semibold">{seller?.phone ?? "—"}</p>
-        </div>
-        {seller?.phone && (
-          <a href={`tel:${seller.phone}`} className="rounded-lg bg-navy px-4 py-2 text-body font-semibold text-white">
-            {t("call")}
-          </a>
-        )}
-      </section>
+      <DealChat
+        dealId={deal.id}
+        myId={user.id}
+        counterpartName={counterpartName || t("seller")}
+        initialMessages={messages}
+        open={deal.status !== "cancelled"}
+        notificationUrl={`/dealer/deals/${deal.id}`}
+      />
 
       <MeetingForm dealId={deal.id} meetingAt={deal.meeting_at} meetingPlace={deal.meeting_place} editable={active} />
 
@@ -67,6 +64,13 @@ export default async function DealerDealPage({ params }: PageProps<"/[locale]/de
         {deal.status === "scheduled" && <ClaimForm dealId={deal.id} userId={user.id} agreedPrice={deal.agreed_price} />}
         {deal.status === "depreciation_review" && <p className="text-caption text-ink/60">{t("underReview")}</p>}
       </section>
+
+      {deal.status === "cancelled" && deal.cancel_reason && (
+        <p className="rounded-xl bg-white p-4 text-caption text-ink/70 shadow-sm">
+          {t("cancelledReason")}: {t(`reasons.${deal.cancel_reason}` as Parameters<typeof t>[0])}
+        </p>
+      )}
+      {active && <DealerCancelButton dealId={deal.id} />}
     </div>
   );
 }

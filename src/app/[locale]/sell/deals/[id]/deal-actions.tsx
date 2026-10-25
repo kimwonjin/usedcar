@@ -5,18 +5,32 @@ import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-// 거래 완료 / 거래 취소
+const CANCEL_REASONS = ["dealer_no_show", "seller_changed_mind", "other"] as const;
+
+// 거래 완료 / 거래 취소 (취소 사유가 딜러 노쇼면 딜러에게 패널티)
 export function DealActions({ dealId, status }: { dealId: string; status: string }) {
   const t = useTranslations("deal");
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [reason, setReason] = useState<(typeof CANCEL_REASONS)[number]>("dealer_no_show");
 
-  async function run(fn: "complete_deal" | "cancel_deal", message: string) {
-    if (!confirm(message)) return;
+  async function complete() {
+    if (!confirm(t("completeConfirm"))) return;
     setBusy(true);
     setError(false);
-    const { error } = await createClient().rpc(fn, { p_deal_id: dealId });
+    const { error } = await createClient().rpc("complete_deal", { p_deal_id: dealId });
+    setBusy(false);
+    if (error) setError(true);
+    else router.refresh();
+  }
+
+  async function cancel() {
+    if (!confirm(t("cancelConfirm"))) return;
+    setBusy(true);
+    setError(false);
+    const { error } = await createClient().rpc("cancel_deal", { p_deal_id: dealId, p_reason: reason });
     setBusy(false);
     if (error) setError(true);
     else router.refresh();
@@ -30,19 +44,35 @@ export function DealActions({ dealId, status }: { dealId: string; status: string
       <button
         type="button"
         disabled={busy || status !== "scheduled"}
-        onClick={() => run("complete_deal", t("completeConfirm"))}
+        onClick={complete}
         className="h-14 rounded-xl bg-success text-subtitle font-bold text-white disabled:opacity-40"
       >
         {t("complete")}
       </button>
-      <button
-        type="button"
-        disabled={busy}
-        onClick={() => run("cancel_deal", t("cancelConfirm"))}
-        className="h-11 text-body text-ink/50"
-      >
-        {t("cancel")}
-      </button>
+      {cancelling ? (
+        <div className="flex flex-col gap-2 rounded-xl border border-ink/10 bg-white p-4">
+          <p className="text-body font-semibold">{t("cancelReasonTitle")}</p>
+          {CANCEL_REASONS.map((r) => (
+            <label key={r} className="flex items-center gap-2 text-body">
+              <input type="radio" name="cancel-reason" checked={reason === r} onChange={() => setReason(r)} />
+              {t(`reasons.${r}`)}
+            </label>
+          ))}
+          {reason === "dealer_no_show" && <p className="text-caption text-ink/60">{t("noShowHint")}</p>}
+          <button
+            type="button"
+            disabled={busy}
+            onClick={cancel}
+            className="h-11 rounded-lg border border-danger font-semibold text-danger disabled:opacity-40"
+          >
+            {t("cancel")}
+          </button>
+        </div>
+      ) : (
+        <button type="button" disabled={busy} onClick={() => setCancelling(true)} className="h-11 text-body text-ink/50">
+          {t("cancel")}
+        </button>
+      )}
     </div>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { Link, useRouter } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 
@@ -11,7 +11,6 @@ export function HeaderMenu() {
   const t = useTranslations("common");
   const tn = useTranslations("notificationCenter");
   const locale = useLocale();
-  const router = useRouter();
   const [userId, setUserId] = useState<string | null>(null);
   const [unread, setUnread] = useState(0);
 
@@ -45,12 +44,6 @@ export function HeaderMenu() {
     };
   }, [userId, locale]);
 
-  async function logout() {
-    await createClient().auth.signOut();
-    router.replace("/");
-    router.refresh();
-  }
-
   return (
     <nav className="flex items-center gap-2.5 text-caption whitespace-nowrap">
       <Link href="/sell" className="text-white/90">
@@ -70,11 +63,12 @@ export function HeaderMenu() {
             )}
           </Link>
           {/* 러시아어·카자흐어는 글자가 길어 좁은 화면에서 넘치므로 아이콘으로 둔다 */}
-          <button type="button" onClick={logout} aria-label={t("logout")} title={t("logout")} className="text-white/60">
+          <Link href="/account" aria-label={t("account")} title={t("account")} className="text-white/70">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-[18px]" aria-hidden>
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 21a8 8 0 0 1 16 0" />
             </svg>
-          </button>
+          </Link>
         </>
       )}
     </nav>

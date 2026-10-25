@@ -12,6 +12,7 @@ export type DealDetail = {
   seller_id: string;
   dealer_id: string;
   seller_rating: number | null;
+  cancel_reason: string | null;
   auction_id: string;
   auctions: {
     cars: {
@@ -24,6 +25,8 @@ export type DealDetail = {
     };
   };
 };
+
+export type ChatMessage = { id: string; sender_id: string; kind: "text" | "phone"; body: string; created_at: string };
 
 export type Claim = {
   id: string;
@@ -43,7 +46,7 @@ export async function loadDeal(dealId: string) {
   const { data: deal } = await supabase
     .from("deals")
     .select(
-      "id, status, agreed_price, final_price, meeting_at, meeting_place, seller_id, dealer_id, seller_rating, auction_id, auctions(cars(id, make, model, year, plate_number, car_photos(slot, storage_path)))",
+      "id, status, agreed_price, final_price, meeting_at, meeting_place, seller_id, dealer_id, seller_rating, cancel_reason, auction_id, auctions(cars(id, make, model, year, plate_number, car_photos(slot, storage_path)))",
     )
     .eq("id", dealId)
     .maybeSingle()
@@ -62,5 +65,21 @@ export async function loadDeal(dealId: string) {
     photoUrls: c.photo_paths.map((p) => urls[p]).filter(Boolean),
   }));
 
-  return { deal, claims, supabase };
+  const [{ data: messages }, { data: counterpart }] = await Promise.all([
+    supabase
+      .from("deal_messages")
+      .select("id, sender_id, kind, body, created_at")
+      .eq("deal_id", dealId)
+      .order("created_at")
+      .limit(300),
+    supabase.rpc("deal_counterpart", { p_deal_id: dealId }),
+  ]);
+
+  return {
+    deal,
+    claims,
+    supabase,
+    messages: (messages ?? []) as ChatMessage[],
+    counterpartName: ((counterpart?.[0] as { name: string | null } | undefined)?.name ?? null) as string | null,
+  };
 }

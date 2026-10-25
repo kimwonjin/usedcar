@@ -1,6 +1,7 @@
 import type { Locale } from "@/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Badge } from "@/components/badge";
+import { BidBlockNotice } from "@/components/bid-block-notice";
 import { Countdown } from "@/components/countdown";
 import { DealerTabs } from "@/components/dealer-tabs";
 import { PushToggle } from "@/components/push-toggle";
@@ -38,10 +39,12 @@ export default async function DealerAuctions({ params, searchParams }: PageProps
   const user = await getCurrentUser();
   if (!user) return redirect({ href: "/login?next=/dealer", locale });
 
+  let blockedUntil: string | null = null;
   if (user.role !== "admin") {
     const dealer = await getDealer(user.id);
     if (!dealer) return redirect({ href: "/dealer/apply", locale });
     if (dealer.status !== "approved") return <DealerStatusCard status={dealer.status} reason={dealer.rejection_reason} />;
+    if (dealer.bid_blocked_until && new Date(dealer.bid_blocked_until) > new Date()) blockedUntil = dealer.bid_blocked_until;
   }
 
   const query = await searchParams;
@@ -88,6 +91,7 @@ export default async function DealerAuctions({ params, searchParams }: PageProps
       <DealerTabs />
       {/* 새 매물 알림을 받으려면 푸시가 필요하다 */}
       <PushToggle compact />
+      {blockedUntil && <BidBlockNotice until={blockedUntil} />}
 
       <div className="flex gap-2 overflow-x-auto pb-1">
         <FilterChip href={filterHref({ make: null })} active={!make}>

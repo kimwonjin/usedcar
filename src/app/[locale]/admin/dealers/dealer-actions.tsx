@@ -10,10 +10,12 @@ export function DealerActions({
   dealerId,
   status,
   warningCount,
+  blocked,
 }: {
   dealerId: string;
   status: DealerStatus;
   warningCount: number;
+  blocked: boolean;
 }) {
   const t = useTranslations("admin");
   const router = useRouter();
@@ -39,6 +41,18 @@ export function DealerActions({
     const { error } = await createClient()
       .from("dealers")
       .update({ warning_count: warningCount + 1 })
+      .eq("id", dealerId);
+    setBusy(false);
+    if (error) setError(true);
+    else router.refresh();
+  }
+
+  // 입찰 제한 해제와 경고 초기화 (관리자 판단으로 패널티를 되돌릴 때)
+  async function clearPenalty() {
+    setBusy(true);
+    const { error } = await createClient()
+      .from("dealers")
+      .update({ bid_blocked_until: null, warning_count: 0 })
       .eq("id", dealerId);
     setBusy(false);
     if (error) setError(true);
@@ -77,6 +91,11 @@ export function DealerActions({
             </>
           )}
         </>
+      )}
+      {(blocked || warningCount > 0) && status === "approved" && (
+        <button type="button" disabled={busy} onClick={clearPenalty} className={`${button} border border-ink/20 text-ink/70`}>
+          {t("clearPenalty")}
+        </button>
       )}
       {error && <p className="text-caption text-danger">{t("actionFailed")}</p>}
     </div>

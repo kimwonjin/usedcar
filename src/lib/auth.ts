@@ -41,6 +41,7 @@ export type DealerProfile = {
   rejection_reason: string | null;
   rating: number;
   warning_count: number;
+  bid_blocked_until: string | null;
 };
 
 // 현재 사용자의 딜러 신청서. 신청 전이면 null.
@@ -48,7 +49,7 @@ export async function getDealer(userId: string): Promise<DealerProfile | null> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("dealers")
-    .select("id, business_name, bin, address, shop_photo_paths, status, rejection_reason, rating, warning_count")
+    .select("id, business_name, bin, address, shop_photo_paths, status, rejection_reason, rating, warning_count, bid_blocked_until")
     .eq("id", userId)
     .maybeSingle();
   return data as DealerProfile | null;

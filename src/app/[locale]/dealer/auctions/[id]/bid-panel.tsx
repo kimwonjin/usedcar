@@ -49,6 +49,8 @@ export function BidPanel({
       setError(
         error.message.includes("raised")
           ? t("mustRaise")
+          : error.message.includes("blocked")
+            ? t("blocked")
           : error.message.includes("not live")
             ? t("closed")
             : t("failed"),
