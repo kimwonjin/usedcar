@@ -2,13 +2,15 @@
 
 import { useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
+import { ConsentNote } from "@/components/consent-note";
 import { useRouter } from "@/i18n/navigation";
+import { formatPhoneInput, normalizePhone } from "@/lib/phone";
 import { createClient } from "@/lib/supabase/client";
 
 export function LoginForm({ next }: { next: "/sell" | "/dealer" | "/admin" }) {
   const t = useTranslations("login");
   const router = useRouter();
-  const [phone, setPhone] = useState("+7");
+  const [phone, setPhone] = useState("");
   const [code, setCode] = useState("");
   const [step, setStep] = useState<"phone" | "code">("phone");
   const [message, setMessage] = useState<string | null>(null);
@@ -19,16 +21,24 @@ export function LoginForm({ next }: { next: "/sell" | "/dealer" | "/admin" }) {
     setBusy(true);
     setMessage(null);
     const supabase = createClient();
+    const normalized = normalizePhone(phone);
+    if (!normalized) {
+      setMessage(t("invalidPhone"));
+      setBusy(false);
+      return;
+    }
+    // 문자 인증은 국제 형식(+7…, +82…)으로 보낸다
+    const e164 = `+${normalized}`;
 
     if (step === "phone") {
-      const { error } = await supabase.auth.signInWithOtp({ phone });
+      const { error } = await supabase.auth.signInWithOtp({ phone: e164 });
       if (error) setMessage(t("error"));
       else {
         setStep("code");
         setMessage(t("sent"));
       }
     } else {
-      const { error } = await supabase.auth.verifyOtp({ phone, token: code, type: "sms" });
+      const { error } = await supabase.auth.verifyOtp({ phone: e164, token: code, type: "sms" });
       if (error) setMessage(t("error"));
       else {
         router.replace(next);
@@ -50,9 +60,9 @@ export function LoginForm({ next }: { next: "/sell" | "/dealer" | "/admin" }) {
             inputMode="tel"
             autoComplete="tel"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={(e) => setPhone(formatPhoneInput(e.target.value))}
             className="h-14 rounded-xl border border-ink/15 bg-white px-4 text-subtitle"
-            placeholder="+7 701 000 00 00"
+            placeholder="+7 701 000-00-00 / 010-0000-0000"
           />
         </label>
       ) : (
@@ -71,13 +81,16 @@ export function LoginForm({ next }: { next: "/sell" | "/dealer" | "/admin" }) {
 
       {message && <p className="text-caption text-ink/70">{message}</p>}
 
-      <button
-        type="submit"
-        disabled={busy}
-        className="mt-auto h-14 rounded-xl bg-navy text-subtitle font-bold text-white disabled:opacity-50"
-      >
-        {step === "phone" ? t("sendCode") : t("verify")}
-      </button>
+      <div className="mt-auto flex flex-col gap-2">
+        <ConsentNote />
+        <button
+          type="submit"
+          disabled={busy}
+          className="h-14 rounded-xl bg-navy text-subtitle font-bold text-white disabled:opacity-50"
+        >
+          {step === "phone" ? t("sendCode") : t("verify")}
+        </button>
+      </div>
     </form>
   );
 }

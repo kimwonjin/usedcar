@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
+import { ConsentNote } from "@/components/consent-note";
 import { useRouter } from "@/i18n/navigation";
 import type { DealerProfile } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/client";
@@ -142,6 +143,7 @@ export function ApplyForm({ userId, dealer }: { userId: string; dealer: DealerPr
 
       <div className="sticky bottom-0 mt-auto flex flex-col gap-2 bg-surface pt-2 pb-4">
         {error && <p className="text-caption text-danger">{error}</p>}
+        <ConsentNote kind="dealer" />
         <button
           type="button"
           disabled={!valid || busy || uploading}

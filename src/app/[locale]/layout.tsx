@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { Header } from "@/components/header";
+import { SiteFooter } from "@/components/site-footer";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 
@@ -44,6 +45,7 @@ export default async function LocaleLayout({
           <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-6 has-[.admin-wide]:max-w-6xl">
             {children}
           </main>
+          <SiteFooter />
         </NextIntlClientProvider>
       </body>
     </html>

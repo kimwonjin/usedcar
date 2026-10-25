@@ -2,8 +2,9 @@
 
 import { useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
+import { ConsentNote } from "@/components/consent-note";
 import { useRouter } from "@/i18n/navigation";
-import { normalizeKzPhone } from "@/lib/phone";
+import { formatPhoneInput, normalizePhone } from "@/lib/phone";
 import { createClient } from "@/lib/supabase/client";
 
 // 개발 기간용: 인증번호 없이 전화번호만으로 로그인한다.
@@ -17,13 +18,13 @@ const devCredentials = (phone: string) => ({
 export function DevPhoneLoginForm({ next }: { next: "/sell" | "/dealer" | "/admin" }) {
   const t = useTranslations("login");
   const router = useRouter();
-  const [phone, setPhone] = useState("+7");
+  const [phone, setPhone] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
-    const normalized = normalizeKzPhone(phone);
+    const normalized = normalizePhone(phone);
     if (!normalized) {
       setMessage(t("invalidPhone"));
       return;
@@ -64,21 +65,24 @@ export function DevPhoneLoginForm({ next }: { next: "/sell" | "/dealer" | "/admi
           inputMode="tel"
           autoComplete="tel"
           value={phone}
-          onChange={(e) => setPhone(e.target.value)}
+          onChange={(e) => setPhone(formatPhoneInput(e.target.value))}
           className="h-14 rounded-xl border border-ink/15 bg-white px-4 text-subtitle"
-          placeholder="+7 701 000 00 00"
+          placeholder="+7 701 000-00-00 / 010-0000-0000"
         />
       </label>
 
       {message && <p className="text-caption text-danger">{message}</p>}
 
-      <button
-        type="submit"
-        disabled={busy}
-        className="mt-auto h-14 rounded-xl bg-navy text-subtitle font-bold text-white disabled:opacity-50"
-      >
-        {t("start")}
-      </button>
+      <div className="mt-auto flex flex-col gap-2">
+        <ConsentNote />
+        <button
+          type="submit"
+          disabled={busy}
+          className="h-14 rounded-xl bg-navy text-subtitle font-bold text-white disabled:opacity-50"
+        >
+          {t("start")}
+        </button>
+      </div>
     </form>
   );
 }

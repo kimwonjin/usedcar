@@ -5,6 +5,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { Link, redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { getCurrentUser, getDealer } from "@/lib/auth";
+import { formatPhoneInput } from "@/lib/phone";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton, NameForm } from "./account-forms";
 
@@ -32,7 +33,7 @@ export default async function AccountPage({ params }: PageProps<"/[locale]/accou
         <NameForm initialName={(profile?.full_name as string | null) ?? ""} />
         <div>
           <p className="text-caption text-ink/60">{t("phone")}</p>
-          <p className="price text-subtitle font-semibold">{user.phone ?? "—"}</p>
+          <p className="price text-subtitle font-semibold">{user.phone ? formatPhoneInput(user.phone) : "—"}</p>
           <p className="text-caption text-ink/50">{t("phoneHidden")}</p>
         </div>
       </section>
