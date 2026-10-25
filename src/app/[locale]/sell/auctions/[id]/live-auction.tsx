@@ -6,6 +6,7 @@ import { Countdown } from "@/components/countdown";
 import { useRouter } from "@/i18n/navigation";
 import { formatTenge } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
+import { authorizeRealtime } from "@/lib/supabase/realtime";
 
 type Stats = { bid_count: number; top_amount: number | null };
 
@@ -40,22 +41,28 @@ export function LiveAuction({
   // 새 입찰이 들어오면 Realtime으로 알림을 받아 최고가를 다시 읽는다
   useEffect(() => {
     const supabase = createClient();
-    const channel = supabase
-      .channel(`auction-${auctionId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "bids", filter: `auction_id=eq.${auctionId}` }, async () => {
-        const { data } = await supabase.rpc("auction_stats", { p_auction_id: auctionId });
-        if (data?.[0]) {
-          setStats(data[0] as Stats);
-          setFlash(true);
-          setTimeout(() => setFlash(false), 1500);
-        }
-      })
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "auctions", filter: `id=eq.${auctionId}` }, () =>
-        router.refresh(),
-      )
-      .subscribe();
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let closed = false;
+    authorizeRealtime(supabase).then(() => {
+      if (closed) return;
+      channel = supabase
+        .channel(`auction-${auctionId}`)
+        .on("postgres_changes", { event: "*", schema: "public", table: "bids", filter: `auction_id=eq.${auctionId}` }, async () => {
+          const { data } = await supabase.rpc("auction_stats", { p_auction_id: auctionId });
+          if (data?.[0]) {
+            setStats(data[0] as Stats);
+            setFlash(true);
+            setTimeout(() => setFlash(false), 1500);
+          }
+        })
+        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "auctions", filter: `id=eq.${auctionId}` }, () =>
+          router.refresh(),
+        )
+        .subscribe();
+    });
     return () => {
-      supabase.removeChannel(channel);
+      closed = true;
+      if (channel) supabase.removeChannel(channel);
     };
   }, [auctionId, router]);
 

@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import type { ChatMessage } from "@/lib/deals";
 import { createClient } from "@/lib/supabase/client";
+import { authorizeRealtime } from "@/lib/supabase/realtime";
 
 // 거래 채팅: 실제 번호는 숨기고 앱 안에서 대화한다. 통화가 필요하면 본인이 번호를 보낸다.
 export function DealChat({
@@ -39,19 +40,42 @@ export function DealChat({
       .is("read_at", null)
       .then(() => {});
 
-    const channel = supabase
-      .channel(`deal-chat-${dealId}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "deal_messages", filter: `deal_id=eq.${dealId}` },
-        (payload) => {
-          const message = payload.new as ChatMessage;
-          setMessages((prev) => (prev.some((m) => m.id === message.id) ? prev : [...prev, message]));
-        },
-      )
-      .subscribe();
+    const append = (incoming: ChatMessage[]) =>
+      setMessages((prev) => {
+        const known = new Set(prev.map((m) => m.id));
+        const fresh = incoming.filter((m) => !known.has(m.id));
+        return fresh.length ? [...prev, ...fresh] : prev;
+      });
+
+    let channel: ReturnType<typeof supabase.channel> | null = null;
+    let closed = false;
+    authorizeRealtime(supabase).then(() => {
+      if (closed) return;
+      channel = supabase
+        .channel(`deal-chat-${dealId}`)
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "deal_messages", filter: `deal_id=eq.${dealId}` },
+          (payload) => append([payload.new as ChatMessage]),
+        )
+        .subscribe();
+    });
+
+    // 실시간 연결이 끊겨도 놓친 메시지를 10초마다 따라잡는다
+    const poll = setInterval(async () => {
+      const { data } = await supabase
+        .from("deal_messages")
+        .select("id, sender_id, kind, body, created_at")
+        .eq("deal_id", dealId)
+        .order("created_at", { ascending: false })
+        .limit(20);
+      if (data) append((data as ChatMessage[]).reverse());
+    }, 10_000);
+
     return () => {
-      supabase.removeChannel(channel);
+      clearInterval(poll);
+      closed = true;
+      if (channel) supabase.removeChannel(channel);
     };
   }, [dealId, notificationUrl]);
 
