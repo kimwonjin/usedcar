@@ -7,7 +7,7 @@ import { formatTenge } from "./format";
 const messages = { ko, ru, kk };
 
 export type NotificationType = keyof (typeof ko)["notifications"];
-export type NotificationParams = { car?: string; amount?: number; name?: string; text?: string };
+export type NotificationParams = { car?: string; amount?: number; name?: string; text?: string; rank?: number };
 
 // DB에 저장된 type·params를 사용자 언어의 제목·본문으로 바꾼다 (푸시와 알림함 공용)
 export function notificationText(locale: string, type: string, params: NotificationParams) {
@@ -20,6 +20,7 @@ export function notificationText(locale: string, type: string, params: Notificat
     name: params.name ?? "",
     text: params.text ?? "",
     amount: params.amount != null ? formatTenge(params.amount) : "",
+    rank: params.rank ?? 0,
   };
   return {
     title: t(`${key}.title`, values),

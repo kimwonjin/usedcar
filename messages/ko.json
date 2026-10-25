@@ -425,7 +425,14 @@
     "won": "낙찰",
     "goToDeal": "거래 진행하기",
     "waitingSeller": "판매자가 결과를 확인하고 있습니다.",
-    "notWon": "이번 경매는 낙찰되지 않았습니다."
+    "notWon": "이번 경매는 낙찰되지 않았습니다.",
+    "soldToOther": "다른 딜러에게 판매되었습니다.",
+    "soldPrice": "낙찰가",
+    "myRank": "내 순위",
+    "rankOf": "{rank}위 / {count}명",
+    "gap": "낙찰가와 차이",
+    "pickedOther": "판매자가 가격 외 조건(평점·거래 이력 등)을 보고 다른 딜러를 골랐습니다.",
+    "gapHint": "다음 비슷한 차에 입찰할 때 참고하세요."
   },
   "bid": {
     "myBid": "내 입찰가",
@@ -745,6 +752,14 @@
     "price_watch": {
       "title": "이번 달 내 차 시세",
       "body": "{car} · 평균 {amount}"
+    },
+    "auction_lost": {
+      "title": "다른 딜러에게 판매되었어요",
+      "body": "{car} · 낙찰가 {amount} · 내 순위 {rank}위"
+    },
+    "desired_reached": {
+      "title": "희망가를 넘었어요! 🎯",
+      "body": "{car} · 현재 최고가 {amount}"
     }
   },
   "notificationCenter": {

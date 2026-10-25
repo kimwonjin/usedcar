@@ -90,6 +90,13 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
   const bidCount = (stats?.[0]?.bid_count as number | undefined) ?? 0;
   const isLive = auction.status === "live";
   const own = auction.seller_id === userId; // 딜러가 판매자로 올린 자기 차
+  // 다른 딜러에게 팔린 경매: 낙찰가와 내 순위 (다음 입찰 참고용)
+  const result =
+    auction.status === "accepted" && myBid && !deal
+      ? ((await supabase.rpc("auction_result", { p_auction_id: id })).data?.[0] as
+          | { winning_amount: number; my_amount: number; my_rank: number; bidders: number }
+          | undefined)
+      : undefined;
 
   const specs: [string, string][] = [
     [t("year"), String(car.year)],
@@ -175,6 +182,30 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
               <Badge tone="gold">{t("won")}</Badge>
               <span className="ml-2 text-body font-semibold text-steppe">{t("goToDeal")} →</span>
             </Link>
+          ) : result ? (
+            <div className="mt-3 flex flex-col gap-2">
+              <p className="text-body font-semibold">{t("soldToOther")}</p>
+              <dl className="grid grid-cols-3 gap-2 text-center">
+                <div className="rounded-lg bg-surface p-2">
+                  <dt className="text-caption text-ink/60">{t("soldPrice")}</dt>
+                  <dd className="price text-body font-bold">{formatTenge(result.winning_amount)}</dd>
+                </div>
+                <div className="rounded-lg bg-surface p-2">
+                  <dt className="text-caption text-ink/60">{t("myRank")}</dt>
+                  <dd className="price text-body font-bold">{t("rankOf", { rank: result.my_rank, count: result.bidders })}</dd>
+                </div>
+                <div className="rounded-lg bg-surface p-2">
+                  <dt className="text-caption text-ink/60">{t("gap")}</dt>
+                  <dd className={`price text-body font-bold ${result.my_amount < result.winning_amount ? "text-danger" : "text-steppe"}`}>
+                    {result.my_amount < result.winning_amount ? "−" : "+"}
+                    {formatTenge(Math.abs(result.winning_amount - result.my_amount))}
+                  </dd>
+                </div>
+              </dl>
+              <p className="text-caption text-ink/60">
+                {result.my_amount >= result.winning_amount ? t("pickedOther") : t("gapHint")}
+              </p>
+            </div>
           ) : (
             <p className="mt-2 text-body text-ink/70">
               {auction.status === "ended" ? t("waitingSeller") : t("notWon")}
