@@ -5,6 +5,7 @@ const tones = {
   review: "bg-steppe/10 text-steppe",
   warning: "bg-danger/10 text-danger",
   gold: "bg-gold text-navy",
+  neutral: "bg-ink/5 text-ink/60",
 };
 
 export function Badge({

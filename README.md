@@ -51,6 +51,12 @@ supabase/
 | `accept_bid` / `reject_auction` | 판매자 | 판매 결정(거래 생성) / 거절 |
 | `review_dealer` | 관리자 | 딜러 승인·거절·정지 |
 | `close_expired_auctions` | pg_cron (1분마다) | 마감 시간이 지난 경매 종료 |
+| `cancel_my_auction` | 판매자 | 입찰 전 경매 취소 |
+| `complete_deal` / `cancel_deal` | 판매자 | 거래 완료(최종가 = 낙찰가 − 승인된 감가) / 취소 |
+| `comment_claim` | 판매자 | 감가 청구에 의견 |
+| `review_claim` | 관리자 | 감가 승인·거절 |
+| `rate_dealer` | 판매자 | 완료 거래 딜러 평가 → 딜러 평점 평균 |
+| `admin_cancel_auction` | 관리자 | 경매 강제 종료 |
 
 연락처는 낙찰된 딜러와 판매자 사이에서만 공개된다(RLS).
 
@@ -60,7 +66,7 @@ supabase/
 1. [supabase.com](https://supabase.com)에서 새 프로젝트 생성 (리전: 가까운 `Frankfurt (eu-central-1)` 권장)
 2. Database → Extensions에서 **pg_cron** 켜기
 3. 마이그레이션 적용 (둘 중 하나)
-   - SQL Editor에 `supabase/migrations/20261025000000_init.sql` 내용을 붙여넣고 실행
+   - SQL Editor에 `supabase/migrations/` 폴더의 파일을 **이름 순서대로** 하나씩 붙여넣고 실행
    - 또는 CLI: `npx supabase login` → `npx supabase link --project-ref <ref>` → `npm run db:push`
 4. Authentication → Sign In / Providers → **Phone** 켜고 SMS 제공자 연결
    - Supabase 기본 지원: Twilio, Vonage, MessageBird (카자흐스탄 +7 발송 가능)
@@ -95,15 +101,15 @@ Docker가 있는 환경이면 `npm run db:start`로 로컬 Supabase를 띄울 �
 
 ## 진행 상황 (MVP 18개 화면)
 
-- [x] 프로젝트 구조, 디자인 토큰, 3개 언어 라우팅
-- [x] DB 스키마·RLS·경매 함수 (로컬 Postgres로 입찰·낙찰 흐름 검증)
+- [x] 프로젝트 구조, 디자인 토큰, 3개 언어 라우팅 (ko·ru·kk)
+- [x] DB 스키마·RLS·경매/거래/감가 함수 (로컬 Postgres로 전체 흐름 검증)
 - [x] S1 랜딩, 로그인 (개발 중에는 인증번호 없이 전화번호만, 출시 때 `NEXT_PUBLIC_AUTH_MODE=phone`으로 휴대폰 OTP 전환)
-- [x] S2 판매자 홈(진행 중 경매·최고가), D2 딜러 경매 목록, A1 관리자 대시보드 (기본형)
-- [x] S3~S5 차량 등록 단계형 화면 + 사진 촬영 가이드 (사진은 긴 변 1600px로 줄여 업로드)
+- [x] S2 판매자 홈, S3~S5 차량 등록 + 사진 촬영 가이드
+- [x] S6 경매 진행(Realtime 최고가), S7 결과(상위 3위 선택·거절·재등록), S8 거래(일정·감가 확인·완료·딜러 평가)
+- [x] D1 딜러 가입·재신청, D2 경매 목록(사진·필터·정렬), D3 차량 상세, D4 블라인드 입찰, D5 낙찰·감가 청구, D6 내 활동·수수료·평판
+- [x] A1 대시보드, A2 딜러 승인·거절·경고·정지, A3 경매 관리·강제 종료, A4 감가 심사(사진 비교)
 - [ ] 촬영 가이드 예시 그림을 실제 예시 사진으로 교체
-- [ ] S6~S8 경매 진행·결과·거래 (Realtime 최고가)
-- [ ] D1 딜러 가입, D3~D6 상세·입찰·낙찰·내 활동
-- [ ] A2~A4 딜러 관리·경매 관리·감가 심사
-- [ ] 딜러 새 매물 푸시 알림 (Web Push)
+- [ ] 알림: 딜러 새 매물·판매자 경매 마감 (Web Push / SMS)
+- [ ] 수수료 정책 확정 (`src/lib/fees.ts` 임시 구간표)
 - [ ] 휴대폰 OTP 로그인 켜기: SMS 업체 연결 + Vercel에 `NEXT_PUBLIC_AUTH_MODE=phone` (최종 단계)
 - [ ] 러시아어·카자흐어 번역 원어민 검수 (현재는 초안)

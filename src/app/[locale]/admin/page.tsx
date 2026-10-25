@@ -1,8 +1,8 @@
 import type { Locale } from "@/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { SetupNotice } from "@/components/setup-notice";
-import { redirect } from "@/i18n/navigation";
-import { getCurrentUser } from "@/lib/auth";
+import { AdminOnly } from "@/components/admin-only";
+import { requireAdmin } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 import { startOfAlmatyDay } from "@/lib/time";
@@ -14,8 +14,7 @@ export default async function AdminDashboard({ params }: PageProps<"/[locale]/ad
   const t = await getTranslations("admin");
   if (!isSupabaseConfigured) return <SetupNotice />;
 
-  const user = await getCurrentUser();
-  if (user?.role !== "admin") return redirect({ href: "/login?next=/admin", locale });
+  if (!(await requireAdmin(locale))) return <AdminOnly />;
 
   const supabase = await createClient();
   const startOfDay = startOfAlmatyDay();

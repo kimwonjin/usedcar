@@ -34,7 +34,8 @@ export default async function LocaleLayout({
       <body className="flex min-h-full flex-col">
         <NextIntlClientProvider>
           <Header />
-          <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-6">
+          {/* 관리자 화면(.admin-wide)은 PC용으로 넓게 */}
+          <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-6 has-[.admin-wide]:max-w-6xl">
             {children}
           </main>
         </NextIntlClientProvider>
