@@ -2,6 +2,7 @@ import type { Locale } from "@/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Badge } from "@/components/badge";
 import { BidBlockNotice } from "@/components/bid-block-notice";
+import { ReviewList, type DealerReview } from "@/components/dealer-profile";
 import { DealerTabs } from "@/components/dealer-tabs";
 import { Stars } from "@/components/stars";
 import { StatusBadge } from "@/components/status-badge";
@@ -43,7 +44,7 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
 
   // 서로 관계없는 조회는 한 번에 보낸다
   const supabase = await createClient();
-  const [dealer, feeBands, { data: penaltyRows }, { data: bidRows }, { data: dealRows }, tp] = await Promise.all([
+  const [dealer, feeBands, { data: penaltyRows }, { data: bidRows }, { data: dealRows }, tp, { data: reviewRows }, tr] = await Promise.all([
     getDealer(userId),
     loadFeeBands(supabase),
     supabase
@@ -66,6 +67,8 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
       .order("created_at", { ascending: false })
       .overrideTypes<MyDeal[], { merge: false }>(),
     getTranslations("penalty"),
+    supabase.rpc("dealer_reviews", { p_dealer_id: userId, p_limit: 10 }),
+    getTranslations("dealerProfile"),
   ]);
   if (!dealer) return redirect({ href: "/dealer/apply", locale });
   const penalties = (penaltyRows ?? []) as { id: string; reason: string; action: string; created_at: string }[];
@@ -126,6 +129,11 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
           </ul>
         </section>
       )}
+
+      <section className="flex flex-col rounded-xl bg-white px-4 pt-4 pb-1 shadow-sm">
+        <h2 className="text-subtitle font-semibold">{tr("myReviews")}</h2>
+        <ReviewList reviews={(reviewRows ?? []) as DealerReview[]} />
+      </section>
 
       <section className="flex flex-col gap-2">
         <h2 className="text-subtitle font-semibold">{t("deals")}</h2>

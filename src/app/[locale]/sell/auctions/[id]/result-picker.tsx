@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Badge } from "@/components/badge";
 import { Countdown } from "@/components/countdown";
+import { DealerProfileButton } from "@/components/dealer-profile";
 import { Stars } from "@/components/stars";
 import { useRouter } from "@/i18n/navigation";
 import { formatTenge } from "@/lib/format";
@@ -106,6 +107,9 @@ export function ResultPicker({
                 </div>
                 {i === 0 && <Badge tone="gold">{t("best")}</Badge>}
               </button>
+              <div className="flex justify-end px-2 pt-1">
+                <DealerProfileButton dealerId={bid.dealer_id} dealerName={bid.dealer_name} />
+              </div>
             </li>
           );
         })}

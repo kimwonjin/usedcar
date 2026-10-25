@@ -37,6 +37,7 @@
 - [ ] Supabase 자체 설치: Postgres·Auth·Storage·Realtime·pg_cron·pg_net 포함, 도메인·HTTPS 설정
 - [ ] `supabase/migrations/` 전체 순서대로 적용, `app_config`(푸시 발송 주소·비밀값) 다시 입력
 - [ ] Storage 버킷(car-photos, dealer-docs, claim-photos) 생성 확인
+- [ ] 서버 위치: 지금은 DB(싱가포르)에 맞춰 `vercel.json` `regions: ["sin1"]`. Vercel에는 카자흐스탄 지역이 없으므로 새 DB와 가장 가까운 지역으로 바꾸거나, 화면 서버도 현지에 둘지 결정
 - [ ] Vercel 환경변수의 Supabase 주소·키 교체, `src/lib/supabase/env.ts` 기본값 교체, `next.config.ts` 이미지 도메인 추가
 - [ ] 문자 인증 업체 연결 + `NEXT_PUBLIC_AUTH_MODE=phone`
 - [ ] 개발용 테스트 계정·데이터는 옮기지 않는다 (새 DB로 깨끗하게 시작)

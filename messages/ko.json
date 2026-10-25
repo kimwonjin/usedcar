@@ -896,5 +896,19 @@
     "android": "앱처럼 바로 열리고, 새 매물·입찰 알림을 놓치지 않습니다.",
     "install": "설치하기",
     "close": "닫기"
+  },
+  "dealerProfile": {
+    "open": "딜러 정보·후기 보기",
+    "completed": "거래 완료",
+    "reviews": "후기",
+    "since": "승인일",
+    "cancellations": "딜러 사정 취소",
+    "reviewsTitle": "판매자 후기",
+    "noReviews": "아직 후기가 없습니다.",
+    "ratingOnly": "별점만 남긴 후기",
+    "loading": "불러오는 중…",
+    "failed": "불러오지 못했습니다.",
+    "close": "닫기",
+    "myReviews": "내가 받은 후기"
   }
 }
