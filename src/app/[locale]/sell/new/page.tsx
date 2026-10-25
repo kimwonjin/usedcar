@@ -37,10 +37,16 @@ export default async function NewCarPage({ params, searchParams }: PageProps<"/[
   setRequestLocale(locale);
   if (!isSupabaseConfigured) return <SetupNotice />;
 
+  const { car: carId, make, model, year } = await searchParams;
   const user = await getCurrentUser();
-  if (!user) return redirect({ href: "/login?next=/sell", locale });
-
-  const { car: carId } = await searchParams;
+  if (!user) {
+    // 시세 조회에서 왔으면 로그인 뒤에도 미리 채운 등록 화면으로 돌아온다
+    const query = new URLSearchParams(
+      Object.entries({ make, model, year }).filter((e): e is [string, string] => typeof e[1] === "string" && e[1] !== ""),
+    ).toString();
+    const next = query ? `/sell/new?${query}` : "/sell";
+    return redirect({ href: `/login?next=${encodeURIComponent(next)}`, locale });
+  }
   let initial: WizardInitial | undefined;
   if (typeof carId === "string") {
     const supabase = await createClient();
@@ -84,5 +90,13 @@ export default async function NewCarPage({ params, searchParams }: PageProps<"/[
     };
   }
 
-  return <CarWizard userId={user.id} currentYear={almatyYear()} initial={initial} />;
+  // 시세 조회에서 넘어오면 제조사·모델·연식을 미리 채운다
+  const text = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
+  const prefill = {
+    make: text(make, 40),
+    model: text(model, 40),
+    year: /^\d{4}$/.test(text(year, 4)) ? text(year, 4) : "",
+  };
+
+  return <CarWizard userId={user.id} currentYear={almatyYear()} initial={initial} prefill={prefill} />;
 }

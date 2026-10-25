@@ -16,7 +16,7 @@ const devCredentials = (phone: string) => ({
   password: `satu-dev-${phone}`,
 });
 
-export function DevPhoneLoginForm({ next }: { next: "/sell" | "/dealer" | "/admin" }) {
+export function DevPhoneLoginForm({ next }: { next: string }) {
   const t = useTranslations("login");
   const router = useRouter();
   const [phone, setPhone] = useState("");

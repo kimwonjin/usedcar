@@ -75,10 +75,12 @@ export function CarWizard({
   userId,
   currentYear,
   initial,
+  prefill,
 }: {
   userId: string;
   currentYear: number;
   initial?: WizardInitial;
+  prefill?: Partial<Pick<Draft, "make" | "model" | "year">>;
 }) {
   const t = useTranslations("carForm");
   const tc = useTranslations("condition");
@@ -89,7 +91,7 @@ export function CarWizard({
     const complete = REQUIRED_SLOTS.every((slot) => initial.photos[slot]?.length);
     return STEPS.indexOf(complete ? "review" : "photos");
   });
-  const [draft, setDraft] = useState<Draft>(initial?.draft ?? initialDraft);
+  const [draft, setDraft] = useState<Draft>(initial?.draft ?? { ...initialDraft, ...prefill });
   const [carId, setCarId] = useState<string | null>(initial?.carId ?? null);
   const [photos, setPhotos] = useState<PhotoMap>(initial?.photos ?? {});
   const [busy, setBusy] = useState(false);

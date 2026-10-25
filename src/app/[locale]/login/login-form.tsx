@@ -8,7 +8,7 @@ import { PhoneField } from "@/components/phone-field";
 import { normalizePhone } from "@/lib/phone";
 import { createClient } from "@/lib/supabase/client";
 
-export function LoginForm({ next }: { next: "/sell" | "/dealer" | "/admin" }) {
+export function LoginForm({ next }: { next: string }) {
   const t = useTranslations("login");
   const router = useRouter();
   const [phone, setPhone] = useState("");

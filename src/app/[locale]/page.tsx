@@ -57,6 +57,17 @@ export default async function LandingPage({ params }: PageProps<"/[locale]">) {
         </dl>
       )}
 
+      <Link
+        href="/price"
+        className="flex items-center justify-between gap-3 rounded-xl border border-steppe/30 bg-steppe/5 p-4"
+      >
+        <div>
+          <p className="text-subtitle font-semibold text-navy">📊 {t("priceTitle")}</p>
+          <p className="text-caption text-ink/70">{t("priceSub")}</p>
+        </div>
+        <span className="shrink-0 text-subtitle font-bold text-steppe">→</span>
+      </Link>
+
       <ol className="flex flex-col gap-3">
         {(["step1", "step2", "step3"] as const).map((step, i) => (
           <li key={step} className="flex items-center gap-3 rounded-xl bg-white p-4 shadow-sm">
