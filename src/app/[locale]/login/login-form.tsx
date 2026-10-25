@@ -4,7 +4,8 @@ import { useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { ConsentNote } from "@/components/consent-note";
 import { useRouter } from "@/i18n/navigation";
-import { formatPhoneInput, normalizePhone } from "@/lib/phone";
+import { PhoneField } from "@/components/phone-field";
+import { normalizePhone } from "@/lib/phone";
 import { createClient } from "@/lib/supabase/client";
 
 export function LoginForm({ next }: { next: "/sell" | "/dealer" | "/admin" }) {
@@ -53,18 +54,7 @@ export function LoginForm({ next }: { next: "/sell" | "/dealer" | "/admin" }) {
       <h1 className="text-title font-bold text-navy">{t("title")}</h1>
 
       {step === "phone" ? (
-        <label className="flex flex-col gap-2">
-          <span className="text-caption text-ink/70">{t("phone")}</span>
-          <input
-            type="tel"
-            inputMode="tel"
-            autoComplete="tel"
-            value={phone}
-            onChange={(e) => setPhone(formatPhoneInput(e.target.value))}
-            className="h-14 rounded-xl border border-ink/15 bg-white px-4 text-subtitle"
-            placeholder="+7 701 000-00-00 / 010-0000-0000"
-          />
-        </label>
+        <PhoneField label={t("phone")} value={phone} onChange={setPhone} />
       ) : (
         <label className="flex flex-col gap-2">
           <span className="text-caption text-ink/70">{t("code")}</span>

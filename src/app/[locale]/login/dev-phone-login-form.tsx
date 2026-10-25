@@ -4,7 +4,8 @@ import { useTranslations } from "next-intl";
 import { useState, type FormEvent } from "react";
 import { ConsentNote } from "@/components/consent-note";
 import { useRouter } from "@/i18n/navigation";
-import { formatPhoneInput, normalizePhone } from "@/lib/phone";
+import { PhoneField } from "@/components/phone-field";
+import { normalizePhone } from "@/lib/phone";
 import { createClient } from "@/lib/supabase/client";
 
 // 개발 기간용: 인증번호 없이 전화번호만으로 로그인한다.
@@ -58,18 +59,7 @@ export function DevPhoneLoginForm({ next }: { next: "/sell" | "/dealer" | "/admi
       <h1 className="text-title font-bold text-navy">{t("title")}</h1>
       <p className="text-caption text-ink/60">{t("devNotice")}</p>
 
-      <label className="flex flex-col gap-2">
-        <span className="text-caption text-ink/70">{t("phone")}</span>
-        <input
-          type="tel"
-          inputMode="tel"
-          autoComplete="tel"
-          value={phone}
-          onChange={(e) => setPhone(formatPhoneInput(e.target.value))}
-          className="h-14 rounded-xl border border-ink/15 bg-white px-4 text-subtitle"
-          placeholder="+7 701 000-00-00 / 010-0000-0000"
-        />
-      </label>
+      <PhoneField label={t("phone")} value={phone} onChange={setPhone} />
 
       {message && <p className="text-caption text-danger">{message}</p>}
 
