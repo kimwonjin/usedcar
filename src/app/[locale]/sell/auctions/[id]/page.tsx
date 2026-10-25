@@ -7,6 +7,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { Link, redirect } from "@/i18n/navigation";
 import { decisionDeadline } from "@/lib/auction-rules";
 import { getCurrentUser } from "@/lib/auth";
+import type { DamageMap } from "@/lib/car-catalog";
 import { firstRow } from "@/lib/supabase/rows";
 import { createClient } from "@/lib/supabase/server";
 import { LiveAuction } from "./live-auction";
@@ -21,7 +22,7 @@ type SellerAuctionDetail = {
   ends_at: string;
   car_id: string;
   seller_id: string;
-  cars: { make: string; model: string; year: number; desired_price: number | null; defects: string | null };
+  cars: { make: string; model: string; year: number; desired_price: number | null; defects: string | null; damage: DamageMap | null };
   deals: { id: string } | { id: string }[] | null;
 };
 
@@ -38,7 +39,7 @@ export default async function SellerAuctionPage({ params }: PageProps<"/[locale]
   const supabase = await createClient();
   const { data: auction } = await supabase
     .from("auctions")
-    .select("id, status, starts_at, ends_at, car_id, seller_id, cars(make, model, year, desired_price, defects), deals(id)")
+    .select("id, status, starts_at, ends_at, car_id, seller_id, cars(make, model, year, desired_price, defects, damage), deals(id)")
     .eq("id", id)
     .maybeSingle()
     .overrideTypes<SellerAuctionDetail, { merge: false }>();
@@ -68,7 +69,7 @@ export default async function SellerAuctionPage({ params }: PageProps<"/[locale]
           initialEvents={events}
           desiredPrice={car.desired_price}
         />
-        <LiveEdits carId={auction.car_id} userId={user.id} defects={car.defects} />
+        <LiveEdits carId={auction.car_id} userId={user.id} defects={car.defects} damage={car.damage ?? {}} />
       </>
     );
   } else if (auction.status === "ended") {

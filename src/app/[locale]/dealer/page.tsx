@@ -28,6 +28,7 @@ type LiveAuction = {
     steering: string;
     fuel: string | null;
     transmission: string | null;
+    accident: string | null;
     car_photos: { slot: string; storage_path: string }[];
   };
 };
@@ -39,6 +40,7 @@ export default async function DealerAuctions({ params, searchParams }: PageProps
   const locale = (await params).locale as Locale; // layout에서 검증됨
   setRequestLocale(locale);
   const t = await getTranslations("dealer");
+  const tc = await getTranslations("condition");
   if (!isSupabaseConfigured) return <SetupNotice />;
 
   const user = await getCurrentUser();
@@ -64,13 +66,14 @@ export default async function DealerAuctions({ params, searchParams }: PageProps
     fuel: param("fuel"),
     transmission: param("transmission"),
     steering: param("steering"),
+    noAccident: param("noAccident") === "1",
     favorites: param("fav") === "1",
   };
 
   const supabase = await createClient();
   const { data } = await supabase
     .from("auctions")
-    .select("id, ends_at, created_at, cars(make, model, year, mileage_km, steering, fuel, transmission, car_photos(slot, storage_path))")
+    .select("id, ends_at, created_at, cars(make, model, year, mileage_km, steering, fuel, transmission, accident, car_photos(slot, storage_path))")
     .eq("status", "live")
     .gt("ends_at", new Date().toISOString())
     .order(sort === "ending" ? "ends_at" : "created_at", { ascending: sort === "ending" })
@@ -89,6 +92,7 @@ export default async function DealerAuctions({ params, searchParams }: PageProps
     if (filters.fuel && c.fuel !== filters.fuel) return false;
     if (filters.transmission && c.transmission !== filters.transmission) return false;
     if (filters.steering && c.steering !== filters.steering) return false;
+    if (filters.noAccident && c.accident !== "none") return false;
     if (filters.favorites && !favorites.has(a.id)) return false;
     return true;
   });
@@ -194,7 +198,20 @@ export default async function DealerAuctions({ params, searchParams }: PageProps
                   <span className="text-caption text-ink/60">
                     {t("bidders", { count: bidCount.get(auction.id) ?? 0 })}
                   </span>
-                  <span className="col-span-2 text-caption">
+                  <span className="col-span-2 flex flex-wrap items-center gap-1.5 text-caption">
+                    {auction.cars.accident && (
+                      <Badge
+                        tone={
+                          auction.cars.accident === "none"
+                            ? "verified"
+                            : auction.cars.accident === "major"
+                              ? "warning"
+                              : "neutral"
+                        }
+                      >
+                        {tc(`accidentShort.${auction.cars.accident as "none"}`)}
+                      </Badge>
+                    )}
                     {mine ? (
                       <Badge tone="review">
                         {t("myBid")} <span className="price ml-1">{formatTenge(mine)}</span>

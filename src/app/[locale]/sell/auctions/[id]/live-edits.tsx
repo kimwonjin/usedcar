@@ -2,13 +2,33 @@
 
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
+import { DamageDiagram, DamageLegend } from "@/components/damage-diagram";
 import { useRouter } from "@/i18n/navigation";
+import { DAMAGE_KINDS, type DamageMap, type Panel } from "@/lib/car-catalog";
 import { createClient } from "@/lib/supabase/client";
 import { uploadPhoto } from "@/lib/upload";
 
-// 경매 중 정보 보강: 하자 설명 수정과 사진 추가만 가능 (기본 정보·기존 사진은 잠김). 입찰·찜 딜러에게 알림이 간다.
-export function LiveEdits({ carId, userId, defects }: { carId: string; userId: string; defects: string | null }) {
+// 경매 중 정보 보강: 하자 설명 수정, 외판 표시 추가·변경, 사진 추가만 가능 (기본 정보·기존 사진·기존 표시 삭제는 잠김).
+// 입찰·찜 딜러에게 알림이 간다.
+export function LiveEdits({
+  carId,
+  userId,
+  defects,
+  damage: savedDamage,
+}: {
+  carId: string;
+  userId: string;
+  defects: string | null;
+  damage: DamageMap;
+}) {
   const t = useTranslations("liveEdits");
+  const tc = useTranslations("condition");
+  const [damage, setDamage] = useState<DamageMap>(savedDamage);
+  const [panel, setPanel] = useState<Panel | null>(null);
+  // 마지막으로 저장된 표시. 이 부위들은 지울 수 없다
+  const [baseline, setBaseline] = useState<DamageMap>(savedDamage);
+  const [damageSaved, setDamageSaved] = useState(false);
+  const damageChanged = !sameDamage(damage, baseline);
   const router = useRouter();
   const [text, setText] = useState(defects ?? "");
   const [saved, setSaved] = useState(false);
@@ -26,6 +46,18 @@ export function LiveEdits({ carId, userId, defects }: { carId: string; userId: s
     else {
       setSaved(true);
       router.refresh();
+    }
+  }
+
+  async function saveDamage() {
+    setBusy(true);
+    setError(false);
+    const { error } = await createClient().from("cars").update({ damage }).eq("id", carId);
+    setBusy(false);
+    if (error) setError(true);
+    else {
+      setBaseline(damage);
+      setDamageSaved(true);
     }
   }
 
@@ -71,6 +103,61 @@ export function LiveEdits({ carId, userId, defects }: { carId: string; userId: s
         >
           {saved ? `✓ ${t("saved")}` : t("saveDefects")}
         </button>
+        <div className="flex flex-col gap-2">
+          <span className="text-caption text-ink/60">{tc("damage")}</span>
+          <div className="flex gap-3">
+            <DamageDiagram damage={damage} selected={panel} onSelect={setPanel} className="h-56 w-auto shrink-0 select-none" />
+            <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+              {panel ? (
+                <>
+                  <p className="text-body font-semibold text-navy">{tc(`panels.${panel}`)}</p>
+                  {DAMAGE_KINDS.map((kind) => (
+                    <button
+                      key={kind}
+                      type="button"
+                      aria-pressed={damage[panel] === kind}
+                      onClick={() => {
+                        setDamage({ ...damage, [panel]: kind });
+                        setDamageSaved(false);
+                      }}
+                      className={`h-10 rounded-lg border text-body font-semibold ${
+                        damage[panel] === kind ? "border-steppe bg-steppe/10 text-navy" : "border-ink/10 bg-white"
+                      }`}
+                    >
+                      {tc(`kinds.${kind}`)}
+                    </button>
+                  ))}
+                  {/* 저장된 표시는 지울 수 없다 (DB 규칙과 같음) */}
+                  {!baseline[panel] && damage[panel] && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const rest = { ...damage };
+                        delete rest[panel];
+                        setDamage(rest);
+                      }}
+                      className="h-10 rounded-lg border border-ink/10 bg-white text-body text-ink/70"
+                    >
+                      {tc("kinds.ok")}
+                    </button>
+                  )}
+                </>
+              ) : (
+                <p className="text-caption text-ink/60">{tc("damageStep.tapPanel")}</p>
+              )}
+            </div>
+          </div>
+          <DamageLegend />
+          <p className="text-caption text-ink/50">{t("damageLocked")}</p>
+          <button
+            type="button"
+            disabled={busy || !damageChanged}
+            onClick={saveDamage}
+            className="h-11 rounded-lg border border-navy font-semibold text-navy disabled:opacity-40"
+          >
+            {damageSaved && !damageChanged ? `✓ ${t("saved")}` : t("saveDamage")}
+          </button>
+        </div>
         <input
           ref={fileRef}
           type="file"
@@ -94,4 +181,10 @@ export function LiveEdits({ carId, userId, defects }: { carId: string; userId: s
       </div>
     </details>
   );
+}
+
+// DB(jsonb)는 키 순서를 바꿔 돌려주므로 순서와 무관하게 비교한다
+function sameDamage(a: DamageMap, b: DamageMap) {
+  const keys = Object.keys(a) as (keyof DamageMap)[];
+  return keys.length === Object.keys(b).length && keys.every((k) => a[k] === b[k]);
 }

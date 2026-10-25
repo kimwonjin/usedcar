@@ -10,6 +10,7 @@ type Values = {
   fuel: string | null;
   transmission: string | null;
   steering: string | null;
+  noAccident: boolean;
   favorites: boolean;
 };
 
@@ -82,6 +83,10 @@ export function FilterPanel({ action, values, activeCount }: { action: string; v
               </option>
             ))}
           </select>
+        </label>
+        <label className="col-span-2 flex items-center gap-2 text-body">
+          <input type="checkbox" name="noAccident" value="1" defaultChecked={values.noAccident} className="size-5 accent-navy" />
+          {t("noAccident")}
         </label>
         <a href={`${action}?sort=${values.sort}`} className="flex h-11 items-center justify-center rounded-lg border border-ink/15 text-body text-ink/70">
           {t("reset")}
