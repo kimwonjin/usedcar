@@ -5,6 +5,7 @@ import { BidBlockNotice } from "@/components/bid-block-notice";
 import { Countdown } from "@/components/countdown";
 import { DealerTabs } from "@/components/dealer-tabs";
 import { FavoriteButton } from "@/components/favorite-button";
+import { InstallPrompt } from "@/components/install-prompt";
 import { PushToggle } from "@/components/push-toggle";
 import { SetupNotice } from "@/components/setup-notice";
 import { Link, redirect } from "@/i18n/navigation";
@@ -131,6 +132,7 @@ export default async function DealerAuctions({ params, searchParams }: PageProps
     <div className="flex flex-col gap-3">
       <DealerTabs />
       {/* 새 매물 알림을 받으려면 푸시가 필요하다 */}
+      <InstallPrompt />
       <PushToggle compact />
       {blockedUntil && <BidBlockNotice until={blockedUntil} />}
       {overdue.length > 0 && (

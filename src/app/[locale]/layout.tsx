@@ -2,10 +2,11 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Header } from "@/components/header";
 import { SiteFooter } from "@/components/site-footer";
 import { routing } from "@/i18n/routing";
+import { siteUrl } from "@/lib/integrations/config";
 import "../globals.css";
 
 const inter = Inter({
@@ -13,12 +14,28 @@ const inter = Inter({
   subsets: ["latin", "cyrillic", "cyrillic-ext"],
 });
 
-export const metadata: Metadata = {
-  title: "Satu — 알마티 내 차 팔기 경매",
-  description: "승인된 알마티 딜러들의 48시간 경쟁 입찰로 내 차를 최고가에 파세요.",
-  appleWebApp: { capable: true, title: "Satu", statusBarStyle: "default" },
-  icons: { icon: "/icon-192.png", apple: "/apple-touch-icon.png" },
-};
+const OG_LOCALES = { ko: "ko_KR", ru: "ru_RU", kk: "kk_KZ" } as const;
+
+// 언어별 제목·설명. 메신저(WhatsApp·Telegram)로 링크를 공유하면 이 내용과 opengraph-image 가 보인다
+export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Promise<Metadata> {
+  const { locale } = await params;
+  if (!hasLocale(routing.locales, locale)) return {};
+  const t = await getTranslations({ locale, namespace: "meta" });
+  return {
+    metadataBase: new URL(siteUrl),
+    title: t("title"),
+    description: t("description"),
+    openGraph: {
+      type: "website",
+      siteName: "Satu",
+      title: t("title"),
+      description: t("description"),
+      locale: OG_LOCALES[locale],
+    },
+    appleWebApp: { capable: true, title: "Satu", statusBarStyle: "default" },
+    icons: { icon: "/icon-192.png", apple: "/apple-touch-icon.png" },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#14213D",

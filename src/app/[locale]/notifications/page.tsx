@@ -1,5 +1,6 @@
 import type { Locale } from "@/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { InstallPrompt } from "@/components/install-prompt";
 import { PushToggle } from "@/components/push-toggle";
 import { Link, redirect } from "@/i18n/navigation";
 import { getCurrentUser } from "@/lib/auth";
@@ -39,6 +40,7 @@ export default async function NotificationsPage({ params }: PageProps<"/[locale]
   return (
     <div className="flex flex-col gap-4 pb-6">
       <h1 className="text-title font-bold text-navy">{t("title")}</h1>
+      <InstallPrompt />
       <PushToggle />
       {hasUnread && <MarkAllRead />}
 
