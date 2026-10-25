@@ -45,7 +45,8 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
   const [{ data: bidRows }, { data: dealRows }] = await Promise.all([
     supabase
       .from("bids")
-      .select("id, amount, auction_id, auctions(status, ends_at, winning_bid_id, cars(make, model, year))")
+      // auctions.winning_bid_id도 bids를 가리켜서 관계 이름을 지정해야 한다
+      .select("id, amount, auction_id, auctions!bids_auction_id_fkey(status, ends_at, winning_bid_id, cars(make, model, year))")
       .eq("dealer_id", user.id)
       .order("updated_at", { ascending: false })
       .limit(50)
