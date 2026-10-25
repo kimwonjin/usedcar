@@ -4,6 +4,7 @@ import { Badge } from "@/components/badge";
 import { BidBlockNotice } from "@/components/bid-block-notice";
 import { Countdown } from "@/components/countdown";
 import { DealerTabs } from "@/components/dealer-tabs";
+import { FavoriteButton } from "@/components/favorite-button";
 import { PushToggle } from "@/components/push-toggle";
 import { SetupNotice } from "@/components/setup-notice";
 import { Link, redirect } from "@/i18n/navigation";
@@ -12,6 +13,7 @@ import { formatKm, formatTenge } from "@/lib/format";
 import { signedUrlMap } from "@/lib/storage";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
+import { FilterPanel } from "./filter-panel";
 
 type LiveAuction = {
   id: string;
@@ -23,6 +25,8 @@ type LiveAuction = {
     year: number;
     mileage_km: number;
     steering: string;
+    fuel: string | null;
+    transmission: string | null;
     car_photos: { slot: string; storage_path: string }[];
   };
 };
@@ -48,19 +52,45 @@ export default async function DealerAuctions({ params, searchParams }: PageProps
   }
 
   const query = await searchParams;
-  const make = typeof query.make === "string" ? query.make : null;
+  const param = (key: string) => (typeof query[key] === "string" && query[key] ? (query[key] as string) : null);
+  const make = param("make");
   const sort = SORTS.find((s) => s === query.sort) ?? "ending";
+  const filters = {
+    yearFrom: Number(param("yearFrom")) || null,
+    yearTo: Number(param("yearTo")) || null,
+    maxKm: Number(param("maxKm")) || null,
+    fuel: param("fuel"),
+    transmission: param("transmission"),
+    steering: param("steering"),
+    favorites: param("fav") === "1",
+  };
 
   const supabase = await createClient();
   const { data } = await supabase
     .from("auctions")
-    .select("id, ends_at, created_at, cars(make, model, year, mileage_km, steering, car_photos(slot, storage_path))")
+    .select("id, ends_at, created_at, cars(make, model, year, mileage_km, steering, fuel, transmission, car_photos(slot, storage_path))")
     .eq("status", "live")
     .gt("ends_at", new Date().toISOString())
     .order(sort === "ending" ? "ends_at" : "created_at", { ascending: sort === "ending" })
     .overrideTypes<LiveAuction[], { merge: false }>();
   const all = data ?? [];
-  const auctions = make ? all.filter((a) => a.cars.make === make) : all;
+  const { data: favRows } = await supabase.from("dealer_favorites").select("auction_id").eq("dealer_id", user.id);
+  const favorites = new Set((favRows ?? []).map((f) => f.auction_id as string));
+
+  // 목록 규모가 작아서 조건 필터는 받아온 뒤 서버에서 거른다
+  const auctions = all.filter((a) => {
+    const c = a.cars;
+    if (make && c.make !== make) return false;
+    if (filters.yearFrom && c.year < filters.yearFrom) return false;
+    if (filters.yearTo && c.year > filters.yearTo) return false;
+    if (filters.maxKm && c.mileage_km > filters.maxKm) return false;
+    if (filters.fuel && c.fuel !== filters.fuel) return false;
+    if (filters.transmission && c.transmission !== filters.transmission) return false;
+    if (filters.steering && c.steering !== filters.steering) return false;
+    if (filters.favorites && !favorites.has(a.id)) return false;
+    return true;
+  });
+  const activeFilterCount = Object.values(filters).filter(Boolean).length;
   const makes = [...new Set(all.map((a) => a.cars.make))].sort();
   const ids = auctions.map((a) => a.id);
 
@@ -78,11 +108,16 @@ export default async function DealerAuctions({ params, searchParams }: PageProps
     ((counts ?? []) as { auction_id: string; bid_count: number }[]).map((c) => [c.auction_id, c.bid_count]),
   );
 
-  const filterHref = (next: { make?: string | null; sort?: string }) => {
+  // 현재 조건을 유지한 채 일부만 바꾼 링크
+  const filterHref = (next: Record<string, string | null>) => {
     const params = new URLSearchParams();
-    const m = next.make === undefined ? make : next.make;
-    if (m) params.set("make", m);
-    params.set("sort", next.sort ?? sort);
+    for (const [key, value] of Object.entries(query)) {
+      if (typeof value === "string" && value) params.set(key, value);
+    }
+    for (const [key, value] of Object.entries(next)) {
+      if (value) params.set(key, value);
+      else params.delete(key);
+    }
     return `/dealer?${params}`;
   };
 
@@ -94,6 +129,9 @@ export default async function DealerAuctions({ params, searchParams }: PageProps
       {blockedUntil && <BidBlockNotice until={blockedUntil} />}
 
       <div className="flex gap-2 overflow-x-auto pb-1">
+        <FilterChip href={filterHref({ fav: filters.favorites ? null : "1" })} active={filters.favorites}>
+          ★ {t("favoritesOnly")} {favorites.size}
+        </FilterChip>
         <FilterChip href={filterHref({ make: null })} active={!make}>
           {t("allMakes")} {all.length}
         </FilterChip>
@@ -103,6 +141,11 @@ export default async function DealerAuctions({ params, searchParams }: PageProps
           </FilterChip>
         ))}
       </div>
+      <FilterPanel
+        action={`/${locale}/dealer`}
+        values={{ ...filters, make, sort }}
+        activeCount={activeFilterCount - (filters.favorites ? 1 : 0)}
+      />
       <div className="flex gap-3 text-caption">
         {SORTS.map((s) => (
           <Link key={s} href={filterHref({ sort: s })} className={s === sort ? "font-bold text-navy" : "text-ink/50"}>
@@ -118,7 +161,13 @@ export default async function DealerAuctions({ params, searchParams }: PageProps
           const thumb = front ? thumbs[front.storage_path] : undefined;
           const mine = myBid.get(auction.id);
           return (
-            <li key={auction.id}>
+            <li key={auction.id} className="relative">
+              <FavoriteButton
+                auctionId={auction.id}
+                dealerId={user.id}
+                initial={favorites.has(auction.id)}
+                className="absolute top-3 left-3 z-10 size-8 text-[17px]"
+              />
               <Link href={`/dealer/auctions/${auction.id}`} className="flex gap-3 rounded-xl bg-white p-2 shadow-sm">
                 <div className="h-20 w-28 shrink-0 overflow-hidden rounded-lg bg-ink/5">
                   {thumb && (

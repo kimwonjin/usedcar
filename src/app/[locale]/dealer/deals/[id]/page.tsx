@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ClaimCard } from "@/components/deal/claim-card";
 import { DealChat } from "@/components/deal/deal-chat";
+import { ReportButton } from "@/components/deal/report-button";
 import { MeetingForm } from "@/components/deal/meeting-form";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
@@ -71,6 +72,7 @@ export default async function DealerDealPage({ params }: PageProps<"/[locale]/de
         </p>
       )}
       {active && <DealerCancelButton dealId={deal.id} />}
+      <ReportButton dealId={deal.id} />
     </div>
   );
 }

@@ -17,6 +17,7 @@ import {
 import { formatKm, formatThousands } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
 import { PhotoStep, type PhotoMap } from "./photo-step";
+import { PriceEstimate } from "./price-estimate";
 
 type Draft = {
   plate: string;
@@ -364,6 +365,8 @@ export function CarWizard({
               })}
             </ReviewRow>
           </dl>
+
+          <PriceEstimate make={draft.make.trim()} model={draft.model.trim()} year={year} />
 
           <label className="flex flex-col gap-2">
             <span className="text-body font-semibold">{t("review.desiredPrice")}</span>

@@ -2,6 +2,7 @@ import type { Locale } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PageHeader } from "@/components/page-header";
+import { PriceChart, type BidEvent } from "@/components/price-chart";
 import { StatusBadge } from "@/components/status-badge";
 import { Link, redirect } from "@/i18n/navigation";
 import { decisionDeadline } from "@/lib/auction-rules";
@@ -9,16 +10,18 @@ import { getCurrentUser } from "@/lib/auth";
 import { firstRow } from "@/lib/supabase/rows";
 import { createClient } from "@/lib/supabase/server";
 import { LiveAuction } from "./live-auction";
+import { LiveEdits } from "./live-edits";
 import { RelistButton } from "./relist-button";
 import { ResultPicker, type TopBid } from "./result-picker";
 
 type SellerAuctionDetail = {
   id: string;
   status: string;
+  starts_at: string;
   ends_at: string;
   car_id: string;
   seller_id: string;
-  cars: { make: string; model: string; year: number; desired_price: number | null };
+  cars: { make: string; model: string; year: number; desired_price: number | null; defects: string | null };
   deals: { id: string } | { id: string }[] | null;
 };
 
@@ -35,27 +38,54 @@ export default async function SellerAuctionPage({ params }: PageProps<"/[locale]
   const supabase = await createClient();
   const { data: auction } = await supabase
     .from("auctions")
-    .select("id, status, ends_at, car_id, seller_id, cars(make, model, year, desired_price), deals(id)")
+    .select("id, status, starts_at, ends_at, car_id, seller_id, cars(make, model, year, desired_price, defects), deals(id)")
     .eq("id", id)
     .maybeSingle()
     .overrideTypes<SellerAuctionDetail, { merge: false }>();
   if (!auction || auction.seller_id !== user.id) notFound();
   const car = auction.cars;
 
+  // 최고가 그래프용 입찰 기록 (판매자만 읽을 수 있다)
+  const loadEvents = async () => {
+    const { data } = await supabase.from("bid_events").select("amount, created_at").eq("auction_id", id).order("created_at");
+    return (data ?? []) as BidEvent[];
+  };
+
   let body: React.ReactNode;
   if (auction.status === "live") {
-    const { data: stats } = await supabase.rpc("auction_stats", { p_auction_id: id });
+    const [{ data: stats }, events] = await Promise.all([
+      supabase.rpc("auction_stats", { p_auction_id: id }),
+      loadEvents(),
+    ]);
     const initial = (stats?.[0] ?? { bid_count: 0, top_amount: null }) as { bid_count: number; top_amount: number | null };
-    body = <LiveAuction auctionId={id} endsAt={auction.ends_at} initial={initial} desiredPrice={car.desired_price} />;
-  } else if (auction.status === "ended") {
-    const { data: top } = await supabase.rpc("auction_top_bids", { p_auction_id: id });
     body = (
-      <ResultPicker
+      <>
+        <LiveAuction
+          auctionId={id}
+          startsAt={auction.starts_at}
+          endsAt={auction.ends_at}
+          initial={initial}
+          initialEvents={events}
+          desiredPrice={car.desired_price}
+        />
+        <LiveEdits carId={auction.car_id} userId={user.id} defects={car.defects} />
+      </>
+    );
+  } else if (auction.status === "ended") {
+    const [{ data: top }, events] = await Promise.all([
+      supabase.rpc("auction_top_bids", { p_auction_id: id }),
+      loadEvents(),
+    ]);
+    body = (
+      <>
+        <PriceChart events={events} startAt={auction.starts_at} endAt={auction.ends_at} />
+        <ResultPicker
         auctionId={id}
         bids={(top ?? []) as TopBid[]}
         desiredPrice={car.desired_price}
         deadline={decisionDeadline(auction.ends_at)}
-      />
+        />
+      </>
     );
   } else if (auction.status === "accepted") {
     body = (

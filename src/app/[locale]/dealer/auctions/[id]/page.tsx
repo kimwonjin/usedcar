@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Badge } from "@/components/badge";
 import { BidBlockNotice } from "@/components/bid-block-notice";
 import { Countdown } from "@/components/countdown";
+import { FavoriteButton } from "@/components/favorite-button";
 import { PageHeader } from "@/components/page-header";
 import { PhotoGallery } from "@/components/photo-gallery";
 import { StatusBadge } from "@/components/status-badge";
@@ -71,6 +72,12 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
     supabase.from("deals").select("id").eq("auction_id", id).eq("dealer_id", user.id).maybeSingle(),
     getDealer(user.id),
   ]);
+  const { data: fav } = await supabase
+    .from("dealer_favorites")
+    .select("auction_id")
+    .eq("dealer_id", user.id)
+    .eq("auction_id", id)
+    .maybeSingle();
   const blockedUntil =
     dealer?.bid_blocked_until && new Date(dealer.bid_blocked_until) > new Date() ? dealer.bid_blocked_until : null;
   const bidCount = (stats?.[0]?.bid_count as number | undefined) ?? 0;
@@ -91,7 +98,10 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
   return (
     <div className="flex flex-col gap-4 pb-4">
       <PageHeader title={`${car.make} ${car.model}`} backHref="/dealer" backLabel={t("backToList")}>
-        <StatusBadge kind="auction" status={auction.status} />
+        <div className="flex items-center gap-2">
+          {isLive && <FavoriteButton auctionId={id} dealerId={user.id} initial={Boolean(fav)} className="border border-ink/10" />}
+          <StatusBadge kind="auction" status={auction.status} />
+        </div>
       </PageHeader>
 
       <PhotoGallery

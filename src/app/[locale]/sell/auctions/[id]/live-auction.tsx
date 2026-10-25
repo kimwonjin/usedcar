@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { Countdown } from "@/components/countdown";
+import { PriceChart, type BidEvent } from "@/components/price-chart";
 import { useRouter } from "@/i18n/navigation";
 import { formatTenge } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
@@ -18,20 +19,27 @@ function subscribeClock(onTick: () => void) {
 // S6 경매 진행 중: 카운트다운, 실시간 최고가(금색), 입찰 딜러 수
 export function LiveAuction({
   auctionId,
+  startsAt,
   endsAt,
   initial,
+  initialEvents,
   desiredPrice,
 }: {
   auctionId: string;
+  startsAt: string;
   endsAt: string;
   initial: Stats;
+  initialEvents: BidEvent[];
   desiredPrice: number | null;
 }) {
   const t = useTranslations("sellerAuction");
   const router = useRouter();
   const [stats, setStats] = useState<Stats>(initial);
+  const [events, setEvents] = useState<BidEvent[]>(initialEvents);
   const [flash, setFlash] = useState(false);
   const [cancelError, setCancelError] = useState(false);
+  // 5초 단위로 반올림해서 렌더마다 같은 값을 돌려준다
+  const now = useSyncExternalStore(subscribeClock, () => Math.floor(Date.now() / 5000) * 5000, () => 0);
   const closed = useSyncExternalStore(
     subscribeClock,
     () => Date.now() >= new Date(endsAt).getTime(),
@@ -48,7 +56,11 @@ export function LiveAuction({
       channel = supabase
         .channel(`auction-${auctionId}`)
         .on("postgres_changes", { event: "*", schema: "public", table: "bids", filter: `auction_id=eq.${auctionId}` }, async () => {
-          const { data } = await supabase.rpc("auction_stats", { p_auction_id: auctionId });
+          const [{ data }, { data: eventRows }] = await Promise.all([
+            supabase.rpc("auction_stats", { p_auction_id: auctionId }),
+            supabase.from("bid_events").select("amount, created_at").eq("auction_id", auctionId).order("created_at"),
+          ]);
+          if (eventRows) setEvents(eventRows as BidEvent[]);
           if (data?.[0]) {
             setStats(data[0] as Stats);
             setFlash(true);
@@ -101,6 +113,9 @@ export function LiveAuction({
           </p>
         )}
       </section>
+
+      {/* 지금까지 시간 기준으로 그린다 */}
+      <PriceChart events={events} startAt={startsAt} endAt={new Date(Math.min(now || Date.parse(startsAt), Date.parse(endsAt))).toISOString()} />
 
       <ul className="flex flex-col gap-2 rounded-xl bg-white p-4 text-caption text-ink/70 shadow-sm">
         <li>• {t("guideLive1")}</li>

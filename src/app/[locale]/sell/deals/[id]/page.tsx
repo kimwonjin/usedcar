@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Badge } from "@/components/badge";
 import { ClaimCard } from "@/components/deal/claim-card";
 import { DealChat } from "@/components/deal/deal-chat";
+import { ReportButton } from "@/components/deal/report-button";
 import { MeetingForm } from "@/components/deal/meeting-form";
 import { PageHeader } from "@/components/page-header";
 import { Stars } from "@/components/stars";
@@ -104,6 +105,7 @@ export default async function SellerDealPage({ params }: PageProps<"/[locale]/se
         </p>
       )}
       <DealActions dealId={deal.id} status={deal.status} />
+      <ReportButton dealId={deal.id} />
       {deal.status === "completed" && deal.seller_rating === null && <RatingForm dealId={deal.id} />}
       {deal.seller_rating !== null && (
         <p className="text-center text-caption text-ink/60">
