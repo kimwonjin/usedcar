@@ -52,7 +52,7 @@ export function HeaderMenu() {
   }
 
   return (
-    <nav className="flex items-center gap-3 text-caption">
+    <nav className="flex items-center gap-2.5 text-caption whitespace-nowrap">
       <Link href="/sell" className="text-white/90">
         {t("navSell")}
       </Link>
@@ -69,8 +69,11 @@ export function HeaderMenu() {
               </span>
             )}
           </Link>
-          <button type="button" onClick={logout} className="text-white/60">
-            {t("logout")}
+          {/* 러시아어·카자흐어는 글자가 길어 좁은 화면에서 넘치므로 아이콘으로 둔다 */}
+          <button type="button" onClick={logout} aria-label={t("logout")} title={t("logout")} className="text-white/60">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="size-[18px]" aria-hidden>
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
+            </svg>
           </button>
         </>
       )}

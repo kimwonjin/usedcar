@@ -3,7 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { HeaderMenu } from "./header-menu";
 
-const localeLabels = { ko: "한", ru: "Рус", kk: "Қаз" } as const;
+const localeLabels = { ko: "KO", ru: "RU", kk: "KZ" } as const;
 
 export function Header() {
   const t = useTranslations("common");
@@ -11,13 +11,13 @@ export function Header() {
 
   return (
     <header className="bg-navy text-white">
-      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4">
-        <Link href="/" className="text-title font-bold tracking-tight">
+      <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-2 px-3 sm:px-4">
+        <Link href="/" className="text-subtitle font-bold tracking-tight sm:text-title">
           {t("appName")}
         </Link>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2.5">
           <HeaderMenu />
-          <nav className="flex gap-2 border-l border-white/20 pl-3 text-caption">
+          <nav className="flex gap-1.5 border-l border-white/20 pl-2.5 text-caption whitespace-nowrap">
             {routing.locales.map((locale) => (
               <Link
                 key={locale}
