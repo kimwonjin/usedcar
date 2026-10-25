@@ -34,6 +34,7 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
       locale: OG_LOCALES[locale],
     },
     appleWebApp: { capable: true, title: "Satu", statusBarStyle: "default" },
+    other: { google: "notranslate" },
     icons: { icon: "/icon-192.png", apple: "/apple-touch-icon.png" },
   };
 }
@@ -55,7 +56,8 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
 
   return (
-    <html lang={locale} className={`${inter.variable} h-full antialiased`}>
+    // 3개 언어를 직접 제공하므로 브라우저 자동 번역을 막는다 (기계 번역 오역 + 번역기가 화면 구조를 바꿔 React 오류가 나는 문제)
+    <html lang={locale} translate="no" className={`${inter.variable} notranslate h-full antialiased`}>
       <body className="flex min-h-full flex-col">
         <NextIntlClientProvider>
           <Header />
