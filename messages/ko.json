@@ -576,7 +576,7 @@
     "auction": {
       "live": "진행 중",
       "ended": "결정 대기",
-      "accepted": "낙찰",
+      "accepted": "판매 결정",
       "rejected": "판매 거절",
       "no_bids": "유찰",
       "cancelled": "취소",
