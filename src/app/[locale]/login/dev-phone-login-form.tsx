@@ -34,18 +34,20 @@ export function DevPhoneLoginForm({ next }: { next: "/sell" | "/dealer" | "/admi
     const supabase = createClient();
     const credentials = devCredentials(normalized);
 
-    let { data, error } = await supabase.auth.signInWithPassword(credentials);
-    if (error?.code === "invalid_credentials") {
-      ({ data, error } = await supabase.auth.signUp(credentials));
-    }
+    const signIn = await supabase.auth.signInWithPassword(credentials);
+    const { data, error } =
+      signIn.error?.code === "invalid_credentials"
+        ? await supabase.auth.signUp(credentials) // 처음 쓰는 번호면 가입
+        : signIn;
 
-    if (error || !data.session) {
+    const session = data.session;
+    if (error || !session) {
       setMessage(error?.message ?? t("confirmEmailOn"));
       setBusy(false);
       return;
     }
 
-    await supabase.from("profiles").update({ phone: `+${normalized}` }).eq("id", data.session.user.id);
+    await supabase.from("profiles").update({ phone: `+${normalized}` }).eq("id", session.user.id);
     router.replace(next);
     router.refresh();
   }
