@@ -57,6 +57,7 @@ supabase/
 | `review_claim` | 관리자 | 감가 승인·거절 |
 | `rate_dealer` | 판매자 | 완료 거래 딜러 평가 → 딜러 평점 평균 |
 | `admin_cancel_auction` | 관리자 | 경매 강제 종료 |
+| `process_decision_deadlines` | pg_cron (1분마다) | 경매 종료 후 12시간째 판매자 알림, 24시간 안에 결정하지 않으면 '기한 초과'로 종료 |
 
 연락처는 낙찰된 딜러와 판매자 사이에서만 공개된다(RLS).
 

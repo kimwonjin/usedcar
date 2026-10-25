@@ -50,7 +50,8 @@
     "drafts": "작성 중인 차량",
     "continueDraft": "이어서 등록",
     "deleteDraft": "삭제",
-    "deleteDraftConfirm": "작성 중인 차량을 삭제할까요? 올린 사진도 함께 지워집니다."
+    "deleteDraftConfirm": "작성 중인 차량을 삭제할까요? 올린 사진도 함께 지워집니다.",
+    "decideWithin": "결정 마감"
   },
   "dealer": {
     "title": "경매 목록",
@@ -340,10 +341,14 @@
     "closedMessage": {
       "rejected": "판매를 거절한 경매입니다.",
       "no_bids": "입찰한 딜러가 없어 경매가 종료되었습니다.",
-      "cancelled": "취소된 경매입니다."
+      "cancelled": "취소된 경매입니다.",
+      "expired": "24시간 안에 판매를 결정하지 않아 경매가 종료되었습니다."
     },
     "relist": "같은 정보로 다시 경매 올리기",
-    "relistFailed": "다시 올리지 못했습니다."
+    "relistFailed": "다시 올리지 못했습니다.",
+    "decisionDeadline": "판매 결정 마감까지",
+    "decisionDeadlineHint": "24시간 안에 결정하지 않으면 자동으로 종료됩니다",
+    "deadlinePassed": "결정 기한(24시간)이 지나 판매할 수 없습니다. 다시 경매에 올려 주세요."
   },
   "deal": {
     "backToActivity": "내 활동",
@@ -403,7 +408,8 @@
       "accepted": "낙찰",
       "rejected": "판매 거절",
       "no_bids": "유찰",
-      "cancelled": "취소"
+      "cancelled": "취소",
+      "expired": "기한 초과"
     },
     "deal": {
       "scheduled": "거래 진행",
@@ -503,6 +509,14 @@
     "dealer_suspended": {
       "title": "입찰이 정지되었습니다",
       "body": "고객센터로 문의해 주세요"
+    },
+    "decision_reminder": {
+      "title": "판매 결정이 12시간 남았어요",
+      "body": "{car} · 기한이 지나면 경매가 자동 종료됩니다"
+    },
+    "auction_expired": {
+      "title": "결정 기한이 지나 경매가 종료되었어요",
+      "body": "{car} · 다시 경매에 올릴 수 있습니다"
     }
   },
   "notificationCenter": {

@@ -9,7 +9,7 @@ import { formatTenge } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { CancelAuctionButton } from "./cancel-auction-button";
 
-const FILTERS = ["all", "live", "ended", "accepted", "rejected", "no_bids", "cancelled"] as const;
+const FILTERS = ["all", "live", "ended", "accepted", "rejected", "expired", "no_bids", "cancelled"] as const;
 
 type AdminAuction = {
   id: string;

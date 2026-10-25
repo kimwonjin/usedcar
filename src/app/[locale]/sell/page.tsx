@@ -5,6 +5,7 @@ import { PushToggle } from "@/components/push-toggle";
 import { SetupNotice } from "@/components/setup-notice";
 import { StatusBadge } from "@/components/status-badge";
 import { Link, redirect } from "@/i18n/navigation";
+import { decisionDeadline } from "@/lib/auction-rules";
 import { getCurrentUser } from "@/lib/auth";
 import { formatTenge } from "@/lib/format";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -101,8 +102,13 @@ export default async function SellerHome({ params }: PageProps<"/[locale]/sell">
               href={`/sell/auctions/${auction.id}`}
               className="flex items-center justify-between rounded-xl border-2 border-gold bg-white p-4 shadow-sm"
             >
-              <span className="text-subtitle font-semibold">{carName(auction)}</span>
-              <span className="text-body font-semibold text-navy">{t("seeResult")} →</span>
+              <div>
+                <p className="text-subtitle font-semibold">{carName(auction)}</p>
+                <p className="text-caption text-ink/60">
+                  {t("decideWithin")} <Countdown endsAt={decisionDeadline(auction.ends_at)} />
+                </p>
+              </div>
+              <span className="shrink-0 text-body font-semibold text-navy">{t("seeResult")} →</span>
             </Link>
           ))}
         </Section>

@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { Link, redirect } from "@/i18n/navigation";
+import { decisionDeadline } from "@/lib/auction-rules";
 import { getCurrentUser } from "@/lib/auth";
 import { firstRow } from "@/lib/supabase/rows";
 import { createClient } from "@/lib/supabase/server";
@@ -48,7 +49,14 @@ export default async function SellerAuctionPage({ params }: PageProps<"/[locale]
     body = <LiveAuction auctionId={id} endsAt={auction.ends_at} initial={initial} desiredPrice={car.desired_price} />;
   } else if (auction.status === "ended") {
     const { data: top } = await supabase.rpc("auction_top_bids", { p_auction_id: id });
-    body = <ResultPicker auctionId={id} bids={(top ?? []) as TopBid[]} desiredPrice={car.desired_price} />;
+    body = (
+      <ResultPicker
+        auctionId={id}
+        bids={(top ?? []) as TopBid[]}
+        desiredPrice={car.desired_price}
+        deadline={decisionDeadline(auction.ends_at)}
+      />
+    );
   } else if (auction.status === "accepted") {
     body = (
       <Link

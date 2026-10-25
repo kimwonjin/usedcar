@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Badge } from "@/components/badge";
+import { Countdown } from "@/components/countdown";
 import { Stars } from "@/components/stars";
 import { useRouter } from "@/i18n/navigation";
 import { formatTenge } from "@/lib/format";
@@ -22,24 +23,26 @@ export function ResultPicker({
   auctionId,
   bids,
   desiredPrice,
+  deadline,
 }: {
   auctionId: string;
   bids: TopBid[];
   desiredPrice: number | null;
+  deadline: string;
 }) {
   const t = useTranslations("sellerAuction");
   const router = useRouter();
   const [selected, setSelected] = useState(bids[0]?.bid_id ?? null);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<"failed" | "deadline" | null>(null);
 
   async function accept() {
     if (!selected) return;
     setBusy(true);
-    setError(false);
+    setError(null);
     const { data, error } = await createClient().rpc("accept_bid", { p_auction_id: auctionId, p_bid_id: selected });
     if (error) {
-      setError(true);
+      setError(error.message.includes("deadline") ? "deadline" : "failed");
       setBusy(false);
       return;
     }
@@ -52,7 +55,7 @@ export function ResultPicker({
     setBusy(true);
     const { error } = await createClient().rpc("reject_auction", { p_auction_id: auctionId });
     setBusy(false);
-    if (error) setError(true);
+    if (error) setError("failed");
     else router.refresh();
   }
 
@@ -61,6 +64,16 @@ export function ResultPicker({
       <div className="flex flex-col gap-1">
         <h2 className="text-subtitle font-semibold">{t("resultTitle")}</h2>
         <p className="text-caption text-ink/60">{t("resultHint")}</p>
+      </div>
+
+      <div className="flex items-center justify-between rounded-xl border border-danger/30 bg-danger/5 p-3">
+        <div>
+          <p className="text-caption font-semibold">{t("decisionDeadline")}</p>
+          <p className="text-caption text-ink/60">{t("decisionDeadlineHint")}</p>
+        </div>
+        <span className="text-subtitle font-bold">
+          <Countdown endsAt={deadline} />
+        </span>
       </div>
 
       <ul className="flex flex-col gap-2">
@@ -99,7 +112,9 @@ export function ResultPicker({
       </ul>
 
       <p className="text-caption text-ink/70">{t("promise")}</p>
-      {error && <p className="text-caption text-danger">{t("decisionFailed")}</p>}
+      {error && (
+        <p className="text-caption text-danger">{t(error === "deadline" ? "deadlinePassed" : "decisionFailed")}</p>
+      )}
 
       <div className="sticky bottom-0 mt-auto flex flex-col gap-2 bg-surface pt-2 pb-4">
         <button
