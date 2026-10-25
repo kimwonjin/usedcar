@@ -6,6 +6,7 @@ import { DealChat } from "@/components/deal/deal-chat";
 import { ReportButton } from "@/components/deal/report-button";
 import { MeetingForm } from "@/components/deal/meeting-form";
 import { TransferGuide } from "@/components/deal/transfer-guide";
+import { TransferStatus } from "@/components/deal/transfer-status";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { redirect } from "@/i18n/navigation";
@@ -27,7 +28,7 @@ export default async function DealerDealPage({ params }: PageProps<"/[locale]/de
   if (!user) return redirect({ href: "/login?next=/dealer", locale });
   const loaded = await loadDeal(id);
   if (!loaded || loaded.deal.dealer_id !== user.id) notFound();
-  const { deal, claims, messages, counterpartName } = loaded;
+  const { deal, claims, messages, counterpartName, transferDocUrls } = loaded;
   const car = deal.auctions.cars;
   const feeBands = await loadFeeBands(loaded.supabase);
   const active = deal.status === "scheduled" || deal.status === "depreciation_review";
@@ -57,6 +58,16 @@ export default async function DealerDealPage({ params }: PageProps<"/[locale]/de
       />
 
       <MeetingForm dealId={deal.id} meetingAt={deal.meeting_at} meetingPlace={deal.meeting_place} editable={active} />
+      {deal.status === "completed" && (
+        <TransferStatus
+          dealId={deal.id}
+          userId={user.id}
+          role="dealer"
+          dueAt={deal.transfer_due_at}
+          submittedAt={deal.transfer_submitted_at}
+          docUrls={transferDocUrls}
+        />
+      )}
       {deal.status !== "cancelled" && <TransferGuide dealId={deal.id} role="dealer" />}
 
       <section className="flex flex-col gap-3">

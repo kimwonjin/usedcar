@@ -189,7 +189,17 @@
       "payments": "결제·수수료",
       "users": "사용자"
     },
-    "exportNote": "엑셀에서 열 수 있습니다. 개인정보(전화번호)가 포함되므로 외부에 공유하지 마세요."
+    "exportNote": "엑셀에서 열 수 있습니다. 개인정보(전화번호)가 포함되므로 외부에 공유하지 마세요.",
+    "tabTransfers": "명의이전",
+    "transfersTitle": "명의 이전 확인",
+    "transferFilter": {
+      "overdue": "기한 초과",
+      "pending": "대기",
+      "done": "완료"
+    },
+    "transferDue": "기한",
+    "transferSubmitted": "제출",
+    "transfersEmpty": "해당 거래가 없습니다."
   },
   "carForm": {
     "back": "이전",
@@ -626,6 +636,26 @@
     "support_new": {
       "title": "새 1:1 문의",
       "body": "{text}"
+    },
+    "transfer_done": {
+      "title": "명의 이전이 완료됐어요",
+      "body": "{car} · 딜러가 증빙을 올렸습니다"
+    },
+    "transfer_reminder": {
+      "title": "명의 이전 기한이 다가와요",
+      "body": "{car} · 2일 안에 증빙을 올려 주세요"
+    },
+    "transfer_overdue": {
+      "title": "명의 이전 기한이 지났어요",
+      "body": "{car} · 바로 처리하고 증빙을 올려 주세요"
+    },
+    "transfer_overdue_seller": {
+      "title": "명의 이전이 늦어지고 있어요",
+      "body": "{car} · 운영팀이 딜러에게 확인합니다"
+    },
+    "transfer_overdue_admin": {
+      "title": "명의 이전 기한 초과",
+      "body": "{car}"
     }
   },
   "notificationCenter": {
@@ -1009,5 +1039,22 @@
     "noData": "아직 비교할 거래가 없습니다. 경매에 올리면 승인된 딜러들이 직접 가격을 매겨 드립니다.",
     "note": "실제 가격은 주행거리·사고 이력·상태에 따라 달라집니다. 정확한 가격은 48시간 경매로 확인하세요.",
     "cta": "이 차로 경매 시작하기"
+  },
+  "transferStatus": {
+    "title": "명의 이전",
+    "pending": "대기",
+    "overdue": "기한 초과",
+    "done": "완료",
+    "pendingSeller": "딜러가 {date}까지 명의 이전을 마치고 증빙을 올립니다. 완료되면 알려드려요.",
+    "overdueSeller": "명의 이전 기한({date})이 지났습니다. 운영팀이 딜러에게 확인하고 있습니다.",
+    "pendingDealer": "{date}까지 새 소유자 명의로 등록한 뒤, 새 등록증(техпаспорт) 또는 СпецЦОН 접수증 사진을 올려 주세요.",
+    "overdueDealer": "명의 이전 기한({date})이 지났습니다. 바로 처리하고 증빙을 올려 주세요. 계속 늦으면 경고·입찰 제한이 될 수 있습니다.",
+    "doneSeller": "{date}에 딜러가 명의 이전 증빙을 올렸습니다. 이제 이 차의 과태료·세금은 판매자에게 나오지 않습니다.",
+    "doneDealer": "{date}에 명의 이전 증빙을 제출했습니다.",
+    "docAlt": "명의 이전 증빙",
+    "uploadHint": "개인정보(새 소유자 신분증 번호 등)는 가리고 찍어도 됩니다. 최대 6장.",
+    "addPhoto": "증빙 사진 추가",
+    "submit": "명의 이전 완료 제출",
+    "failed": "저장하지 못했습니다. 다시 시도해 주세요."
   }
 }

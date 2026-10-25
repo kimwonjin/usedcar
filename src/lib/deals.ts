@@ -14,6 +14,9 @@ export type DealDetail = {
   seller_rating: number | null;
   cancel_reason: string | null;
   auction_id: string;
+  transfer_due_at: string | null;
+  transfer_doc_paths: string[];
+  transfer_submitted_at: string | null;
   auctions: {
     cars: {
       id: string;
@@ -46,7 +49,7 @@ export async function loadDeal(dealId: string) {
   const { data: deal } = await supabase
     .from("deals")
     .select(
-      "id, status, agreed_price, final_price, meeting_at, meeting_place, seller_id, dealer_id, seller_rating, cancel_reason, auction_id, auctions(cars(id, make, model, year, plate_number, car_photos(slot, storage_path)))",
+      "id, status, agreed_price, final_price, meeting_at, meeting_place, seller_id, dealer_id, seller_rating, cancel_reason, auction_id, transfer_due_at, transfer_doc_paths, transfer_submitted_at, auctions(cars(id, make, model, year, plate_number, car_photos(slot, storage_path)))",
     )
     .eq("id", dealId)
     .maybeSingle()
@@ -59,7 +62,10 @@ export async function loadDeal(dealId: string) {
     .eq("deal_id", dealId)
     .order("created_at");
   const rows = (claimRows ?? []) as Omit<Claim, "photoUrls">[];
-  const urls = await signedUrlMap(supabase, "claim-photos", rows.flatMap((c) => c.photo_paths));
+  const [urls, transferUrls] = await Promise.all([
+    signedUrlMap(supabase, "claim-photos", rows.flatMap((c) => c.photo_paths)),
+    signedUrlMap(supabase, "transfer-docs", deal.transfer_doc_paths ?? []),
+  ]);
   const claims: Claim[] = rows.map((c) => ({
     ...c,
     photoUrls: c.photo_paths.map((p) => urls[p]).filter(Boolean),
@@ -78,6 +84,7 @@ export async function loadDeal(dealId: string) {
   return {
     deal,
     claims,
+    transferDocUrls: (deal.transfer_doc_paths ?? []).map((p) => transferUrls[p]).filter(Boolean),
     supabase,
     messages: (messages ?? []) as ChatMessage[],
     counterpartName: ((counterpart?.[0] as { name: string | null } | undefined)?.name ?? null) as string | null,
