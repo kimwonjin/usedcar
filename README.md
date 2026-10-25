@@ -66,7 +66,7 @@ supabase/
    - Supabase 기본 지원: Twilio, Vonage, MessageBird (카자흐스탄 +7 발송 가능)
    - 현지 업체(Mobizon.kz 등)를 쓰려면 Auth의 Send SMS Hook으로 연결
 5. 관리자 지정: 로그인한 뒤 SQL Editor에서
-   `update profiles set role = 'admin' where phone = '7701xxxxxxx';`
+   `update profiles set role = 'admin' where phone = '+7701xxxxxxx';`
 
 ### 2. 로컬 실행
 ```bash
@@ -97,7 +97,7 @@ Docker가 있는 환경이면 `npm run db:start`로 로컬 Supabase를 띄울 �
 
 - [x] 프로젝트 구조, 디자인 토큰, 3개 언어 라우팅
 - [x] DB 스키마·RLS·경매 함수 (로컬 Postgres로 입찰·낙찰 흐름 검증)
-- [x] S1 랜딩, 로그인 (개발 중에는 이메일, 출시 때 `NEXT_PUBLIC_AUTH_MODE=phone`으로 휴대폰 OTP 전환)
+- [x] S1 랜딩, 로그인 (개발 중에는 인증번호 없이 전화번호만, 출시 때 `NEXT_PUBLIC_AUTH_MODE=phone`으로 휴대폰 OTP 전환)
 - [x] S2 판매자 홈(진행 중 경매·최고가), D2 딜러 경매 목록, A1 관리자 대시보드 (기본형)
 - [ ] S3~S5 차량 등록 단계형 화면 + 사진 촬영 가이드
 - [ ] S6~S8 경매 진행·결과·거래 (Realtime 최고가)
