@@ -1,6 +1,7 @@
 import type { Locale } from "@/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AdminOnly } from "@/components/admin-only";
+import { ConditionSummary, type CarCondition } from "@/components/condition-summary";
 import { StatusBadge } from "@/components/status-badge";
 import { Link } from "@/i18n/navigation";
 import { requireAdmin } from "@/lib/auth";
@@ -25,7 +26,7 @@ type AdminClaim = {
   deals: {
     agreed_price: number;
     auctions: {
-      cars: { make: string; model: string; year: number; defects: string | null; car_photos: { slot: string; storage_path: string }[] };
+      cars: CarCondition & { make: string; model: string; year: number; defects: string | null; car_photos: { slot: string; storage_path: string }[] };
     };
   };
 };
@@ -45,7 +46,7 @@ export default async function AdminClaims({ params, searchParams }: PageProps<"/
   const { data } = await supabase
     .from("depreciation_claims")
     .select(
-      "id, amount, reason, photo_paths, status, seller_comment, admin_note, created_at, dealers(business_name), deals(agreed_price, auctions(cars(make, model, year, defects, car_photos(slot, storage_path))))",
+      "id, amount, reason, photo_paths, status, seller_comment, admin_note, created_at, dealers(business_name), deals(agreed_price, auctions(cars(make, model, year, defects, options, accident, owners, damage, car_photos(slot, storage_path))))",
     )
     .eq("status", status)
     .order("created_at", { ascending: status === "submitted" })
@@ -126,6 +127,13 @@ export default async function AdminClaims({ params, searchParams }: PageProps<"/
                 )}
               </div>
             </div>
+
+            <details>
+              <summary className="cursor-pointer text-caption font-semibold text-steppe">{t("sellerCondition")}</summary>
+              <div className="mt-2">
+                <ConditionSummary condition={car} />
+              </div>
+            </details>
 
             <div className="grid gap-3 md:grid-cols-2">
               <PhotoStrip title={t("sellerPhotos")} urls={car.car_photos.map((p) => sellerUrls[p.storage_path]).filter(Boolean)} />

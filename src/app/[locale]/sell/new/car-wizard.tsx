@@ -3,14 +3,22 @@
 import { useTranslations } from "next-intl";
 import { useState, type ReactNode } from "react";
 import { useRouter } from "@/i18n/navigation";
+import { DamageDiagram, DamageLegend } from "@/components/damage-diagram";
 import {
+  ACCIDENTS,
+  CAR_OPTIONS,
+  DAMAGE_KINDS,
   FUELS,
   MIN_YEAR,
   POPULAR_MAKES,
   REQUIRED_SLOTS,
   STEERINGS,
   TRANSMISSIONS,
+  type Accident,
+  type CarOption,
+  type DamageMap,
   type Fuel,
+  type Panel,
   type Steering,
   type Transmission,
 } from "@/lib/car-catalog";
@@ -29,11 +37,15 @@ type Draft = {
   transmission: Transmission;
   steering: Steering;
   customsCleared: boolean;
+  accident: Accident | "";
+  owners: string;
+  damage: DamageMap;
+  options: CarOption[];
   defects: string;
   desiredPrice: string;
 };
 
-const STEPS = ["plate", "make", "model", "year", "mileage", "details", "defects", "photos", "review"] as const;
+const STEPS = ["plate", "make", "model", "year", "mileage", "details", "history", "damage", "options", "defects", "photos", "review"] as const;
 type Step = (typeof STEPS)[number];
 
 const initialDraft: Draft = {
@@ -46,6 +58,10 @@ const initialDraft: Draft = {
   transmission: "automatic",
   steering: "left",
   customsCleared: true,
+  accident: "",
+  owners: "",
+  damage: {},
+  options: [],
   defects: "",
   desiredPrice: "",
 };
@@ -65,6 +81,7 @@ export function CarWizard({
   initial?: WizardInitial;
 }) {
   const t = useTranslations("carForm");
+  const tc = useTranslations("condition");
   const router = useRouter();
   // 이어서 등록할 때는 사진 단계(사진이 다 있으면 확인 단계)부터 시작한다
   const [stepIndex, setStepIndex] = useState(() => {
@@ -78,6 +95,7 @@ export function CarWizard({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showOtherMake, setShowOtherMake] = useState(false);
+  const [panel, setPanel] = useState<Panel | null>(null);
 
   const step: Step = STEPS[stepIndex];
   const set = <K extends keyof Draft>(key: K, value: Draft[K]) =>
@@ -96,6 +114,9 @@ export function CarWizard({
     year: year >= MIN_YEAR && year <= currentYear + 1,
     mileage: draft.mileage.length > 0,
     details: true,
+    history: draft.accident !== "" && draft.owners !== "",
+    damage: true,
+    options: true,
     defects: true,
     photos: photosComplete,
     review: photosComplete,
@@ -115,6 +136,10 @@ export function CarWizard({
       transmission: draft.transmission,
       steering: draft.steering,
       customs_cleared: draft.customsCleared,
+      accident: draft.accident || null,
+      owners: Number(draft.owners) || null,
+      damage: draft.damage,
+      options: draft.options,
       defects: draft.defects.trim() || null,
     };
     if (carId) {
@@ -318,6 +343,89 @@ export function CarWizard({
         </Question>
       )}
 
+      {step === "history" && (
+        <Question title={tc("history.title")} hint={tc("history.hint")}>
+          <ChoiceGroup label={tc("accident")}>
+            {ACCIDENTS.map((value) => (
+              <Chip key={value} selected={draft.accident === value} onClick={() => set("accident", value)}>
+                {tc(`accidents.${value}`)}
+              </Chip>
+            ))}
+          </ChoiceGroup>
+          <ChoiceGroup label={tc("owners")}>
+            {["1", "2", "3", "4"].map((value) => (
+              <Chip key={value} selected={draft.owners === value} onClick={() => set("owners", value)}>
+                {value === "4" ? tc("ownersMany") : tc("ownersCount", { count: Number(value) })}
+              </Chip>
+            ))}
+          </ChoiceGroup>
+        </Question>
+      )}
+
+      {step === "damage" && (
+        <Question title={tc("damageStep.title")} hint={tc("damageStep.hint")}>
+          <div className="flex gap-4">
+            <DamageDiagram
+              damage={draft.damage}
+              selected={panel}
+              onSelect={setPanel}
+              className="h-80 w-auto shrink-0 select-none"
+            />
+            <div className="flex min-w-0 flex-1 flex-col gap-2">
+              {panel ? (
+                <>
+                  <p className="text-body font-semibold text-navy">{tc(`panels.${panel}`)}</p>
+                  {DAMAGE_KINDS.map((kind) => (
+                    <Chip
+                      key={kind}
+                      selected={draft.damage[panel] === kind}
+                      onClick={() => set("damage", { ...draft.damage, [panel]: kind })}
+                    >
+                      {tc(`kinds.${kind}`)}
+                    </Chip>
+                  ))}
+                  <Chip
+                    selected={!draft.damage[panel]}
+                    onClick={() => {
+                      const rest = { ...draft.damage };
+                      delete rest[panel];
+                      set("damage", rest);
+                    }}
+                  >
+                    {tc("kinds.ok")}
+                  </Chip>
+                </>
+              ) : (
+                <p className="text-body text-ink/60">{tc("damageStep.tapPanel")}</p>
+              )}
+            </div>
+          </div>
+          <DamageLegend />
+        </Question>
+      )}
+
+      {step === "options" && (
+        <Question title={tc("optionsStep.title")} hint={tc("optionsStep.hint")}>
+          <div className="grid grid-cols-2 gap-2">
+            {CAR_OPTIONS.map((option) => {
+              const on = draft.options.includes(option);
+              return (
+                <Chip
+                  key={option}
+                  selected={on}
+                  onClick={() =>
+                    set("options", on ? draft.options.filter((o) => o !== option) : [...draft.options, option])
+                  }
+                >
+                  {on ? "✓ " : ""}
+                  {tc(`optionNames.${option}`)}
+                </Chip>
+              );
+            })}
+          </div>
+        </Question>
+      )}
+
       {step === "defects" && (
         <Question title={t("defects.title")} hint={t("defects.hint")}>
           <textarea
@@ -355,6 +463,18 @@ export function CarWizard({
                 t(`steering.${draft.steering}`),
                 t(draft.customsCleared ? "customs.yes" : "customs.no"),
               ].join(" · ")}
+            </ReviewRow>
+            <ReviewRow label={tc("history.short")} onEdit={() => goTo("history")} editLabel={t("review.edit")}>
+              {draft.accident ? tc(`accidents.${draft.accident}`) : "—"} ·{" "}
+              {draft.owners === "4" ? tc("ownersMany") : tc("ownersCount", { count: Number(draft.owners) || 1 })}
+            </ReviewRow>
+            <ReviewRow label={tc("damage")} onEdit={() => goTo("damage")} editLabel={t("review.edit")}>
+              {Object.keys(draft.damage).length
+                ? tc("damageCount", { count: Object.keys(draft.damage).length })
+                : tc("noDamage")}
+            </ReviewRow>
+            <ReviewRow label={tc("options")} onEdit={() => goTo("options")} editLabel={t("review.edit")}>
+              {draft.options.length ? draft.options.map((o) => tc(`optionNames.${o}`)).join(", ") : tc("noOptions")}
             </ReviewRow>
             <ReviewRow label={t("review.defects")} onEdit={() => goTo("defects")} editLabel={t("review.edit")}>
               {draft.defects.trim() || t("defects.none")}

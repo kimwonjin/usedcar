@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Badge } from "@/components/badge";
 import { BidBlockNotice } from "@/components/bid-block-notice";
+import { ConditionSummary, type CarCondition } from "@/components/condition-summary";
 import { Countdown } from "@/components/countdown";
 import { FavoriteButton } from "@/components/favorite-button";
 import { PageHeader } from "@/components/page-header";
@@ -21,7 +22,7 @@ type AuctionDetail = {
   status: string;
   ends_at: string;
   winning_bid_id: string | null;
-  cars: {
+  cars: CarCondition & {
     make: string;
     model: string;
     year: number;
@@ -50,7 +51,7 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
   const { data: auction } = await supabase
     .from("auctions")
     .select(
-      "id, status, ends_at, winning_bid_id, cars(make, model, year, mileage_km, fuel, transmission, steering, customs_cleared, defects, car_photos(slot, storage_path, sort_order))",
+      "id, status, ends_at, winning_bid_id, cars(make, model, year, mileage_km, fuel, transmission, steering, customs_cleared, defects, options, accident, owners, damage, car_photos(slot, storage_path, sort_order))",
     )
     .eq("id", id)
     .maybeSingle()
@@ -134,6 +135,8 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
           </div>
         ))}
       </dl>
+
+      <ConditionSummary condition={car} />
 
       <section className="rounded-xl bg-white p-4 shadow-sm">
         <h2 className="mb-1 text-subtitle font-semibold">{t("sellerDefects")}</h2>

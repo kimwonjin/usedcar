@@ -44,3 +44,49 @@ export const REQUIRED_SLOTS = PHOTO_SLOTS.filter((slot) => slot !== "defect");
 export const MAX_DEFECT_PHOTOS = 4;
 
 export const MIN_YEAR = 1980;
+
+// 차량 상태표 (DB cars.options / accident / owners / damage)
+export const CAR_OPTIONS = [
+  "sunroof",
+  "leather",
+  "navigation",
+  "rear_camera",
+  "camera_360",
+  "parking_sensors",
+  "heated_seats",
+  "ventilated_seats",
+  "heated_steering",
+  "cruise",
+  "keyless",
+  "awd",
+  "third_row",
+  "led_lights",
+  "autostart",
+  "winter_tires",
+] as const;
+export type CarOption = (typeof CAR_OPTIONS)[number];
+
+export const ACCIDENTS = ["none", "minor", "major"] as const;
+export type Accident = (typeof ACCIDENTS)[number];
+
+// 위에서 본 차량 외판 부위. 왼쪽 = 운전석 기준 왼쪽
+export const PANELS = [
+  "front_bumper",
+  "hood",
+  "fl_fender",
+  "fr_fender",
+  "fl_door",
+  "fr_door",
+  "roof",
+  "rl_door",
+  "rr_door",
+  "rl_quarter",
+  "rr_quarter",
+  "trunk",
+  "rear_bumper",
+] as const;
+export type Panel = (typeof PANELS)[number];
+
+export const DAMAGE_KINDS = ["scratch", "dent", "painted", "replaced"] as const;
+export type DamageKind = (typeof DAMAGE_KINDS)[number];
+export type DamageMap = Partial<Record<Panel, DamageKind>>;

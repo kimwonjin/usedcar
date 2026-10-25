@@ -21,6 +21,10 @@ type DraftCar = {
   transmission: WizardInitial["draft"]["transmission"] | null;
   steering: WizardInitial["draft"]["steering"];
   customs_cleared: boolean;
+  accident: WizardInitial["draft"]["accident"] | null;
+  owners: number | null;
+  damage: WizardInitial["draft"]["damage"] | null;
+  options: WizardInitial["draft"]["options"] | null;
   defects: string | null;
   desired_price: number | null;
   car_photos: { id: string; slot: PhotoSlot; storage_path: string; sort_order: number }[];
@@ -43,7 +47,7 @@ export default async function NewCarPage({ params, searchParams }: PageProps<"/[
     const { data: car } = await supabase
       .from("cars")
       .select(
-        "id, plate_number, make, model, year, mileage_km, fuel, transmission, steering, customs_cleared, defects, desired_price, car_photos(id, slot, storage_path, sort_order), auctions(id)",
+        "id, plate_number, make, model, year, mileage_km, fuel, transmission, steering, customs_cleared, accident, owners, damage, options, defects, desired_price, car_photos(id, slot, storage_path, sort_order), auctions(id)",
       )
       .eq("id", carId)
       .eq("seller_id", user.id)
@@ -70,6 +74,10 @@ export default async function NewCarPage({ params, searchParams }: PageProps<"/[
         transmission: car.transmission ?? "automatic",
         steering: car.steering,
         customsCleared: car.customs_cleared,
+        accident: car.accident ?? "",
+        owners: car.owners ? String(Math.min(car.owners, 4)) : "",
+        damage: car.damage ?? {},
+        options: car.options ?? [],
         defects: car.defects ?? "",
         desiredPrice: car.desired_price ? String(car.desired_price) : "",
       },

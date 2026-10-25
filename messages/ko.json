@@ -178,7 +178,8 @@
     "markPaid": "입금 확인",
     "cancelPayment": "청구 취소",
     "confirmPaid": "입금을 확인했나요? 납부 완료로 처리합니다.",
-    "confirmCancelPayment": "이 청구를 취소할까요?"
+    "confirmCancelPayment": "이 청구를 취소할까요?",
+    "sellerCondition": "판매자가 입력한 차량 상태 보기"
   },
   "carForm": {
     "back": "이전",
@@ -791,5 +792,86 @@
     "errorTitle": "문제가 생겼습니다",
     "errorBody": "잠시 후 다시 시도해 주세요.",
     "retry": "다시 시도"
+  },
+  "condition": {
+    "title": "차량 상태",
+    "diagram": "차량 외판 상태 그림",
+    "accident": "사고 이력",
+    "owners": "소유자 수",
+    "ownersCount": "{count}명",
+    "ownersMany": "4명 이상",
+    "notStated": "입력 안 함",
+    "noDamage": "외판 손상 없음",
+    "damage": "외판",
+    "damageCount": "{count}곳 표시",
+    "options": "옵션",
+    "noOptions": "선택한 옵션 없음",
+    "accidents": {
+      "none": "무사고",
+      "minor": "단순 사고 (외판 수리)",
+      "major": "큰 사고 (골격·에어백)"
+    },
+    "history": {
+      "title": "사고 이력과 소유자 수",
+      "hint": "정확할수록 현장 감가가 줄어듭니다. 숨긴 사고는 거래 후에도 분쟁이 됩니다.",
+      "short": "이력"
+    },
+    "damageStep": {
+      "title": "흠집·도색·교환한 곳을 눌러 주세요",
+      "hint": "깨끗하면 그냥 다음을 누르세요. 경매가 시작되면 표시한 곳은 지울 수 없습니다.",
+      "tapPanel": "그림에서 부위를 누르면 상태를 고를 수 있습니다."
+    },
+    "optionsStep": {
+      "title": "있는 옵션을 골라 주세요",
+      "hint": "옵션이 많을수록 딜러가 높게 입찰합니다."
+    },
+    "kinds": {
+      "scratch": "흠집",
+      "dent": "찌그러짐",
+      "painted": "도색",
+      "replaced": "교환",
+      "ok": "이상 없음"
+    },
+    "short": {
+      "scratch": "흠",
+      "dent": "찌",
+      "painted": "도",
+      "replaced": "교"
+    },
+    "panels": {
+      "front_bumper": "앞 범퍼",
+      "hood": "보닛",
+      "fl_fender": "왼쪽 앞 펜더",
+      "fr_fender": "오른쪽 앞 펜더",
+      "fl_door": "왼쪽 앞문",
+      "fr_door": "오른쪽 앞문",
+      "roof": "지붕",
+      "rl_door": "왼쪽 뒷문",
+      "rr_door": "오른쪽 뒷문",
+      "rl_quarter": "왼쪽 뒤 펜더",
+      "rr_quarter": "오른쪽 뒤 펜더",
+      "trunk": "트렁크",
+      "rear_bumper": "뒤 범퍼"
+    },
+    "optionNames": {
+      "sunroof": "선루프",
+      "leather": "가죽 시트",
+      "navigation": "내비게이션",
+      "rear_camera": "후방 카메라",
+      "camera_360": "360° 카메라",
+      "parking_sensors": "주차 센서",
+      "heated_seats": "열선 시트",
+      "ventilated_seats": "통풍 시트",
+      "heated_steering": "열선 핸들",
+      "cruise": "크루즈 컨트롤",
+      "keyless": "스마트키",
+      "awd": "4륜 구동",
+      "third_row": "3열 시트",
+      "led_lights": "LED 헤드램프",
+      "autostart": "원격 시동",
+      "winter_tires": "겨울 타이어 포함"
+    },
+    "front": "앞",
+    "rear": "뒤"
   }
 }
