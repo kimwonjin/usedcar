@@ -2,7 +2,7 @@ import type { Locale } from "@/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Countdown } from "@/components/countdown";
 import { SetupNotice } from "@/components/setup-notice";
-import { redirect } from "@/i18n/navigation";
+import { Link, redirect } from "@/i18n/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { formatTenge } from "@/lib/format";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
@@ -73,10 +73,12 @@ export default async function SellerHome({ params }: PageProps<"/[locale]/sell">
       </section>
 
       <div className="sticky bottom-0 mt-auto bg-surface pt-2 pb-4">
-        {/* S3~S5 차량 등록 단계형 화면은 다음 작업에서 구현 */}
-        <button className="h-14 w-full rounded-xl bg-navy text-subtitle font-bold text-white">
+        <Link
+          href="/sell/new"
+          className="flex h-14 w-full items-center justify-center rounded-xl bg-navy text-subtitle font-bold text-white"
+        >
           {t("start")}
-        </button>
+        </Link>
       </div>
     </div>
   );

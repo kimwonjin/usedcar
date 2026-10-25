@@ -52,5 +52,127 @@
     "accepted": "낙찰",
     "pendingDealers": "승인 대기 딜러",
     "pendingClaims": "감가 심사 대기"
+  },
+  "carForm": {
+    "back": "이전",
+    "next": "다음",
+    "saving": "저장 중…",
+    "plate": {
+      "title": "차량 번호판을 입력해 주세요",
+      "hint": "예: 123ABC02 (띄어쓰기 없이)"
+    },
+    "make": {
+      "title": "제조사를 골라 주세요",
+      "other": "기타",
+      "otherPlaceholder": "제조사 이름을 입력하세요"
+    },
+    "model": {
+      "title": "{make}의 어떤 모델인가요?",
+      "placeholder": "모델명",
+      "hint": "목록에 없으면 직접 입력하세요"
+    },
+    "year": {
+      "title": "연식은 언제인가요?",
+      "hint": "차량 등록증(техпаспорт)의 제조연도"
+    },
+    "mileage": {
+      "title": "주행거리를 입력해 주세요",
+      "hint": "계기판에 표시된 숫자 그대로"
+    },
+    "details": {
+      "title": "차량 정보를 골라 주세요",
+      "fuel": "연료",
+      "transmission": "변속기",
+      "steering": "핸들 위치",
+      "customs": "통관 (растаможен)"
+    },
+    "fuel": {
+      "petrol": "휘발유",
+      "diesel": "디젤",
+      "gas": "가스(LPG)",
+      "hybrid": "하이브리드",
+      "electric": "전기"
+    },
+    "transmission": {
+      "automatic": "자동",
+      "manual": "수동"
+    },
+    "steering": {
+      "left": "왼쪽 핸들",
+      "right": "오른쪽 핸들"
+    },
+    "customs": {
+      "yes": "통관 완료",
+      "no": "미통관"
+    },
+    "defects": {
+      "title": "알고 있는 하자가 있나요?",
+      "hint": "사고·도색·흠집을 미리 적어 두면 현장에서 감가 분쟁이 줄어듭니다.",
+      "placeholder": "예: 앞 범퍼 흠집, 운전석 문 도색",
+      "none": "하자 없음"
+    },
+    "photos": {
+      "title": "사진을 찍어 주세요",
+      "hint": "7칸은 필수, 하자 사진은 선택입니다. 밝은 곳에서 찍을수록 높은 가격을 받기 쉽습니다.",
+      "required": "필수",
+      "optional": "선택",
+      "add": "촬영",
+      "retake": "다시",
+      "uploading": "올리는 중…",
+      "progress": "{done}/{total} 완료",
+      "failed": "사진을 올리지 못했습니다. 다시 시도해 주세요.",
+      "remove": "삭제"
+    },
+    "slots": {
+      "front": {
+        "label": "앞",
+        "guide": "정면, 번호판이 보이게"
+      },
+      "rear": {
+        "label": "뒤",
+        "guide": "후면 전체와 번호판"
+      },
+      "left": {
+        "label": "왼쪽",
+        "guide": "왼쪽 옆면 전체"
+      },
+      "right": {
+        "label": "오른쪽",
+        "guide": "오른쪽 옆면 전체"
+      },
+      "interior": {
+        "label": "실내",
+        "guide": "앞좌석과 핸들"
+      },
+      "dashboard": {
+        "label": "계기판",
+        "guide": "시동 켜고 주행거리가 보이게"
+      },
+      "trunk": {
+        "label": "트렁크",
+        "guide": "트렁크를 열고 안쪽 전체"
+      },
+      "defect": {
+        "label": "하자 부위",
+        "guide": "흠집·찌그러짐을 가까이서"
+      }
+    },
+    "review": {
+      "title": "입력한 내용을 확인해 주세요",
+      "edit": "수정",
+      "car": "차량",
+      "plate": "번호판",
+      "mileage": "주행거리",
+      "options": "정보",
+      "defects": "하자",
+      "photos": "사진",
+      "photoCount": "{count}장",
+      "desiredPrice": "희망 판매가 (선택)",
+      "desiredPriceHint": "입력하면 경매 결과와 비교해 보여 드립니다.",
+      "start": "48시간 경매 시작",
+      "promise": "연락처는 내가 고른 딜러 한 곳에게만 공개됩니다.",
+      "photosMissing": "필수 사진 7칸을 모두 채워 주세요."
+    },
+    "error": "저장하지 못했습니다. 다시 시도해 주세요."
   }
 }

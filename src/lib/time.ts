@@ -5,3 +5,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 export function startOfAlmatyDay(now: number = Date.now()): Date {
   return new Date(Math.floor((now + ALMATY_OFFSET_MS) / DAY_MS) * DAY_MS - ALMATY_OFFSET_MS);
 }
+
+export function almatyYear(now: number = Date.now()): number {
+  return new Date(now + ALMATY_OFFSET_MS).getUTCFullYear();
+}
