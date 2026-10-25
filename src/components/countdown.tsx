@@ -12,7 +12,8 @@ const getServerNow = () => null;
 
 const URGENT_SECONDS = 60 * 60;
 
-export function Countdown({ endsAt }: { endsAt: string }) {
+// inverse: 어두운 배경 위에서 쓸 때 (임박 시에도 읽히도록 금색)
+export function Countdown({ endsAt, inverse = false }: { endsAt: string; inverse?: boolean }) {
   const now = useSyncExternalStore(subscribe, getNow, getServerNow);
   if (now === null) return <span className="price">--:--:--</span>;
 
@@ -23,7 +24,7 @@ export function Countdown({ endsAt }: { endsAt: string }) {
   const pad = (n: number) => String(n).padStart(2, "0");
 
   return (
-    <span className={`price ${left < URGENT_SECONDS ? "text-danger" : "text-ink"}`}>
+    <span className={`price ${left < URGENT_SECONDS ? (inverse ? "text-gold" : "text-danger") : inverse ? "text-white" : "text-ink"}`}>
       {pad(h)}:{pad(m)}:{pad(s)}
     </span>
   );

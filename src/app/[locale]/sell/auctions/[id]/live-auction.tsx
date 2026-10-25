@@ -97,7 +97,7 @@ export function LiveAuction({
       <section className="flex flex-col items-center gap-1 rounded-xl bg-navy p-6 text-white">
         <p className="text-caption text-white/70">{closed ? t("closing") : t("timeLeft")}</p>
         <p className="text-[36px] font-bold">
-          {closed ? "00:00:00" : <Countdown endsAt={endsAt} />}
+          {closed ? "00:00:00" : <Countdown endsAt={endsAt} inverse />}
         </p>
       </section>
 

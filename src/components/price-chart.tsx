@@ -1,7 +1,8 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useRef, useState } from "react";
+import { intlLocales } from "@/lib/datetime";
 import { formatTenge } from "@/lib/format";
 
 export type BidEvent = { amount: number; created_at: string };
@@ -15,7 +16,9 @@ const LINE = "#0089A8"; // 검증 통과 색(명도·채도·대비 3:1 이상)
 
 export function PriceChart({ events, startAt, endAt }: { events: BidEvent[]; startAt: string; endAt: string }) {
   const t = useTranslations("priceChart");
+  const locale = useLocale();
   const svgRef = useRef<SVGSVGElement>(null);
+  // 포인터가 가리키는 시각(ms). 계단형이라 그 시각에 유효한 최고가를 보여준다
   const [hover, setHover] = useState<number | null>(null);
 
   // 입찰이 들어올 때마다 그 시점의 최고가
@@ -40,30 +43,36 @@ export function PriceChart({ events, startAt, endAt }: { events: BidEvent[]; sta
   const x = (time: number) => PAD.left + ((time - t0) / Math.max(t1 - t0, 1)) * (W - PAD.left - PAD.right);
   const y = (amount: number) => PAD.top + (1 - (amount - (low - span * 0.15)) / (span * 1.3)) * (H - PAD.top - PAD.bottom);
 
-  // 계단형: 다음 입찰 전까지 최고가가 유지된다
+  // 계단형: 다음 입찰 전까지 최고가가 유지된다. 선은 지금(또는 마감)까지 이어진다
+  const endTime = Math.max(Math.min(t1, Date.parse(endAt)), points[points.length - 1].time);
   let d = `M ${x(points[0].time)} ${y(points[0].amount)}`;
   for (let i = 1; i < points.length; i++) {
     d += ` H ${x(points[i].time)} V ${y(points[i].amount)}`;
   }
-  const lastX = x(Math.min(t1, Date.parse(endAt)));
-  d += ` H ${Math.max(lastX, x(points[points.length - 1].time))}`;
+  d += ` H ${x(endTime)}`;
 
-  const active = hover !== null ? points[hover] : null;
+  const valueAt = (ms: number) => points.filter((p) => p.time <= ms).pop() ?? points[0];
+  const active = hover !== null ? { time: hover, amount: valueAt(hover).amount } : null;
+  const tooltipLeft = active ? Math.min(85, Math.max(15, (x(active.time) / W) * 100)) : 0;
 
   function pick(clientX: number) {
     const rect = svgRef.current?.getBoundingClientRect();
     if (!rect) return;
     const px = ((clientX - rect.left) / rect.width) * W;
-    // 포인터 위치까지 들어온 마지막 입찰(계단의 현재 값)
-    let index = 0;
-    points.forEach((p, i) => {
-      if (x(p.time) <= px) index = i;
-    });
-    setHover(index);
+    const ms = t0 + ((px - PAD.left) / (W - PAD.left - PAD.right)) * (t1 - t0);
+    setHover(Math.min(endTime, Math.max(points[0].time, ms)));
+  }
+
+  // 키보드: 좌우 화살표로 최고가가 바뀐 시점을 하나씩 이동
+  function step(direction: 1 | -1) {
+    const times = points.map((p) => p.time);
+    const current = hover ?? (direction === 1 ? -Infinity : Infinity);
+    const nextTime = direction === 1 ? times.find((ms) => ms > current) : [...times].reverse().find((ms) => ms < current);
+    setHover(nextTime ?? (direction === 1 ? times[times.length - 1] : times[0]));
   }
 
   const time = (ms: number) =>
-    new Intl.DateTimeFormat(undefined, { timeZone: "Asia/Almaty", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(ms);
+    new Intl.DateTimeFormat(intlLocales[locale as keyof typeof intlLocales] ?? locale, { timeZone: "Asia/Almaty", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(ms);
 
   return (
     <section className="flex flex-col gap-2 rounded-xl bg-white p-4 shadow-sm">
@@ -81,8 +90,8 @@ export function PriceChart({ events, startAt, endAt }: { events: BidEvent[]; sta
           onPointerLeave={() => setHover(null)}
           onBlur={() => setHover(null)}
           onKeyDown={(e) => {
-            if (e.key === "ArrowLeft") setHover((h) => Math.max(0, (h ?? points.length) - 1));
-            if (e.key === "ArrowRight") setHover((h) => Math.min(points.length - 1, (h ?? -1) + 1));
+            if (e.key === "ArrowLeft") step(-1);
+            if (e.key === "ArrowRight") step(1);
           }}
         >
           {/* 기준선(헤어라인) */}
@@ -91,8 +100,11 @@ export function PriceChart({ events, startAt, endAt }: { events: BidEvent[]; sta
           {active && (
             <line x1={x(active.time)} x2={x(active.time)} y1={PAD.top - 6} y2={H - PAD.bottom} stroke="#9CA3AF" strokeWidth={1} />
           )}
-          {/* 끝점: 표면색 테두리 2px */}
-          <circle cx={x(points[points.length - 1].time)} cy={y(high)} r={4} fill={LINE} stroke="#FFFFFF" strokeWidth={2} />
+          {/* 끝점(지금의 최고가): 표면색 테두리 2px + 값 라벨(본문 글자색) */}
+          <circle cx={x(endTime)} cy={y(high)} r={4} fill={LINE} stroke="#FFFFFF" strokeWidth={2} />
+          <text x={x(endTime) - 2} y={y(high) - 9} fontSize={11} fontWeight={700} fill="#1F2933" textAnchor="end">
+            {formatTenge(high)}
+          </text>
           {active && <circle cx={x(active.time)} cy={y(active.amount)} r={4} fill={LINE} stroke="#FFFFFF" strokeWidth={2} />}
           <text x={PAD.left} y={H - 6} fontSize={10} fill="#6B7280">
             {time(t0)}
@@ -104,7 +116,7 @@ export function PriceChart({ events, startAt, endAt }: { events: BidEvent[]; sta
         {active && (
           <div
             className="pointer-events-none absolute top-0 rounded-lg border border-ink/10 bg-white px-2 py-1 shadow-md"
-            style={{ left: `${(x(active.time) / W) * 100}%`, transform: "translateX(-50%)" }}
+            style={{ left: `${tooltipLeft}%`, transform: "translateX(-50%)" }}
           >
             <p className="price text-body font-bold whitespace-nowrap">{formatTenge(active.amount)}</p>
             <p className="text-caption whitespace-nowrap text-ink/60">{time(active.time)}</p>

@@ -1,4 +1,4 @@
-const intlLocales = { ko: "ko-KR", ru: "ru-KZ", kk: "kk-KZ" } as const;
+export const intlLocales = { ko: "ko-KR", ru: "ru-KZ", kk: "kk-KZ" } as const;
 
 // 알마티 시간으로 날짜·시각 표시
 export function formatDateTime(iso: string, locale: string): string {
