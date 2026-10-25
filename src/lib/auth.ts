@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { redirect } from "@/i18n/navigation";
 import type { Locale } from "@/i18n/routing";
 import { createClient } from "./supabase/server";
@@ -12,14 +13,20 @@ export type CurrentUser = {
   role: Role;
 };
 
-export async function getCurrentUser(): Promise<CurrentUser | null> {
+// 로그인한 사용자 id. 세션 토큰을 서버에서 검증만 하므로 DB 왕복이 없다.
+// cache: 한 요청 안에서 여러 번 불러도 한 번만 실행
+export const getUserId = cache(async (): Promise<string | null> => {
   if (!isSupabaseConfigured) return null;
-
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
-  const userId = data?.claims.sub;
+  return data?.claims.sub ?? null;
+});
+
+export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
+  const userId = await getUserId();
   if (!userId) return null;
 
+  const supabase = await createClient();
   const { data: profile } = await supabase
     .from("profiles")
     .select("id, phone, role")
@@ -27,7 +34,7 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
     .single();
 
   return profile as CurrentUser | null;
-}
+});
 
 export type DealerStatus = "pending" | "approved" | "rejected" | "suspended";
 
@@ -45,7 +52,7 @@ export type DealerProfile = {
 };
 
 // 현재 사용자의 딜러 신청서. 신청 전이면 null.
-export async function getDealer(userId: string): Promise<DealerProfile | null> {
+export const getDealer = cache(async (userId: string): Promise<DealerProfile | null> => {
   const supabase = await createClient();
   const { data } = await supabase
     .from("dealers")
@@ -53,7 +60,7 @@ export async function getDealer(userId: string): Promise<DealerProfile | null> {
     .eq("id", userId)
     .maybeSingle();
   return data as DealerProfile | null;
-}
+});
 
 // 관리자 페이지 공통: 로그인 안 했으면 로그인으로, 관리자가 아니면 null
 export async function requireAdmin(locale: Locale): Promise<CurrentUser | null> {

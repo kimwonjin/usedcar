@@ -9,7 +9,7 @@ import { InstallPrompt } from "@/components/install-prompt";
 import { PushToggle } from "@/components/push-toggle";
 import { SetupNotice } from "@/components/setup-notice";
 import { Link, redirect } from "@/i18n/navigation";
-import { getCurrentUser, getDealer } from "@/lib/auth";
+import { getCurrentUser, getDealer, getUserId } from "@/lib/auth";
 import { overduePayments } from "@/lib/payments";
 import { formatKm, formatTenge } from "@/lib/format";
 import { signedUrlMap } from "@/lib/storage";
@@ -44,17 +44,8 @@ export default async function DealerAuctions({ params, searchParams }: PageProps
   const tc = await getTranslations("condition");
   if (!isSupabaseConfigured) return <SetupNotice />;
 
-  const user = await getCurrentUser();
-  if (!user) return redirect({ href: "/login?next=/dealer", locale });
-
-  let blockedUntil: string | null = null;
-  if (user.role !== "admin") {
-    const dealer = await getDealer(user.id);
-    if (!dealer) return redirect({ href: "/dealer/apply", locale });
-    if (dealer.status !== "approved") return <DealerStatusCard status={dealer.status} reason={dealer.rejection_reason} />;
-    if (dealer.bid_blocked_until && new Date(dealer.bid_blocked_until) > new Date()) blockedUntil = dealer.bid_blocked_until;
-  }
-  const overdue = user.role === "admin" ? [] : await overduePayments(user.id);
+  const userId = await getUserId();
+  if (!userId) return redirect({ href: "/login?next=/dealer", locale });
 
   const query = await searchParams;
   const param = (key: string) => (typeof query[key] === "string" && query[key] ? (query[key] as string) : null);
@@ -71,16 +62,31 @@ export default async function DealerAuctions({ params, searchParams }: PageProps
     favorites: param("fav") === "1",
   };
 
+  // 서로 관계없는 조회는 한 번에 보낸다 (DB 왕복 횟수가 화면 속도를 좌우한다)
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("auctions")
-    .select("id, ends_at, created_at, cars(make, model, year, mileage_km, steering, fuel, transmission, accident, car_photos(slot, storage_path))")
-    .eq("status", "live")
-    .gt("ends_at", new Date().toISOString())
-    .order(sort === "ending" ? "ends_at" : "created_at", { ascending: sort === "ending" })
-    .overrideTypes<LiveAuction[], { merge: false }>();
+  const [user, dealer, overdueRows, { data }, { data: favRows }] = await Promise.all([
+    getCurrentUser(),
+    getDealer(userId),
+    overduePayments(userId),
+    supabase
+      .from("auctions")
+      .select("id, ends_at, created_at, cars(make, model, year, mileage_km, steering, fuel, transmission, accident, car_photos(slot, storage_path))")
+      .eq("status", "live")
+      .gt("ends_at", new Date().toISOString())
+      .order(sort === "ending" ? "ends_at" : "created_at", { ascending: sort === "ending" })
+      .overrideTypes<LiveAuction[], { merge: false }>(),
+    supabase.from("dealer_favorites").select("auction_id").eq("dealer_id", userId),
+  ]);
+  if (!user) return redirect({ href: "/login?next=/dealer", locale });
+
+  let blockedUntil: string | null = null;
+  if (user.role !== "admin") {
+    if (!dealer) return redirect({ href: "/dealer/apply", locale });
+    if (dealer.status !== "approved") return <DealerStatusCard status={dealer.status} reason={dealer.rejection_reason} />;
+    if (dealer.bid_blocked_until && new Date(dealer.bid_blocked_until) > new Date()) blockedUntil = dealer.bid_blocked_until;
+  }
+  const overdue = user.role === "admin" ? [] : overdueRows;
   const all = data ?? [];
-  const { data: favRows } = await supabase.from("dealer_favorites").select("auction_id").eq("dealer_id", user.id);
   const favorites = new Set((favRows ?? []).map((f) => f.auction_id as string));
 
   // 목록 규모가 작아서 조건 필터는 받아온 뒤 서버에서 거른다

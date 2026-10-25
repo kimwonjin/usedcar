@@ -7,7 +7,7 @@ import { SetupNotice } from "@/components/setup-notice";
 import { StatusBadge } from "@/components/status-badge";
 import { Link, redirect } from "@/i18n/navigation";
 import { decisionDeadline } from "@/lib/auction-rules";
-import { getCurrentUser } from "@/lib/auth";
+import { getUserId } from "@/lib/auth";
 import { formatTenge } from "@/lib/format";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { firstRow } from "@/lib/supabase/rows";
@@ -31,25 +31,26 @@ export default async function SellerHome({ params }: PageProps<"/[locale]/sell">
   const t = await getTranslations("seller");
   if (!isSupabaseConfigured) return <SetupNotice />;
 
-  const user = await getCurrentUser();
-  if (!user) return redirect({ href: "/login?next=/sell", locale });
+  const userId = await getUserId();
+  if (!userId) return redirect({ href: "/login?next=/sell", locale });
 
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("auctions")
-    .select("id, status, ends_at, cars(make, model, year), deals(id, status, agreed_price, final_price)")
-    .eq("seller_id", user.id)
-    .order("created_at", { ascending: false })
-    .overrideTypes<SellerAuction[], { merge: false }>();
+  const [{ data }, { data: carRows }] = await Promise.all([
+    supabase
+      .from("auctions")
+      .select("id, status, ends_at, cars(make, model, year), deals(id, status, agreed_price, final_price)")
+      .eq("seller_id", userId)
+      .order("created_at", { ascending: false })
+      .overrideTypes<SellerAuction[], { merge: false }>(),
+    // 경매에 한 번도 올리지 않은 차량 = 등록하다 멈춘 차량
+    supabase
+      .from("cars")
+      .select("id, make, model, year, auctions(id)")
+      .eq("seller_id", userId)
+      .order("created_at", { ascending: false })
+      .overrideTypes<{ id: string; make: string; model: string; year: number; auctions: { id: string }[] }[], { merge: false }>(),
+  ]);
   const auctions = data ?? [];
-
-  // 경매에 한 번도 올리지 않은 차량 = 등록하다 멈춘 차량
-  const { data: carRows } = await supabase
-    .from("cars")
-    .select("id, make, model, year, auctions(id)")
-    .eq("seller_id", user.id)
-    .order("created_at", { ascending: false })
-    .overrideTypes<{ id: string; make: string; model: string; year: number; auctions: { id: string }[] }[], { merge: false }>();
   const drafts = (carRows ?? []).filter((car) => car.auctions.length === 0);
 
   const live = auctions.filter((a) => a.status === "live");

@@ -4,7 +4,7 @@ import { PushToggle } from "@/components/push-toggle";
 import { StatusBadge } from "@/components/status-badge";
 import { Link, redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
-import { getCurrentUser, getDealer } from "@/lib/auth";
+import { getCurrentUser, getDealer, getUserId } from "@/lib/auth";
 import { formatPhoneInput } from "@/lib/phone";
 import { createClient } from "@/lib/supabase/server";
 import { AlertPrefs, DeleteAccount, LogoutButton, NameForm } from "./account-forms";
@@ -17,13 +17,15 @@ export default async function AccountPage({ params }: PageProps<"/[locale]/accou
   setRequestLocale(locale);
   const t = await getTranslations("account");
 
-  const user = await getCurrentUser();
-  if (!user) return redirect({ href: "/login", locale });
+  const userId = await getUserId();
+  if (!userId) return redirect({ href: "/login", locale });
   const supabase = await createClient();
-  const [{ data: profile }, dealer] = await Promise.all([
-    supabase.from("profiles").select("full_name, notify_new_auction, notify_makes").eq("id", user.id).maybeSingle(),
-    getDealer(user.id),
+  const [user, { data: profile }, dealer] = await Promise.all([
+    getCurrentUser(),
+    supabase.from("profiles").select("full_name, notify_new_auction, notify_makes").eq("id", userId).maybeSingle(),
+    getDealer(userId),
   ]);
+  if (!user) return redirect({ href: "/login", locale });
 
   return (
     <div className="flex flex-col gap-4 pb-6">

@@ -6,7 +6,7 @@ import { DealerTabs } from "@/components/dealer-tabs";
 import { Stars } from "@/components/stars";
 import { StatusBadge } from "@/components/status-badge";
 import { Link, redirect } from "@/i18n/navigation";
-import { getCurrentUser, getDealer } from "@/lib/auth";
+import { getDealer, getUserId } from "@/lib/auth";
 import { formatDateTime } from "@/lib/datetime";
 import { dealerFee, loadFeeBands } from "@/lib/fees";
 import { formatTenge } from "@/lib/format";
@@ -38,38 +38,39 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
   setRequestLocale(locale);
   const t = await getTranslations("activity");
 
-  const user = await getCurrentUser();
-  if (!user) return redirect({ href: "/login?next=/dealer", locale });
-  const dealer = await getDealer(user.id);
-  if (!dealer) return redirect({ href: "/dealer/apply", locale });
+  const userId = await getUserId();
+  if (!userId) return redirect({ href: "/login?next=/dealer", locale });
 
+  // 서로 관계없는 조회는 한 번에 보낸다
   const supabase = await createClient();
-  const feeBands = await loadFeeBands(supabase);
-  const { data: penaltyRows } = await supabase
-    .from("dealer_penalties")
-    .select("id, reason, action, created_at")
-    .eq("dealer_id", user.id)
-    .order("created_at", { ascending: false });
-  const penalties = (penaltyRows ?? []) as { id: string; reason: string; action: string; created_at: string }[];
-  const blockedUntil =
-    dealer.bid_blocked_until && new Date(dealer.bid_blocked_until) > new Date() ? dealer.bid_blocked_until : null;
-  const tp = await getTranslations("penalty");
-  const [{ data: bidRows }, { data: dealRows }] = await Promise.all([
+  const [dealer, feeBands, { data: penaltyRows }, { data: bidRows }, { data: dealRows }, tp] = await Promise.all([
+    getDealer(userId),
+    loadFeeBands(supabase),
+    supabase
+      .from("dealer_penalties")
+      .select("id, reason, action, created_at")
+      .eq("dealer_id", userId)
+      .order("created_at", { ascending: false }),
     supabase
       .from("bids")
       // auctions.winning_bid_id도 bids를 가리켜서 관계 이름을 지정해야 한다
       .select("id, amount, auction_id, auctions!bids_auction_id_fkey(status, ends_at, winning_bid_id, cars(make, model, year))")
-      .eq("dealer_id", user.id)
+      .eq("dealer_id", userId)
       .order("updated_at", { ascending: false })
       .limit(50)
       .overrideTypes<MyBid[], { merge: false }>(),
     supabase
       .from("deals")
       .select("id, status, agreed_price, final_price, auctions(cars(make, model, year))")
-      .eq("dealer_id", user.id)
+      .eq("dealer_id", userId)
       .order("created_at", { ascending: false })
       .overrideTypes<MyDeal[], { merge: false }>(),
+    getTranslations("penalty"),
   ]);
+  if (!dealer) return redirect({ href: "/dealer/apply", locale });
+  const penalties = (penaltyRows ?? []) as { id: string; reason: string; action: string; created_at: string }[];
+  const blockedUntil =
+    dealer.bid_blocked_until && new Date(dealer.bid_blocked_until) > new Date() ? dealer.bid_blocked_until : null;
   const bids = bidRows ?? [];
   const deals = dealRows ?? [];
 

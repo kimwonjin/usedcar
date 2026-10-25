@@ -10,7 +10,7 @@ import { PageHeader } from "@/components/page-header";
 import { PhotoGallery } from "@/components/photo-gallery";
 import { StatusBadge } from "@/components/status-badge";
 import { Link, redirect } from "@/i18n/navigation";
-import { getCurrentUser, getDealer } from "@/lib/auth";
+import { getDealer, getUserId } from "@/lib/auth";
 import { PHOTO_SLOTS } from "@/lib/car-catalog";
 import { formatKm, formatTenge } from "@/lib/format";
 import { signedUrlMap } from "@/lib/storage";
@@ -44,18 +44,28 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
   const t = await getTranslations("auctionDetail");
   const tf = await getTranslations("carForm");
 
-  const user = await getCurrentUser();
-  if (!user) return redirect({ href: "/login?next=/dealer", locale });
+  const userId = await getUserId();
+  if (!userId) return redirect({ href: "/login?next=/dealer", locale });
 
+  // 서로 관계없는 조회는 한 번에 보낸다
   const supabase = await createClient();
-  const { data: auction } = await supabase
-    .from("auctions")
-    .select(
-      "id, status, ends_at, winning_bid_id, cars(make, model, year, mileage_km, fuel, transmission, steering, customs_cleared, defects, options, accident, owners, damage, car_photos(slot, storage_path, sort_order))",
-    )
-    .eq("id", id)
-    .maybeSingle()
-    .overrideTypes<AuctionDetail, { merge: false }>();
+  const [{ data: auction }, { data: stats }, { data: rank }, { data: myBid }, { data: deal }, dealer, { data: fav }] =
+    await Promise.all([
+      supabase
+        .from("auctions")
+        .select(
+          "id, status, ends_at, winning_bid_id, cars(make, model, year, mileage_km, fuel, transmission, steering, customs_cleared, defects, options, accident, owners, damage, car_photos(slot, storage_path, sort_order))",
+        )
+        .eq("id", id)
+        .maybeSingle()
+        .overrideTypes<AuctionDetail, { merge: false }>(),
+      supabase.rpc("auction_stats", { p_auction_id: id }),
+      supabase.rpc("my_bid_rank", { p_auction_id: id }),
+      supabase.from("bids").select("id, amount").eq("auction_id", id).eq("dealer_id", userId).maybeSingle(),
+      supabase.from("deals").select("id").eq("auction_id", id).eq("dealer_id", userId).maybeSingle(),
+      getDealer(userId),
+      supabase.from("dealer_favorites").select("auction_id").eq("dealer_id", userId).eq("auction_id", id).maybeSingle(),
+    ]);
   if (!auction) notFound();
 
   const car = auction.cars;
@@ -65,20 +75,7 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
         PHOTO_SLOTS.indexOf(b.slot as (typeof PHOTO_SLOTS)[number]) || a.sort_order - b.sort_order,
   );
 
-  const [urls, { data: stats }, { data: rank }, { data: myBid }, { data: deal }, dealer] = await Promise.all([
-    signedUrlMap(supabase, "car-photos", photos.map((p) => p.storage_path)),
-    supabase.rpc("auction_stats", { p_auction_id: id }),
-    supabase.rpc("my_bid_rank", { p_auction_id: id }),
-    supabase.from("bids").select("id, amount").eq("auction_id", id).eq("dealer_id", user.id).maybeSingle(),
-    supabase.from("deals").select("id").eq("auction_id", id).eq("dealer_id", user.id).maybeSingle(),
-    getDealer(user.id),
-  ]);
-  const { data: fav } = await supabase
-    .from("dealer_favorites")
-    .select("auction_id")
-    .eq("dealer_id", user.id)
-    .eq("auction_id", id)
-    .maybeSingle();
+  const urls = await signedUrlMap(supabase, "car-photos", photos.map((p) => p.storage_path));
   const blockedUntil =
     dealer?.bid_blocked_until && new Date(dealer.bid_blocked_until) > new Date() ? dealer.bid_blocked_until : null;
   const bidCount = (stats?.[0]?.bid_count as number | undefined) ?? 0;
@@ -100,7 +97,7 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
     <div className="flex flex-col gap-4 pb-4">
       <PageHeader title={`${car.make} ${car.model}`} backHref="/dealer" backLabel={t("backToList")}>
         <div className="flex items-center gap-2">
-          {isLive && <FavoriteButton auctionId={id} dealerId={user.id} initial={Boolean(fav)} className="border border-ink/10" />}
+          {isLive && <FavoriteButton auctionId={id} dealerId={userId} initial={Boolean(fav)} className="border border-ink/10" />}
           <StatusBadge kind="auction" status={auction.status} />
         </div>
       </PageHeader>
