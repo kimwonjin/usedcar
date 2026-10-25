@@ -734,6 +734,10 @@
     "question_answered": {
       "title": "판매자가 답변했어요",
       "body": "{car} · {text}"
+    },
+    "price_watch": {
+      "title": "이번 달 내 차 시세",
+      "body": "{car} · 평균 {amount}"
     }
   },
   "notificationCenter": {
@@ -1124,7 +1128,13 @@
     "recent": "최근 거래",
     "noData": "아직 비교할 거래가 없습니다. 경매에 올리면 승인된 딜러들이 직접 가격을 매겨 드립니다.",
     "note": "실제 가격은 주행거리·사고 이력·상태에 따라 달라집니다. 정확한 가격은 48시간 경매로 확인하세요.",
-    "cta": "이 차로 경매 시작하기"
+    "cta": "이 차로 경매 시작하기",
+    "watch": "매달 이 차 시세 알림 받기",
+    "watchOn": "매달 1일에 시세를 알려드려요",
+    "watchLimit": "시세 알림은 5개까지 등록할 수 있습니다.",
+    "watchTitle": "시세 알림",
+    "watchEmpty": "등록한 시세 알림이 없습니다.",
+    "watchRemove": "해제"
   },
   "transferStatus": {
     "title": "명의 이전",

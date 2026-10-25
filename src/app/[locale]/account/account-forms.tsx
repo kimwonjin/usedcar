@@ -258,3 +258,33 @@ export function DeleteAccount() {
     </section>
   );
 }
+
+// 내 차 시세 알림 목록과 해제
+export function PriceWatches({ watches }: { watches: { id: string; make: string; model: string; year: number }[] }) {
+  const t = useTranslations("priceLookup");
+  const [items, setItems] = useState(watches);
+  if (items.length === 0) return null;
+
+  async function remove(id: string) {
+    await createClient().from("price_watches").delete().eq("id", id);
+    setItems((prev) => prev.filter((w) => w.id !== id));
+  }
+
+  return (
+    <section className="flex flex-col gap-2 rounded-xl bg-white p-4 shadow-sm">
+      <p className="text-body font-semibold">🔔 {t("watchTitle")}</p>
+      <ul className="flex flex-col divide-y divide-ink/10">
+        {items.map((w) => (
+          <li key={w.id} className="flex items-center justify-between gap-3 py-2 text-body">
+            <span>
+              {w.make} {w.model} · {w.year}
+            </span>
+            <button type="button" onClick={() => remove(w.id)} className="text-caption text-ink/50 underline">
+              {t("watchRemove")}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}

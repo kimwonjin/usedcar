@@ -1,8 +1,8 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useState, type FormEvent } from "react";
-import { Link } from "@/i18n/navigation";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { Link, useRouter } from "@/i18n/navigation";
 import { MIN_YEAR } from "@/lib/car-catalog";
 import { formatDate } from "@/lib/datetime";
 import { formatKm, formatTenge } from "@/lib/format";
@@ -12,13 +12,23 @@ type Estimate = { sample: number; avg_price: number | null; min_price: number | 
 type Sale = { year: number; mileage_km: number; price: number; completed_at: string };
 type Result = { make: string; model: string; year: number; estimate: Estimate; sales: Sale[] };
 
-export function PriceLookup({ makes, currentYear }: { makes: Record<string, string[]>; currentYear: number }) {
+export function PriceLookup({
+  makes,
+  currentYear,
+  initial,
+}: {
+  makes: Record<string, string[]>;
+  currentYear: number;
+  initial: { make: string; model: string; year: string };
+}) {
   const t = useTranslations("priceLookup");
   const tc = useTranslations("estimate");
   const locale = useLocale();
-  const [make, setMake] = useState("");
-  const [model, setModel] = useState("");
-  const [year, setYear] = useState("");
+  const router = useRouter();
+  const [make, setMake] = useState(initial.make);
+  const [model, setModel] = useState(initial.model);
+  const [year, setYear] = useState(initial.year);
+  const [watch, setWatch] = useState<"idle" | "busy" | "on" | "limit" | "failed">("idle");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
   const [failed, setFailed] = useState(false);
@@ -27,13 +37,12 @@ export function PriceLookup({ makes, currentYear }: { makes: Record<string, stri
   const yearNum = Number(year);
   const valid = make.trim() && model.trim() && yearNum >= MIN_YEAR && yearNum <= currentYear + 1;
 
-  async function lookup(e: FormEvent) {
-    e.preventDefault();
-    if (!valid) return;
+  const run = useCallback(async () => {
     setBusy(true);
+    setWatch("idle");
     setFailed(false);
     const supabase = createClient();
-    const args = { p_make: make.trim(), p_model: model.trim(), p_year: yearNum };
+    const args = { p_make: make.trim(), p_model: model.trim(), p_year: Number(year) };
     const [est, sales] = await Promise.all([
       supabase.rpc("estimate_price", args),
       supabase.rpc("comparable_sales", { ...args, p_limit: 5 }),
@@ -46,10 +55,39 @@ export function PriceLookup({ makes, currentYear }: { makes: Record<string, stri
     setResult({
       make: args.p_make,
       model: args.p_model,
-      year: yearNum,
+      year: Number(year),
       estimate: ((est.data as Estimate[] | null)?.[0] ?? { sample: 0 }) as Estimate,
       sales: (sales.data ?? []) as Sale[],
     });
+  }, [make, model, year]);
+
+  async function lookup(e: FormEvent) {
+    e.preventDefault();
+    if (valid) run();
+  }
+
+  // 주소에 차종이 있으면 처음에 한 번 바로 조회
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (initial.make && initial.model && initial.year) run();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // 매달 시세 알림 신청 (로그인 필요)
+  async function subscribe() {
+    if (!result) return;
+    const supabase = createClient();
+    const { data } = await supabase.auth.getUser();
+    const query = new URLSearchParams({ make: result.make, model: result.model, year: String(result.year) });
+    if (!data.user) {
+      router.push(`/login?next=${encodeURIComponent(`/price?${query}`)}`);
+      return;
+    }
+    setWatch("busy");
+    const { error } = await supabase
+      .from("price_watches")
+      .upsert({ user_id: data.user.id, make: result.make, model: result.model, year: result.year }, { onConflict: "user_id,make,model,year" });
+    setWatch(error ? (error.message.includes("too many") ? "limit" : "failed") : "on");
   }
 
   const field = "h-12 w-full rounded-lg border border-ink/15 bg-white px-3 text-body";
@@ -142,6 +180,16 @@ export function PriceLookup({ makes, currentYear }: { makes: Record<string, stri
             <p className="text-body text-ink/70">{t("noData")}</p>
           )}
           <p className="text-caption text-ink/50">{t("note")}</p>
+          <button
+            type="button"
+            onClick={subscribe}
+            disabled={watch === "busy" || watch === "on"}
+            className="h-12 rounded-xl border border-navy font-semibold text-navy disabled:opacity-60"
+          >
+            {watch === "on" ? `✓ ${t("watchOn")}` : `🔔 ${t("watch")}`}
+          </button>
+          {watch === "limit" && <p className="text-caption text-danger">{t("watchLimit")}</p>}
+          {watch === "failed" && <p className="text-caption text-danger">{t("failed")}</p>}
           <Link href={sellHref} className="flex h-14 items-center justify-center rounded-xl bg-navy text-subtitle font-bold text-white">
             {t("cta")}
           </Link>

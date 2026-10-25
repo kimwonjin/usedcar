@@ -16,6 +16,8 @@ function safeNext(next: unknown): string {
   if (allowedNext.includes(next)) return next;
   // 시세 조회에서 넘어온 차량 등록 (제조사·모델·연식을 미리 채움)
   if (/^\/sell\/new(\?[A-Za-z0-9%=&.+_-]*)?$/.test(next)) return next;
+  // 시세 조회에서 알림 신청하려다 로그인한 경우
+  if (/^\/price(\?[A-Za-z0-9%=&.+_-]*)?$/.test(next)) return next;
   return "/sell";
 }
 
