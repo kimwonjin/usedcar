@@ -10,14 +10,21 @@ export function RelistButton({ carId }: { carId: string }) {
   const t = useTranslations("sellerAuction");
   const router = useRouter();
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const tf = useTranslations("carForm");
 
   async function relist() {
     setBusy(true);
     const { data, error } = await createClient().rpc("start_auction", { p_car_id: carId });
     setBusy(false);
     if (error) {
-      setError(true);
+      setError(
+        error.message.includes("plate already listed")
+          ? tf("startBlocked.plate")
+          : error.message.includes("too many active auctions")
+            ? tf("startBlocked.tooMany")
+            : t("relistFailed"),
+      );
       return;
     }
     router.replace(`/sell/auctions/${data}`);
@@ -33,7 +40,7 @@ export function RelistButton({ carId }: { carId: string }) {
       >
         {t("relist")}
       </button>
-      {error && <p className="text-caption text-danger">{t("relistFailed")}</p>}
+      {error && <p className="text-caption text-danger">{error}</p>}
     </>
   );
 }

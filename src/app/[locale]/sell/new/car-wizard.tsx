@@ -202,8 +202,16 @@ export function CarWizard({
         return; // 이동하는 동안 버튼을 잠가 둔다
       }
       setStepIndex((i) => i + 1);
-    } catch {
-      setError(t("error"));
+    } catch (e) {
+      // 경매 시작이 DB 규칙으로 막히면 이유를 알려준다
+      const message = (e as { message?: string })?.message ?? "";
+      setError(
+        message.includes("plate already listed")
+          ? t("startBlocked.plate")
+          : message.includes("too many active auctions")
+            ? t("startBlocked.tooMany")
+            : t("error"),
+      );
     }
     setBusy(false);
   }
