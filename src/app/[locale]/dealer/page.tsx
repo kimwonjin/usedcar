@@ -74,6 +74,7 @@ export default async function DealerAuctions({ params, searchParams }: PageProps
       .from("auctions")
       .select("id, ends_at, created_at, cars(make, model, year, mileage_km, steering, fuel, transmission, accident, body_type, car_photos(slot, storage_path))")
       .eq("status", "live")
+      .neq("seller_id", userId) // 내가 판매자로 올린 차는 빼고
       .gt("ends_at", new Date().toISOString())
       .order(sort === "ending" ? "ends_at" : "created_at", { ascending: sort === "ending" })
       .overrideTypes<LiveAuction[], { merge: false }>(),

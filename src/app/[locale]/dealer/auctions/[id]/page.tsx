@@ -20,6 +20,7 @@ import { BidPanel } from "./bid-panel";
 
 type AuctionDetail = {
   id: string;
+  seller_id: string;
   status: string;
   ends_at: string;
   winning_bid_id: string | null;
@@ -48,6 +49,7 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
   setRequestLocale(locale);
   const t = await getTranslations("auctionDetail");
   const tf = await getTranslations("carForm");
+  const tb = await getTranslations("bid");
 
   const userId = await getUserId();
   if (!userId) return redirect({ href: "/login?next=/dealer", locale });
@@ -59,7 +61,7 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
       supabase
         .from("auctions")
         .select(
-          "id, status, ends_at, winning_bid_id, cars(make, model, year, mileage_km, fuel, transmission, steering, customs_cleared, body_type, color, engine_volume, vin, defects, options, accident, owners, damage, car_photos(slot, storage_path, sort_order))",
+          "id, seller_id, status, ends_at, winning_bid_id, cars(make, model, year, mileage_km, fuel, transmission, steering, customs_cleared, body_type, color, engine_volume, vin, defects, options, accident, owners, damage, car_photos(slot, storage_path, sort_order))",
         )
         .eq("id", id)
         .maybeSingle()
@@ -87,6 +89,7 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
     dealer?.bid_blocked_until && new Date(dealer.bid_blocked_until) > new Date() ? dealer.bid_blocked_until : null;
   const bidCount = (stats?.[0]?.bid_count as number | undefined) ?? 0;
   const isLive = auction.status === "live";
+  const own = auction.seller_id === userId; // 딜러가 판매자로 올린 자기 차
 
   const specs: [string, string][] = [
     [t("year"), String(car.year)],
@@ -108,7 +111,7 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
     <div className="flex flex-col gap-4 pb-4">
       <PageHeader title={`${car.make} ${car.model}`} backHref="/dealer" backLabel={t("backToList")}>
         <div className="flex items-center gap-2">
-          {isLive && <FavoriteButton auctionId={id} dealerId={userId} initial={Boolean(fav)} className="border border-ink/10" />}
+          {isLive && !own && <FavoriteButton auctionId={id} dealerId={userId} initial={Boolean(fav)} className="border border-ink/10" />}
           <StatusBadge kind="auction" status={auction.status} />
         </div>
       </PageHeader>
@@ -151,10 +154,11 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
         <p className="text-body whitespace-pre-line">{car.defects || tf("defects.none")}</p>
       </section>
 
-      <AuctionQa auctionId={id} role="dealer" canAsk={isLive && dealer?.status === "approved"} />
+      <AuctionQa auctionId={id} role="dealer" canAsk={isLive && !own && dealer?.status === "approved"} />
 
-      {isLive && blockedUntil && <BidBlockNotice until={blockedUntil} />}
-      {isLive && !blockedUntil && (
+      {isLive && own && <p className="rounded-xl bg-white p-4 text-body text-ink/70 shadow-sm">{tb("ownAuction")}</p>}
+      {isLive && !own && blockedUntil && <BidBlockNotice until={blockedUntil} />}
+      {isLive && !own && !blockedUntil && (
         <BidPanel
           auctionId={id}
           myAmount={(myBid?.amount as number | undefined) ?? null}

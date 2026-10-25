@@ -8,6 +8,7 @@ import { formatAmount, formatTenge } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
 
 const STEPS = [100_000, 300_000, 1_000_000];
+const MAX_BID = 10_000_000_000; // 서버(place_bid)와 같은 상한
 const REFRESH_MS = 15_000;
 
 // D4 입찰하기: 금액 입력 → 내 순위. 다른 딜러의 금액은 보이지 않는다(블라인드).
@@ -40,8 +41,11 @@ export function BidPanel({
 
   const value = Number(amount);
   const tooLow = shownAmount !== null && value > 0 && value <= shownAmount;
+  const tooHigh = value > MAX_BID;
 
   async function submit() {
+    // 입찰가는 내릴 수 없으므로 금액을 한 번 더 확인한다 (0 하나 더 붙이는 실수 방지)
+    if (!confirm(t("confirm", { amount: formatTenge(value) }))) return;
     setBusy(true);
     setError(null);
     const { data, error } = await createClient().rpc("place_bid", { p_auction_id: auctionId, p_amount: value });
@@ -55,7 +59,11 @@ export function BidPanel({
               ? t("overdue")
           : error.message.includes("not live")
             ? t("closed")
-            : t("failed"),
+            : error.message.includes("own auction")
+              ? t("ownAuction")
+              : error.message.includes("invalid amount")
+                ? t("invalidAmount")
+                : t("failed"),
       );
     } else {
       setJustPlaced({ amount: value, rank: data as number });
@@ -97,11 +105,12 @@ export function BidPanel({
       </div>
 
       {tooLow && <p className="text-caption text-danger">{t("mustRaise")}</p>}
+      {tooHigh && <p className="text-caption text-danger">{t("invalidAmount")}</p>}
       {error && <p className="text-caption text-danger">{error}</p>}
 
       <button
         type="button"
-        disabled={!value || tooLow || busy}
+        disabled={!value || tooLow || tooHigh || busy}
         onClick={submit}
         className="h-14 rounded-xl bg-navy text-subtitle font-bold text-white disabled:opacity-40"
       >

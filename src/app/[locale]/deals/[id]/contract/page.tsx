@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/i18n/routing";
 import { Link, redirect } from "@/i18n/navigation";
 import { getUserId } from "@/lib/auth";
+import type { CarColor } from "@/lib/car-catalog";
 import { formatTenge } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { PrintButton } from "./print-button";
@@ -16,7 +17,7 @@ type ContractDeal = {
   dealer_id: string;
   agreed_price: number;
   final_price: number | null;
-  auctions: { cars: { make: string; model: string; year: number; plate_number: string; vin: string | null; mileage_km: number } };
+  auctions: { cars: { make: string; model: string; year: number; plate_number: string; vin: string | null; mileage_km: number; color: string | null } };
   dealers: { business_name: string; bin: string; address: string } | null;
 };
 
@@ -27,6 +28,7 @@ export default async function ContractPage({ params }: PageProps<"/[locale]/deal
   const locale = rawLocale as Locale; // layout에서 검증됨
   setRequestLocale(locale);
   const t = await getTranslations("transfer");
+  const tColor = await getTranslations({ locale: "ru", namespace: "carForm.color" }); // 계약서는 러시아어
 
   const userId = await getUserId();
   if (!userId) return redirect({ href: "/login", locale });
@@ -35,7 +37,7 @@ export default async function ContractPage({ params }: PageProps<"/[locale]/deal
   const { data: deal } = await supabase
     .from("deals")
     .select(
-      "id, seller_id, dealer_id, agreed_price, final_price, auctions(cars(make, model, year, plate_number, vin, mileage_km)), dealers(business_name, bin, address)",
+      "id, seller_id, dealer_id, agreed_price, final_price, auctions(cars(make, model, year, plate_number, vin, mileage_km, color)), dealers(business_name, bin, address)",
     )
     .eq("id", id)
     .maybeSingle()
@@ -85,7 +87,7 @@ export default async function ContractPage({ params }: PageProps<"/[locale]/deal
               ["Государственный номер", car.plate_number],
               ["VIN / номер кузова", car.vin ?? ""],
               ["Пробег по одометру, км", car.mileage_km.toLocaleString("ru-RU")],
-              ["Цвет", ""],
+              ["Цвет", car.color ? tColor(car.color as CarColor) : ""],
               ["Свидетельство о регистрации ТС №", ""],
             ].map(([label, value]) => (
               <tr key={label}>

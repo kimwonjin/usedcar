@@ -44,7 +44,8 @@ export default async function DealerDealPage({ params }: PageProps<"/[locale]/de
         <p className="text-caption text-ink/60">{deal.final_price ? t("finalPrice") : t("agreedPrice")}</p>
         <p className="price text-price font-bold text-gold">{formatTenge(price)}</p>
         <p className="mt-1 text-caption text-ink/60">
-          {t("plate")} <span className="price">{car.plate_number}</span> · {t("fee")} {formatTenge(dealerFee(price, feeBands))}
+          {t("plate")} <span className="price">{car.plate_number}</span>
+          {deal.status !== "cancelled" && ` · ${t("fee")} ${formatTenge(dealerFee(price, feeBands))}`}
         </p>
       </section>
 

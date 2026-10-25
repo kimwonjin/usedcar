@@ -172,7 +172,8 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
                   {deal.auctions.cars.make} {deal.auctions.cars.model} · {deal.auctions.cars.year}
                 </p>
                 <p className="price text-caption text-ink/60">
-                  {formatTenge(price)} · {t("fee")} {formatTenge(dealerFee(price, feeBands))}
+                  {formatTenge(price)}
+                  {deal.status !== "cancelled" && ` · ${t("fee")} ${formatTenge(dealerFee(price, feeBands))}`}
                 </p>
               </div>
               <StatusBadge kind="deal" status={deal.status} />
