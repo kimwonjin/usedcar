@@ -46,7 +46,7 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
 
   // 서로 관계없는 조회는 한 번에 보낸다
   const supabase = await createClient();
-  const [dealer, feeBands, { data: penaltyRows }, { data: bidRows }, { data: dealRows }, tp, { data: reviewRows }, tr, { data: noteRows }] = await Promise.all([
+  const [dealer, feeBands, { data: penaltyRows }, { data: bidRows }, { data: dealRows }, tp, { data: reviewRows }, tr] = await Promise.all([
     getDealer(userId),
     loadFeeBands(supabase),
     supabase
@@ -71,9 +71,7 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
     getTranslations("penalty"),
     supabase.rpc("dealer_reviews", { p_dealer_id: userId, p_limit: 10 }),
     getTranslations("dealerProfile"),
-    supabase.from("dealer_notes").select("auction_id, body").eq("dealer_id", userId),
   ]);
-  const notes = new Map((noteRows ?? []).map((n) => [n.auction_id as string, n.body as string]));
   if (!dealer) return redirect({ href: "/dealer/apply", locale });
   const penalties = (penaltyRows ?? []) as {
     id: string;
@@ -222,13 +220,6 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
             {t("totalFees")} <span className="price font-semibold text-ink">{formatTenge(totalFees)}</span>
           </p>
         )}
-        {deals.length > 0 && (
-          // 파일 내려받기라 앱 내 이동이 아닌 일반 링크
-          // eslint-disable-next-line @next/next/no-html-link-for-pages
-          <a href="/api/dealer/export" className="self-end text-caption font-semibold text-steppe">
-            ⬇ {t("exportLedger")}
-          </a>
-        )}
       </section>
 
       <section className="flex flex-col gap-2">
@@ -243,9 +234,6 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
                     {bid.auctions.cars.make} {bid.auctions.cars.model} · {bid.auctions.cars.year}
                   </p>
                   <p className="price text-caption text-ink/60">{formatTenge(bid.amount)}</p>
-                  {notes.has(bid.auction_id) && (
-                    <p className="truncate text-caption text-ink/70">📝 {notes.get(bid.auction_id)}</p>
-                  )}
                 </div>
                 {bidResult(bid)}
               </Link>
