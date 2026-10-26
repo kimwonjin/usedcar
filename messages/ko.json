@@ -1621,11 +1621,11 @@
       "referee": "가입자"
     },
     "statuses": {
-      "paid": "지급 완료",
+      "paid": "✓ 지급됨",
       "void": "무효"
     },
     "empty": "아직 보상이 없습니다.",
-    "markPaid": "지급 완료",
+    "markPaid": "지급 처리",
     "markPaidConfirm": "실제로 지급했나요? 지급 완료로 바꿉니다."
   }
 }
