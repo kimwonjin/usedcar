@@ -13,6 +13,7 @@ export function HeaderMenu() {
   const locale = useLocale();
   const [userId, setUserId] = useState<string | null>(null);
   const [unread, setUnread] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (!isSupabaseConfigured) return;
@@ -27,6 +28,12 @@ export function HeaderMenu() {
     const supabase = createClient();
     // 푸시 알림 문구를 사용자 언어로 보내기 위해 현재 언어를 저장한다
     supabase.from("profiles").update({ locale }).eq("id", userId).neq("locale", locale).then(() => {});
+    supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", userId)
+      .maybeSingle()
+      .then(({ data }) => setIsAdmin(data?.role === "admin"));
 
     const refresh = () =>
       supabase
@@ -49,9 +56,16 @@ export function HeaderMenu() {
       <Link href="/sell" className="text-white/90">
         {t("navSell")}
       </Link>
-      <Link href="/dealer" className="text-white/90">
-        {t("navDealer")}
-      </Link>
+      {/* 관리자는 딜러 메뉴 자리에 관리자 화면 바로가기 */}
+      {userId && isAdmin ? (
+        <Link href="/admin" className="font-semibold text-gold">
+          {t("navAdmin")}
+        </Link>
+      ) : (
+        <Link href="/dealer" className="text-white/90">
+          {t("navDealer")}
+        </Link>
+      )}
       {userId && (
         <>
           <Link href="/notifications" aria-label={tn("bell")} className="relative text-[18px] leading-none">

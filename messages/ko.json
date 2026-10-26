@@ -8,6 +8,7 @@
     "setupRequired": "Supabase 환경변수(NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY)를 설정하면 데이터가 표시됩니다.",
     "navSell": "내 차 팔기",
     "navDealer": "딜러",
+    "navAdmin": "관리자",
     "account": "내 정보"
   },
   "landing": {

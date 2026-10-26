@@ -8,6 +8,7 @@
     "setupRequired": "Задайте переменные окружения Supabase (NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY), чтобы увидеть данные.",
     "navSell": "Продать авто",
     "navDealer": "Дилерам",
+    "navAdmin": "Админ",
     "account": "Профиль"
   },
   "landing": {

@@ -8,6 +8,7 @@
     "setupRequired": "Деректерді көру үшін Supabase айнымалыларын (NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY) орнатыңыз.",
     "navSell": "Көлік сату",
     "navDealer": "Дилерлерге",
+    "navAdmin": "Әкімші",
     "account": "Профиль"
   },
   "landing": {
