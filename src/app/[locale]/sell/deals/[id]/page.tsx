@@ -18,6 +18,10 @@ import { getCurrentUser } from "@/lib/auth";
 import { loadDeal } from "@/lib/deals";
 import { formatTenge } from "@/lib/format";
 import { ClaimComment, DealActions, RatingForm } from "./deal-actions";
+import { ReassignPicker } from "./reassign-picker";
+import type { TopBid } from "../../auctions/[id]/result-picker";
+import { Link } from "@/i18n/navigation";
+import { currentDeal } from "@/lib/supabase/rows";
 
 // S8 거래 진행: 딜러 연락처·만남 일정, 감가 사유 확인, 거래 완료, 딜러 평가
 export default async function SellerDealPage({ params }: PageProps<"/[locale]/sell/deals/[id]">) {
@@ -41,6 +45,25 @@ export default async function SellerDealPage({ params }: PageProps<"/[locale]/se
   const active = deal.status === "scheduled" || deal.status === "depreciation_review";
   const approvedDeduction = claims.filter((c) => c.status === "approved").reduce((sum, c) => sum + c.amount, 0);
   const expected = deal.agreed_price - approvedDeduction;
+  // 낙찰 딜러 사정으로 취소된 거래: 차순위 딜러에게 넘겼으면 새 거래로 안내, 아직이면 경매 종료 7일 안에 다시 고르게 한다
+  const reassign = await loadReassign();
+  async function loadReassign() {
+    if (deal.status !== "cancelled" || !["dealer_no_show", "dealer_cancelled"].includes(deal.cancel_reason ?? "")) return null;
+    const { data: auction } = await supabase
+      .from("auctions")
+      .select("status, ends_at, deals(id, status, created_at)")
+      .eq("id", deal.auction_id)
+      .maybeSingle()
+      .overrideTypes<{ status: string; ends_at: string; deals: { id: string; status: string; created_at: string }[] }, { merge: false }>();
+    if (!auction || auction.status !== "accepted") return null;
+    const latest = currentDeal(auction.deals);
+    if (latest && latest.id !== deal.id) return { kind: "moved" as const, nextDealId: latest.id };
+    const until = new Date(new Date(auction.ends_at).getTime() + 7 * 24 * 3600 * 1000).toISOString();
+    if (until < new Date().toISOString()) return null;
+    const { data: bids } = await supabase.rpc("reassign_candidates", { p_auction_id: deal.auction_id });
+    return { kind: "pick" as const, until, bids: (bids ?? []) as TopBid[] };
+  }
+
   // 판매 결과 공유 카드에 넣을 경쟁 딜러 수
   const bidders =
     deal.status === "completed"
@@ -137,6 +160,15 @@ export default async function SellerDealPage({ params }: PageProps<"/[locale]/se
           bidders={bidders}
         />
       )}
+      {reassign?.kind === "moved" && (
+        <Link
+          href={`/sell/deals/${reassign.nextDealId}`}
+          className="flex h-12 items-center justify-center rounded-xl bg-navy font-bold text-white"
+        >
+          {t("goToNextDeal")} →
+        </Link>
+      )}
+      {reassign?.kind === "pick" && <ReassignPicker auctionId={deal.auction_id} bids={reassign.bids} until={reassign.until} />}
       <DealActions dealId={deal.id} status={deal.status} />
       <ReportButton dealId={deal.id} />
       {deal.status === "completed" && deal.seller_rating === null && <RatingForm dealId={deal.id} />}

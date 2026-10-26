@@ -4,6 +4,7 @@ import { AdminOnly } from "@/components/admin-only";
 import { Link } from "@/i18n/navigation";
 import { requireAdmin } from "@/lib/auth";
 import { formatTenge } from "@/lib/format";
+import { currentDeal } from "@/lib/supabase/rows";
 import { createClient } from "@/lib/supabase/server";
 import { daysAgoIso } from "@/lib/time";
 
@@ -14,8 +15,9 @@ type AuctionRow = {
   status: string;
   created_at: string;
   cars: { desired_price: number | null } | null;
-  deals: { status: string; agreed_price: number; final_price: number | null; dealer_id: string } | null;
+  deals: InsightDeal | InsightDeal[] | null;
 };
+type InsightDeal = { status: string; agreed_price: number; final_price: number | null; dealer_id: string; created_at: string };
 type BidRow = { auction_id: string; dealer_id: string; amount: number };
 
 const pct = (part: number, whole: number) => (whole ? Math.round((part / whole) * 100) : null);
@@ -38,13 +40,14 @@ export default async function AdminInsights({ params, searchParams }: PageProps<
     withSince(
       supabase
         .from("auctions")
-        .select("id, status, created_at, cars(desired_price), deals(status, agreed_price, final_price, dealer_id)"),
+        .select("id, status, created_at, cars(desired_price), deals(status, agreed_price, final_price, dealer_id, created_at)"),
     )
       .limit(5000)
       .overrideTypes<AuctionRow[], { merge: false }>(),
     supabase.from("dealers").select("id, business_name").eq("status", "approved"),
   ]);
-  const auctions = auctionData ?? [];
+  // 차순위로 넘긴 경매는 거래가 여러 개라 지금 유효한 거래 하나로 본다
+  const auctions = (auctionData ?? []).map((a) => ({ ...a, deals: currentDeal(a.deals) }));
   const ids = auctions.map((a) => a.id);
   const { data: bidData } = ids.length
     ? await supabase.from("bids").select("auction_id, dealer_id, amount").in("auction_id", ids).limit(20000)

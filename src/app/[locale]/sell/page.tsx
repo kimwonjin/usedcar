@@ -10,11 +10,11 @@ import { decisionDeadline } from "@/lib/auction-rules";
 import { getUserId } from "@/lib/auth";
 import { formatTenge } from "@/lib/format";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { firstRow } from "@/lib/supabase/rows";
+import { currentDeal } from "@/lib/supabase/rows";
 import { createClient } from "@/lib/supabase/server";
 import { DeleteDraftButton } from "./delete-draft-button";
 
-type DealSummary = { id: string; status: string; agreed_price: number; final_price: number | null };
+type DealSummary = { id: string; status: string; agreed_price: number; final_price: number | null; created_at: string };
 
 type SellerAuction = {
   id: string;
@@ -38,7 +38,7 @@ export default async function SellerHome({ params }: PageProps<"/[locale]/sell">
   const [{ data }, { data: carRows }] = await Promise.all([
     supabase
       .from("auctions")
-      .select("id, status, ends_at, cars(make, model, year), deals(id, status, agreed_price, final_price)")
+      .select("id, status, ends_at, cars(make, model, year), deals(id, status, agreed_price, final_price, created_at)")
       .eq("seller_id", userId)
       .order("created_at", { ascending: false })
       .overrideTypes<SellerAuction[], { merge: false }>(),
@@ -146,7 +146,7 @@ export default async function SellerHome({ params }: PageProps<"/[locale]/sell">
       {dealing.length > 0 && (
         <Section title={t("deals")}>
           {dealing.map((auction) => {
-            const deal = firstRow(auction.deals);
+            const deal = currentDeal(auction.deals);
             return (
               <Link
                 key={auction.id}

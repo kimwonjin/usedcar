@@ -12,7 +12,7 @@ import { Link, redirect } from "@/i18n/navigation";
 import { decisionDeadline } from "@/lib/auction-rules";
 import { getCurrentUser } from "@/lib/auth";
 import type { DamageMap } from "@/lib/car-catalog";
-import { firstRow } from "@/lib/supabase/rows";
+import { currentDeal } from "@/lib/supabase/rows";
 import { createClient } from "@/lib/supabase/server";
 import { LiveAuction } from "./live-auction";
 import { LiveEdits } from "./live-edits";
@@ -27,8 +27,10 @@ type SellerAuctionDetail = {
   car_id: string;
   seller_id: string;
   cars: { make: string; model: string; year: number; desired_price: number | null; defects: string | null; damage: DamageMap | null };
-  deals: { id: string } | { id: string }[] | null;
+  deals: DealRef | DealRef[] | null;
 };
+
+type DealRef = { id: string; status: string; created_at: string };
 
 // S6 경매 진행 중 / S7 경매 결과
 export default async function SellerAuctionPage({ params }: PageProps<"/[locale]/sell/auctions/[id]">) {
@@ -43,7 +45,7 @@ export default async function SellerAuctionPage({ params }: PageProps<"/[locale]
   const supabase = await createClient();
   const { data: auction } = await supabase
     .from("auctions")
-    .select("id, status, starts_at, ends_at, car_id, seller_id, cars(make, model, year, desired_price, defects, damage), deals(id)")
+    .select("id, status, starts_at, ends_at, car_id, seller_id, cars(make, model, year, desired_price, defects, damage), deals(id, status, created_at)")
     .eq("id", id)
     .maybeSingle()
     .overrideTypes<SellerAuctionDetail, { merge: false }>();
@@ -114,7 +116,7 @@ export default async function SellerAuctionPage({ params }: PageProps<"/[locale]
   } else if (auction.status === "accepted") {
     body = (
       <Link
-        href={`/sell/deals/${firstRow(auction.deals)?.id}`}
+        href={`/sell/deals/${currentDeal(auction.deals)?.id}`}
         className="flex h-14 items-center justify-center rounded-xl bg-navy text-subtitle font-bold text-white"
       >
         {t("goToDeal")}
