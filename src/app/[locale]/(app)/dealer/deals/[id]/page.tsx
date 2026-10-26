@@ -14,7 +14,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { redirect } from "@/i18n/navigation";
 import { getCurrentUser } from "@/lib/auth";
 import { loadDeal } from "@/lib/deals";
-import { dealerFee, loadFeeBands } from "@/lib/fees";
+import { dealerFee, loadFeeBands, loadFeesEnabled } from "@/lib/fees";
 import { formatTenge } from "@/lib/format";
 import { ClaimForm } from "./claim-form";
 import { DealerCancelButton } from "./dealer-cancel-button";
@@ -33,7 +33,7 @@ export default async function DealerDealPage({ params }: PageProps<"/[locale]/de
   const { deal, claims, messages, counterpartName, transferDocUrls, regDocUrls, inspection } = loaded;
   const hasIssue = Boolean(inspection && Object.values(inspection.items).includes("issue"));
   const car = deal.auctions.cars;
-  const feeBands = await loadFeeBands(loaded.supabase);
+  const [feeBands, feesEnabled] = await Promise.all([loadFeeBands(loaded.supabase), loadFeesEnabled(loaded.supabase)]);
   const active = deal.status === "scheduled" || deal.status === "depreciation_review";
   const price = deal.final_price ?? deal.agreed_price;
 
@@ -48,7 +48,7 @@ export default async function DealerDealPage({ params }: PageProps<"/[locale]/de
         <p className="price text-price font-bold text-gold">{formatTenge(price)}</p>
         <p className="mt-1 text-caption text-ink/60">
           {t("plate")} <span className="price">{car.plate_number}</span>
-          {deal.status !== "cancelled" && ` · ${t("fee")} ${formatTenge(dealerFee(price, feeBands))}`}
+          {deal.status !== "cancelled" && ` · ${t("fee")} ${feesEnabled ? formatTenge(dealerFee(price, feeBands)) : t("feeFree")}`}
         </p>
       </section>
 

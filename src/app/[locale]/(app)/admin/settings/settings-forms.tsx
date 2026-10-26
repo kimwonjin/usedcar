@@ -76,6 +76,7 @@ type Settings = {
   block_bidding_on_overdue: string;
   auction_review: string;
   referral_reward: string;
+  fees_enabled: string;
 };
 
 export function SettingsForm({ initial }: { initial: Settings }) {
@@ -95,6 +96,18 @@ export function SettingsForm({ initial }: { initial: Settings }) {
 
   return (
     <div className="flex flex-col gap-3">
+      <label className="flex items-start gap-2 text-body">
+        <input
+          type="checkbox"
+          checked={values.fees_enabled !== "off"}
+          onChange={(e) => setValues({ ...values, fees_enabled: e.target.checked ? "on" : "off" })}
+          className="mt-1"
+        />
+        <span>
+          {t("feesEnabled")}
+          <span className="block text-caption text-ink/60">{t("feesEnabledHint")}</span>
+        </span>
+      </label>
       <label className="flex flex-col gap-1">
         <span className="text-caption text-ink/60">{t("paymentsMode")}</span>
         <select

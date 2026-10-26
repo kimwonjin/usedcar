@@ -23,9 +23,13 @@ export default async function DealersPage({ params }: PageProps<"/[locale]/deale
   const c = dealerIntroContent[locale];
 
   const supabase = createPublicClient();
-  const { data } = supabase
-    ? await supabase.from("fee_bands").select("max_price, fee").order("max_price", { nullsFirst: false })
-    : { data: null };
+  const [{ data }, { data: feeSetting }] = supabase
+    ? await Promise.all([
+        supabase.from("fee_bands").select("max_price, fee").order("max_price", { nullsFirst: false }),
+        supabase.from("app_settings").select("value").eq("key", "fees_enabled").maybeSingle(),
+      ])
+    : [{ data: null }, { data: null }];
+  const freePilot = feeSetting?.value === "off";
   const bands = (data?.length ? data : DEFAULT_FEE_BANDS) as FeeBand[];
 
   return (
@@ -46,6 +50,9 @@ export default async function DealersPage({ params }: PageProps<"/[locale]/deale
 
       <section className="flex flex-col gap-2 rounded-xl bg-white p-4 shadow-sm">
         <h2 className="text-subtitle font-semibold">{c.feeTitle}</h2>
+        {freePilot && (
+          <p className="rounded-lg bg-steppe/10 p-3 text-body font-semibold text-steppe">🎁 {c.freePilot}</p>
+        )}
         <table className="w-full text-body">
           <tbody className="divide-y divide-ink/10">
             {bands.map((band) => (

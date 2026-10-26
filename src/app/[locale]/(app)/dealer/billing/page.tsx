@@ -50,7 +50,10 @@ export default async function DealerBilling({ params }: PageProps<"/[locale]/dea
       {overdue.length > 0 && setting.get("block_bidding_on_overdue") === "true" && (
         <p className="rounded-xl border border-danger/30 bg-danger/5 p-4 text-body font-semibold text-danger">⛔ {t("overdueBlocked")}</p>
       )}
-      {setting.get("payments_mode") === "mock" && (
+      {setting.get("fees_enabled") === "off" && (
+        <p className="rounded-xl border border-steppe/30 bg-steppe/5 p-4 text-body font-semibold text-steppe">🎁 {t("freePilot")}</p>
+      )}
+      {setting.get("payments_mode") === "mock" && setting.get("fees_enabled") !== "off" && (
         <p className="rounded-lg bg-gold/15 px-3 py-2 text-caption text-ink/80">{t("mockNotice")}</p>
       )}
 

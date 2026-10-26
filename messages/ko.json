@@ -538,7 +538,8 @@
     "bidCount": "입찰",
     "winRate": "낙찰률",
     "avgWon": "평균 낙찰가",
-    "performanceHint": "최근 입찰 50건 중 결과가 난 {decided}건에서 {won}건 낙찰"
+    "performanceHint": "최근 입찰 50건 중 결과가 난 {decided}건에서 {won}건 낙찰",
+    "feeFree": "무료 (시범 기간)"
   },
   "sellerAuction": {
     "back": "내 차 팔기",
@@ -658,7 +659,8 @@
     "regDoc": "차량등록증",
     "ownerVerified": "소유자 확인",
     "regDocMissing": "판매자가 등록증을 올리지 않았습니다. 만날 때 원본과 신분증을 꼭 확인하세요.",
-    "claimNeedsInspection": "감가를 청구하려면 먼저 위 현장 점검표에서 문제 항목을 표시해 저장하세요."
+    "claimNeedsInspection": "감가를 청구하려면 먼저 위 현장 점검표에서 문제 항목을 표시해 저장하세요.",
+    "feeFree": "무료 (시범 기간)"
   },
   "status": {
     "auction": {
@@ -1054,7 +1056,8 @@
     "mockHint": "실제 결제 업체 연결 전 개발용 화면입니다. 버튼을 누르면 납부 완료로 처리됩니다.",
     "mockComplete": "테스트 결제 완료",
     "mockCancel": "취소하고 돌아가기",
-    "mockFailed": "처리하지 못했습니다. 테스트 결제가 꺼져 있을 수 있습니다."
+    "mockFailed": "처리하지 못했습니다. 테스트 결제가 꺼져 있을 수 있습니다.",
+    "freePilot": "시범 운영 기간이라 수수료가 무료입니다. 이 기간에 끝난 거래에는 청구서가 나오지 않습니다."
   },
   "adminSettings": {
     "title": "운영 설정",
@@ -1076,7 +1079,9 @@
     "blockOnOverdue": "기한이 지난 미납 수수료가 있으면 입찰 제한",
     "auctionReview": "경매 검수 (운영팀 승인 후 경매 시작)",
     "auctionReviewHint": "끄면 판매자가 신청하는 즉시 경매가 시작됩니다.",
-    "referralReward": "추천 보상 금액 (₸, 양쪽 각각, 0이면 보상 없음)"
+    "referralReward": "추천 보상 금액 (₸, 양쪽 각각, 0이면 보상 없음)",
+    "feesEnabled": "딜러 수수료 받기",
+    "feesEnabledHint": "끄면 시범 운영(무료)입니다. 켜면 그 뒤에 완료되는 거래부터 청구서가 나가고, 지난 거래는 청구하지 않습니다."
   },
   "errors": {
     "notFoundTitle": "페이지를 찾을 수 없습니다",

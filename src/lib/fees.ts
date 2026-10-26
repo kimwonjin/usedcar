@@ -20,3 +20,9 @@ export function dealerFee(price: number, bands: FeeBand[] = DEFAULT_FEE_BANDS): 
   const band = bands.find((b) => b.max_price === null || price <= b.max_price) ?? bands[bands.length - 1];
   return band.fee;
 }
+
+// 시범 운영 중에는 수수료를 받지 않는다 (관리자 설정 fees_enabled = off). 설정이 없으면 유료로 본다
+export async function loadFeesEnabled(supabase: SupabaseClient): Promise<boolean> {
+  const { data } = await supabase.from("app_settings").select("value").eq("key", "fees_enabled").maybeSingle();
+  return data?.value !== "off";
+}

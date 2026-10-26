@@ -34,6 +34,7 @@ export default async function AdminSettings({ params }: PageProps<"/[locale]/adm
             block_bidding_on_overdue: values.block_bidding_on_overdue ?? "true",
             auction_review: values.auction_review ?? "on",
             referral_reward: values.referral_reward ?? "5000",
+            fees_enabled: values.fees_enabled ?? "on",
           }}
         />
       </section>

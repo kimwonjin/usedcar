@@ -11,7 +11,7 @@ import { Link, redirect } from "@/i18n/navigation";
 import { getDealer, getUserId } from "@/lib/auth";
 import { formatDateTime } from "@/lib/datetime";
 import { loadDealerDepreciation, loadDealerGrades } from "@/lib/dealer-grades";
-import { dealerFee, loadFeeBands } from "@/lib/fees";
+import { dealerFee, loadFeeBands, loadFeesEnabled } from "@/lib/fees";
 import { formatTenge } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 
@@ -46,7 +46,7 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
 
   // 서로 관계없는 조회는 한 번에 보낸다
   const supabase = await createClient();
-  const [dealer, feeBands, { data: penaltyRows }, { data: bidRows }, { data: dealRows }, tp, { data: reviewRows }, tr] = await Promise.all([
+  const [dealer, feeBands, { data: penaltyRows }, { data: bidRows }, { data: dealRows }, tp, { data: reviewRows }, tr, feesEnabled] = await Promise.all([
     getDealer(userId),
     loadFeeBands(supabase),
     supabase
@@ -71,6 +71,7 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
     getTranslations("penalty"),
     supabase.rpc("dealer_reviews", { p_dealer_id: userId, p_limit: 10 }),
     getTranslations("dealerProfile"),
+    loadFeesEnabled(supabase),
   ]);
   if (!dealer) return redirect({ href: "/dealer/apply", locale });
   const penalties = (penaltyRows ?? []) as {
@@ -219,14 +220,14 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
                 </p>
                 <p className="price text-caption text-ink/60">
                   {formatTenge(price)}
-                  {deal.status !== "cancelled" && ` · ${t("fee")} ${formatTenge(dealerFee(price, feeBands))}`}
+                  {deal.status !== "cancelled" && ` · ${t("fee")} ${feesEnabled ? formatTenge(dealerFee(price, feeBands)) : t("feeFree")}`}
                 </p>
               </div>
               <StatusBadge kind="deal" status={deal.status} />
             </Link>
           );
         })}
-        {completed.length > 0 && (
+        {completed.length > 0 && feesEnabled && (
           <p className="text-right text-caption text-ink/60">
             {t("totalFees")} <span className="price font-semibold text-ink">{formatTenge(totalFees)}</span>
           </p>
