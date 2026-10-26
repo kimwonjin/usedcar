@@ -1007,7 +1007,8 @@
     "title": "최고가 변화",
     "aria": "현재 최고가 {amount}, 최고가 갱신 {count}회",
     "summary": "{from} → {to} · 최고가 {count}회 갱신",
-    "table": "기록 보기"
+    "table": "기록 보기",
+    "summaryOne": "첫 입찰 {amount} 이후 최고가 변동 없음"
   },
   "liveEdits": {
     "title": "경매 중 정보 보강",

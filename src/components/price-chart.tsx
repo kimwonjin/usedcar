@@ -125,7 +125,10 @@ export function PriceChart({ events, startAt, endAt }: { events: BidEvent[]; sta
         )}
       </div>
       <p className="text-caption text-ink/60">
-        {t("summary", { from: formatTenge(low), to: formatTenge(high), count: points.length })}
+        {/* 첫 입찰은 갱신이 아니므로 뺀다. 입찰이 한 번뿐이거나 그 뒤로 더 높은 입찰이 없으면 "변동 없음" */}
+        {points.length === 1
+          ? t("summaryOne", { amount: formatTenge(high) })
+          : t("summary", { from: formatTenge(low), to: formatTenge(high), count: points.length - 1 })}
       </p>
       <details className="text-caption">
         <summary className="cursor-pointer text-ink/60">{t("table")}</summary>
