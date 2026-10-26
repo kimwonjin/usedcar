@@ -26,7 +26,7 @@ export async function POST(request: Request) {
       paymentId: payment.id as string,
       amount: payment.amount as number,
       currency: "KZT",
-      description: (payment.description as string | null) ?? "Satu",
+      description: (payment.description as string | null) ?? "Garajym",
       locale: lang,
       returnUrl: `/${lang}/dealer/billing`,
     });

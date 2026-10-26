@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Satu",
+    "appName": "Garajym",
     "verifiedDealer": "승인 딜러",
     "depreciationReview": "감가 심사",
     "timeLeft": "남은 시간",
@@ -445,7 +445,7 @@
         },
         "transfer": {
           "title": "명의 이전 확인",
-          "desc": "딜러가 10일 안에 명의 이전 증빙을 올리고 Satu가 확인합니다"
+          "desc": "딜러가 10일 안에 명의 이전 증빙을 올리고 Garajym이 확인합니다"
         }
       }
     },
@@ -1258,15 +1258,15 @@
     }
   },
   "meta": {
-    "title": "Satu — 알마티 내 차 팔기 경매",
+    "title": "Garajym — 알마티 내 차 팔기 경매",
     "description": "사진만 올리면 승인된 알마티 딜러들이 48시간 동안 경쟁 입찰합니다. 흥정 없이 최고가로, 수수료 무료.",
-    "ogAlt": "Satu — 알마티 내 차 팔기 경매",
+    "ogAlt": "Garajym — 알마티 내 차 팔기 경매",
     "ogPoint1": "48시간 경쟁 입찰",
     "ogPoint2": "승인된 딜러만",
     "ogPoint3": "판매자 수수료 0원"
   },
   "install": {
-    "title": "Satu를 홈 화면에 추가하세요",
+    "title": "Garajym을 홈 화면에 추가하세요",
     "ios": "Safari 아래쪽 공유 버튼<share></share>을 누르고 <b>홈 화면에 추가</b>를 고르세요. 아이폰은 설치해야 입찰·경매 알림을 받을 수 있습니다.",
     "android": "앱처럼 바로 열리고, 새 매물·입찰 알림을 놓치지 않습니다.",
     "install": "설치하기",
@@ -1326,7 +1326,7 @@
     "send": "보내기",
     "replyPlaceholder": "추가로 남길 내용",
     "replyPlaceholderAdmin": "답변 입력",
-    "operator": "Satu 운영팀",
+    "operator": "Garajym 운영팀",
     "customer": "고객",
     "me": "나",
     "closedHint": "종료된 문의입니다. 추가 문의는 새로 남겨 주세요.",
@@ -1351,7 +1351,7 @@
   },
   "priceLookup": {
     "title": "내 차 시세 조회",
-    "intro": "제조사·모델·연식을 입력하면 Satu에서 실제로 팔린 비슷한 차량의 낙찰가를 보여 드립니다. 로그인 없이 무료입니다.",
+    "intro": "제조사·모델·연식을 입력하면 Garajym에서 실제로 팔린 비슷한 차량의 낙찰가를 보여 드립니다. 로그인 없이 무료입니다.",
     "make": "제조사",
     "model": "모델",
     "year": "연식",
@@ -1523,9 +1523,9 @@
   },
   "sold": {
     "title": "{car} 판매 완료",
-    "badge": "Satu에서 판매 완료",
+    "badge": "Garajym에서 판매 완료",
     "competed": "딜러 {count}곳이 경쟁했어요",
-    "howTitle": "Satu로 팔면",
+    "howTitle": "Garajym으로 팔면",
     "how1": "사진만 올리면 48시간 동안 딜러들이 입찰합니다",
     "how2": "흥정 없이 가장 좋은 조건의 딜러를 고르면 끝",
     "how3": "연락처는 고른 딜러 한 곳에만 공개됩니다",
@@ -1534,7 +1534,7 @@
     "shareTitle": "판매 결과를 공유해 보세요",
     "shareHint": "차를 팔려는 지인에게 도움이 됩니다. 번호판·이름·연락처는 공개되지 않아요.",
     "shareButton": "판매 결과 공유하기",
-    "shareText": "Satu에서 {car}, {price}에 팔았어요! 딜러 {count}곳이 경쟁했어요.",
+    "shareText": "Garajym에서 {car}, {price}에 팔았어요! 딜러 {count}곳이 경쟁했어요.",
     "copied": "링크를 복사했어요",
     "copyPrompt": "링크를 복사해 주세요"
   },
@@ -1603,7 +1603,7 @@
   },
   "referral": {
     "title": "친구 초대",
-    "hint": "내 링크로 가입한 친구가 Satu로 차를 팔면 나와 친구 모두 {amount}를 받습니다.",
+    "hint": "내 링크로 가입한 친구가 Garajym으로 차를 팔면 나와 친구 모두 {amount}를 받습니다.",
     "myCode": "내 추천 코드",
     "invited": "가입한 친구",
     "sold": "판매 완료",
@@ -1612,7 +1612,7 @@
     "share": "초대 링크 공유하기",
     "copied": "링크를 복사했어요",
     "copyPrompt": "링크를 복사해 주세요",
-    "shareText": "Satu로 차를 팔면 딜러들이 경쟁해서 사요. 이 링크로 가입해서 팔면 {amount}를 드려요!",
+    "shareText": "Garajym으로 차를 팔면 딜러들이 경쟁해서 사요. 이 링크로 가입해서 팔면 {amount}를 드려요!",
     "terms": "친구가 가입 7일 안에 링크로 들어와 첫 거래를 완료해야 합니다. 보상 지급은 운영팀이 확인 후 진행합니다."
   },
   "adminReferrals": {

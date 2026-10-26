@@ -7,7 +7,7 @@ import type { Locale } from "@/i18n/routing";
 export async function generateMetadata({ params }: PageProps<"/[locale]/guide">): Promise<Metadata> {
   const locale = (await params).locale as Locale;
   const g = guideContent[locale];
-  return { title: `${g.title} · Satu`, description: g.intro };
+  return { title: `${g.title} · Garajym`, description: g.intro };
 }
 
 // 판매 가이드: 진행 순서, 비용, 준비물, 가격 높이는 팁

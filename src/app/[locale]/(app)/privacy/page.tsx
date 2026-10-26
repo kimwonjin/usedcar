@@ -6,7 +6,7 @@ import type { Locale } from "@/i18n/routing";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/privacy">): Promise<Metadata> {
   const locale = (await params).locale as Locale;
-  return { title: `${legalContent[locale].privacy.title} · Satu` };
+  return { title: `${legalContent[locale].privacy.title} · Garajym` };
 }
 
 export default async function Page({ params }: PageProps<"/[locale]/privacy">) {

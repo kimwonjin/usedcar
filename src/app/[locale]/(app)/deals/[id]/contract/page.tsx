@@ -9,7 +9,7 @@ import { formatTenge } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { PrintButton } from "./print-button";
 
-export const metadata: Metadata = { title: "Договор купли-продажи · Satu", robots: { index: false } };
+export const metadata: Metadata = { title: "Договор купли-продажи · Garajym", robots: { index: false } };
 
 type ContractDeal = {
   id: string;
@@ -130,7 +130,7 @@ export default async function ContractPage({ params }: PageProps<"/[locale]/deal
             </div>
           ))}
         </div>
-        <p className="mt-6 text-[11px] text-ink/50">Satu · {deal.id.slice(0, 8)}</p>
+        <p className="mt-6 text-[11px] text-ink/50">Garajym · {deal.id.slice(0, 8)}</p>
       </article>
     </div>
   );

@@ -11,15 +11,15 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/sold/[id
   const { locale, id } = await params;
   const t = await getTranslations({ locale: locale as Locale, namespace: "sold" });
   const sale = await loadPublicSale(id);
-  if (!sale) return { title: "Satu", robots: { index: false } };
+  if (!sale) return { title: "Garajym", robots: { index: false } };
   const car = `${sale.make} ${sale.model} ${sale.year}`;
   const title = t("title", { car });
   const description = t("shareText", { car, price: formatTenge(sale.price), count: sale.bidders });
   return {
-    title: `${title} · Satu`,
+    title: `${title} · Garajym`,
     description,
     // 레이아웃의 사이트 소개 대신 이 판매 결과로 미리보기를 채운다 (이미지는 opengraph-image.tsx)
-    openGraph: { type: "website", siteName: "Satu", title, description },
+    openGraph: { type: "website", siteName: "Garajym", title, description },
     // 개인이 공유한 결과라 검색에는 올리지 않는다 (미리보기는 그대로 보인다)
     robots: { index: false },
   };

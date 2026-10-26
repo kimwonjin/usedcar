@@ -8,7 +8,7 @@ import { PriceLookup } from "./price-lookup";
 export async function generateMetadata({ params }: PageProps<"/[locale]/price">): Promise<Metadata> {
   const locale = (await params).locale as Locale;
   const t = await getTranslations({ locale, namespace: "priceLookup" });
-  return { title: `${t("title")} · Satu`, description: t("intro") };
+  return { title: `${t("title")} · Garajym`, description: t("intro") };
 }
 
 // 무료 시세 조회 (로그인 불필요)

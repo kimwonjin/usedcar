@@ -3,8 +3,8 @@ import type { MetadataRoute } from "next";
 // 홈 화면에 추가(PWA). 아이폰은 이렇게 설치해야 푸시 알림을 받을 수 있다.
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Satu — 내 차 팔기 경매",
-    short_name: "Satu",
+    name: "Garajym — 내 차 팔기 경매",
+    short_name: "Garajym",
     start_url: "/",
     display: "standalone",
     background_color: "#F7F8FA",

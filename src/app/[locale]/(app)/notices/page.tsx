@@ -9,7 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 export async function generateMetadata({ params }: PageProps<"/[locale]/notices">): Promise<Metadata> {
   const locale = (await params).locale as Locale;
   const t = await getTranslations({ locale, namespace: "notices" });
-  return { title: `${t("title")} · Satu` };
+  return { title: `${t("title")} · Garajym` };
 }
 
 // 공지사항 목록 (로그인 불필요). 게시 기간 안의 공지만 RLS로 읽힌다

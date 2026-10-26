@@ -15,12 +15,12 @@ export default async function Image({ params }: { params: Promise<{ locale: stri
   const locale = hasLocale(routing.locales, raw) ? raw : "ru";
   const t = await getTranslations({ locale, namespace: "sold" });
   const sale = await loadPublicSale(id);
-  const car = sale ? `${sale.make} ${sale.model} · ${sale.year}` : "Satu";
+  const car = sale ? `${sale.make} ${sale.model} · ${sale.year}` : "Garajym";
   const price = sale ? formatTenge(sale.price) : "";
   const meta = sale ? formatKm(sale.mileage_km) : "";
   const competed = sale ? t("competed", { count: sale.bidders }) : "";
   const badge = t("badge");
-  const { fonts, fontFamily } = await loadOgFonts(["Satu", "Almaty", "🎉", badge, car, price, meta, competed].join(""));
+  const { fonts, fontFamily } = await loadOgFonts(["Garajym", "Almaty", "🎉", badge, car, price, meta, competed].join(""));
 
   return new ImageResponse(
     (
@@ -51,9 +51,9 @@ export default async function Image({ params }: { params: Promise<{ locale: stri
               fontWeight: 700,
             }}
           >
-            S
+            G
           </div>
-          <div style={{ display: "flex", fontSize: 42, fontWeight: 700 }}>Satu</div>
+          <div style={{ display: "flex", fontSize: 42, fontWeight: 700 }}>Garajym</div>
           <div style={{ display: "flex", fontSize: 28, color: "#FFFFFF99", marginLeft: 6 }}>Almaty</div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>

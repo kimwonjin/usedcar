@@ -13,7 +13,7 @@ export const revalidate = 300;
 export async function generateMetadata({ params }: PageProps<"/[locale]/dealers">): Promise<Metadata> {
   const locale = (await params).locale as Locale;
   const c = dealerIntroContent[locale];
-  return { title: `${c.title} · Satu`, description: c.intro };
+  return { title: `${c.title} · Garajym`, description: c.intro };
 }
 
 // 딜러 모집: 장점, 가입 절차, 조건, 규칙, 수수료표

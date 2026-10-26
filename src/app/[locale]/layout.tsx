@@ -29,12 +29,12 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
     description: t("description"),
     openGraph: {
       type: "website",
-      siteName: "Satu",
+      siteName: "Garajym",
       title: t("title"),
       description: t("description"),
       locale: OG_LOCALES[locale],
     },
-    appleWebApp: { capable: true, title: "Satu", statusBarStyle: "default" },
+    appleWebApp: { capable: true, title: "Garajym", statusBarStyle: "default" },
     other: { google: "notranslate" },
     icons: { icon: "/icon-192.png", apple: "/apple-touch-icon.png" },
   };

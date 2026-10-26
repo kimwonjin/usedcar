@@ -7,7 +7,7 @@ import type { Locale } from "@/i18n/routing";
 export async function generateMetadata({ params }: PageProps<"/[locale]/faq">): Promise<Metadata> {
   const locale = (await params).locale as Locale;
   const t = await getTranslations({ locale, namespace: "legal" });
-  return { title: `${t("faq")} · Satu` };
+  return { title: `${t("faq")} · Garajym` };
 }
 
 // 자주 묻는 질문: 질문을 누르면 답이 펼쳐진다

@@ -21,7 +21,7 @@ export default async function Image({ params }: { params: Promise<{ locale: stri
   const tl = await getTranslations({ locale, namespace: "landing" });
   const headline = tl("headline");
   const points = [t("ogPoint1"), t("ogPoint2"), t("ogPoint3")];
-  const allText = ["Satu", "Almaty", headline, ...points, "✓"].join("");
+  const allText = ["Garajym", "Almaty", headline, ...points, "✓"].join("");
   const { fonts, fontFamily } = await loadOgFonts(allText);
 
   return new ImageResponse(
@@ -53,9 +53,9 @@ export default async function Image({ params }: { params: Promise<{ locale: stri
               fontWeight: 700,
             }}
           >
-            S
+            G
           </div>
-          <div style={{ display: "flex", fontSize: 48, fontWeight: 700 }}>Satu</div>
+          <div style={{ display: "flex", fontSize: 48, fontWeight: 700 }}>Garajym</div>
           <div style={{ display: "flex", fontSize: 30, color: "#FFFFFF99", marginLeft: 8 }}>Almaty</div>
         </div>
         <div style={{ display: "flex", fontSize: 60, fontWeight: 700, lineHeight: 1.2, maxWidth: 1050 }}>{headline}</div>

@@ -51,7 +51,7 @@ export function ReferralCard({ stats, reward }: { stats: ReferralStats; reward: 
     const text = t("shareText", { amount: formatTenge(reward) });
     if (navigator.share) {
       try {
-        await navigator.share({ title: "Satu", text, url });
+        await navigator.share({ title: "Garajym", text, url });
         return;
       } catch (e) {
         if ((e as Error).name === "AbortError") return;

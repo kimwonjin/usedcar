@@ -24,9 +24,9 @@ function verify(body: string, headers: Headers): boolean {
 }
 
 const templates: Record<string, (code: string) => string> = {
-  ko: (code) => `[Satu] 인증번호 ${code}`,
-  ru: (code) => `[Satu] Код подтверждения: ${code}`,
-  kk: (code) => `[Satu] Растау коды: ${code}`,
+  ko: (code) => `[Garajym] 인증번호 ${code}`,
+  ru: (code) => `[Garajym] Код подтверждения: ${code}`,
+  kk: (code) => `[Garajym] Растау коды: ${code}`,
 };
 
 export async function POST(request: Request) {
