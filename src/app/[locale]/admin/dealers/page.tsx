@@ -9,6 +9,7 @@ import { formatDateTime } from "@/lib/datetime";
 import { signedUrlMap } from "@/lib/storage";
 import { createClient } from "@/lib/supabase/server";
 import { DealerActions } from "./dealer-actions";
+import { PenaltyList, type PenaltyRow } from "./penalty-list";
 
 const STATUSES = ["pending", "approved", "rejected", "suspended"] as const;
 
@@ -33,7 +34,17 @@ export default async function AdminDealers({ params, searchParams }: PageProps<"
     .order("created_at", { ascending: status !== "pending" ? false : true })
     .overrideTypes<DealerRow[], { merge: false }>();
   const dealers = data ?? [];
-  const photoUrls = await signedUrlMap(supabase, "dealer-docs", dealers.flatMap((d) => d.shop_photo_paths));
+  const [photoUrls, { data: penaltyData }] = await Promise.all([
+    signedUrlMap(supabase, "dealer-docs", dealers.flatMap((d) => d.shop_photo_paths)),
+    dealers.length
+      ? supabase
+          .from("dealer_penalties")
+          .select("id, dealer_id, reason, action, note, created_at, revoked_at, revoke_note")
+          .in("dealer_id", dealers.map((d) => d.id))
+          .order("created_at", { ascending: false })
+      : Promise.resolve({ data: [] }),
+  ]);
+  const penalties = (penaltyData ?? []) as (PenaltyRow & { dealer_id: string })[];
 
   return (
     <div className="flex flex-col gap-4">
@@ -97,12 +108,10 @@ export default async function AdminDealers({ params, searchParams }: PageProps<"
                 )}
               </div>
             </div>
-            <DealerActions
-              dealerId={dealer.id}
-              status={dealer.status}
-              warningCount={dealer.warning_count}
-              blocked={Boolean(dealer.bid_blocked_until && new Date(dealer.bid_blocked_until) > new Date())}
-            />
+            <DealerActions dealerId={dealer.id} status={dealer.status} />
+            <div className="md:col-span-2">
+              <PenaltyList penalties={penalties.filter((p) => p.dealer_id === dealer.id)} />
+            </div>
           </article>
         ))}
       </div>

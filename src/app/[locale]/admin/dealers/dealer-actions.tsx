@@ -9,13 +9,9 @@ import { createClient } from "@/lib/supabase/client";
 export function DealerActions({
   dealerId,
   status,
-  warningCount,
-  blocked,
 }: {
   dealerId: string;
   status: DealerStatus;
-  warningCount: number;
-  blocked: boolean;
 }) {
   const t = useTranslations("admin");
   const router = useRouter();
@@ -36,27 +32,17 @@ export function DealerActions({
     else router.refresh();
   }
 
+  // 관리자 경고: 노쇼·취소와 같은 단계로 쌓이고 이력에 남는다 (사유는 위 입력칸)
   async function warn() {
     setBusy(true);
-    const { error } = await createClient()
-      .from("dealers")
-      .update({ warning_count: warningCount + 1 })
-      .eq("id", dealerId);
+    setError(false);
+    const { error } = await createClient().rpc("admin_warn_dealer", { p_dealer_id: dealerId, p_note: reason.trim() });
     setBusy(false);
     if (error) setError(true);
-    else router.refresh();
-  }
-
-  // 입찰 제한 해제와 경고 초기화 (관리자 판단으로 패널티를 되돌릴 때)
-  async function clearPenalty() {
-    setBusy(true);
-    const { error } = await createClient()
-      .from("dealers")
-      .update({ bid_blocked_until: null, warning_count: 0 })
-      .eq("id", dealerId);
-    setBusy(false);
-    if (error) setError(true);
-    else router.refresh();
+    else {
+      setReason("");
+      router.refresh();
+    }
   }
 
   const button = "h-10 rounded-lg px-4 text-body font-semibold disabled:opacity-40";
@@ -82,20 +68,16 @@ export function DealerActions({
           )}
           {status === "approved" && (
             <>
-              <button type="button" disabled={busy} onClick={warn} className={`${button} border border-ink/20`}>
+              <button type="button" disabled={busy || !reason.trim()} onClick={warn} className={`${button} border border-ink/20`}>
                 {t("warn")}
               </button>
+              <p className="max-w-56 text-caption text-ink/50">{t("warnHint")}</p>
               <button type="button" disabled={busy} onClick={() => review("suspended")} className={`${button} bg-danger text-white`}>
                 {t("suspend")}
               </button>
             </>
           )}
         </>
-      )}
-      {(blocked || warningCount > 0) && status === "approved" && (
-        <button type="button" disabled={busy} onClick={clearPenalty} className={`${button} border border-ink/20 text-ink/70`}>
-          {t("clearPenalty")}
-        </button>
       )}
       {error && <p className="text-caption text-danger">{t("actionFailed")}</p>}
     </div>

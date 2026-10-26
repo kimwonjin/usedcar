@@ -110,7 +110,7 @@
     "unsuspend": "정지 해제",
     "reject": "거절",
     "reasonPlaceholder": "거절·정지 사유",
-    "warn": "경고 +1",
+    "warn": "경고 주기",
     "suspend": "입찰 정지",
     "auctionsTitle": "경매 관리",
     "all": "전체",
@@ -138,7 +138,6 @@
     "approveClaim": "감가 승인",
     "rejectClaim": "감가 거절",
     "blockedUntil": "입찰 제한",
-    "clearPenalty": "패널티 초기화",
     "tabReports": "신고",
     "tabUsers": "사용자",
     "usersTitle": "사용자 검색",
@@ -204,7 +203,13 @@
     "transferSubmitted": "제출",
     "transfersEmpty": "해당 거래가 없습니다.",
     "tabNotices": "공지",
-    "tabInsights": "지표"
+    "tabInsights": "지표",
+    "warnHint": "경고도 노쇼·취소와 같은 단계로 쌓입니다 (1회 경고 → 2회 7일 제한 → 3회 정지).",
+    "penaltyHistory": "패널티 이력",
+    "revoke": "철회",
+    "revokeConfirm": "이 패널티를 철회할까요? 경고 수가 1 줄고, 7일 제한·정지였으면 풀립니다.",
+    "revokeNotePlaceholder": "철회 사유 (선택, 딜러에게 보입니다)",
+    "noPenalties": "패널티 없음"
   },
   "carForm": {
     "back": "이전",
@@ -769,6 +774,10 @@
     "complete_nudge": {
       "title": "거래를 마치셨나요?",
       "body": "{car} · 대금을 받고 차를 넘겼다면 '대금 받고 거래 완료'를 눌러 주세요"
+    },
+    "penalty_revoked": {
+      "title": "패널티가 철회되었습니다 ✓",
+      "body": "운영팀이 확인 후 패널티 1건을 철회했습니다. 내 활동에서 확인하세요"
     }
   },
   "notificationCenter": {
@@ -840,13 +849,16 @@
     "ladder": "노쇼·딜러 사정 취소 1회 경고 → 2회 7일 입찰 제한 → 3회 입찰 정지",
     "reasons": {
       "dealer_no_show": "노쇼",
-      "dealer_cancelled": "딜러 사정 취소"
+      "dealer_cancelled": "딜러 사정 취소",
+      "admin_warning": "운영팀 경고"
     },
     "actions": {
       "warning": "경고",
       "blocked_7d": "7일 입찰 제한",
       "suspended": "입찰 정지"
-    }
+    },
+    "revoked": "철회됨",
+    "revokeNote": "철회 사유"
   },
   "legal": {
     "terms": "이용약관",

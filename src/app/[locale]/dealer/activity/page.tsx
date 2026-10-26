@@ -49,7 +49,7 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
     loadFeeBands(supabase),
     supabase
       .from("dealer_penalties")
-      .select("id, reason, action, created_at")
+      .select("id, reason, action, note, created_at, revoked_at, revoke_note")
       .eq("dealer_id", userId)
       .order("created_at", { ascending: false }),
     supabase
@@ -71,7 +71,15 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
     getTranslations("dealerProfile"),
   ]);
   if (!dealer) return redirect({ href: "/dealer/apply", locale });
-  const penalties = (penaltyRows ?? []) as { id: string; reason: string; action: string; created_at: string }[];
+  const penalties = (penaltyRows ?? []) as {
+    id: string;
+    reason: string;
+    action: string;
+    note: string | null;
+    created_at: string;
+    revoked_at: string | null;
+    revoke_note: string | null;
+  }[];
   const blockedUntil =
     dealer.bid_blocked_until && new Date(dealer.bid_blocked_until) > new Date() ? dealer.bid_blocked_until : null;
   const bids = bidRows ?? [];
@@ -144,11 +152,20 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
           <p className="text-caption text-ink/60">{tp("ladder")}</p>
           <ul className="flex flex-col gap-1 text-caption">
             {penalties.map((p) => (
-              <li key={p.id} className="flex justify-between gap-2">
-                <span>
-                  {tp(`reasons.${p.reason}` as Parameters<typeof tp>[0])} → <b>{tp(`actions.${p.action}` as Parameters<typeof tp>[0])}</b>
-                </span>
-                <span className="shrink-0 text-ink/50">{formatDateTime(p.created_at, locale)}</span>
+              <li key={p.id} className="flex flex-col gap-0.5">
+                <div className="flex justify-between gap-2">
+                  <span className={p.revoked_at ? "text-ink/40 line-through" : ""}>
+                    {tp(`reasons.${p.reason}` as Parameters<typeof tp>[0])} → <b>{tp(`actions.${p.action}` as Parameters<typeof tp>[0])}</b>
+                    {p.note && ` (${p.note})`}
+                  </span>
+                  <span className="shrink-0 text-ink/50">{formatDateTime(p.created_at, locale)}</span>
+                </div>
+                {p.revoked_at && (
+                  <span className="text-success">
+                    ✓ {tp("revoked")}
+                    {p.revoke_note && ` · ${tp("revokeNote")}: ${p.revoke_note}`}
+                  </span>
+                )}
               </li>
             ))}
           </ul>
