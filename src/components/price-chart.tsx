@@ -2,7 +2,7 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useRef, useState } from "react";
-import { intlLocales } from "@/lib/datetime";
+import { formatLocale } from "@/lib/datetime";
 import { formatTenge } from "@/lib/format";
 
 export type BidEvent = { amount: number; created_at: string };
@@ -72,7 +72,8 @@ export function PriceChart({ events, startAt, endAt }: { events: BidEvent[]; sta
   }
 
   const time = (ms: number) =>
-    new Intl.DateTimeFormat(intlLocales[locale as keyof typeof intlLocales] ?? locale, { timeZone: "Asia/Almaty", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" }).format(ms);
+    // 카자흐어는 서버와 브라우저의 날짜 데이터가 달라 화면이 어긋나므로 숫자 형식(formatLocale)으로 통일
+    new Intl.DateTimeFormat(formatLocale(locale), { timeZone: "Asia/Almaty", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(ms);
 
   return (
     <section className="flex flex-col gap-2 rounded-xl bg-white p-4 shadow-sm">

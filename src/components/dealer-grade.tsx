@@ -35,7 +35,9 @@ export function DepreciationInfo({ record, amount }: { record: DealerDepreciatio
     <div className="flex flex-col text-caption">
       <p className={`price font-semibold ${tone}`}>
         {enough && record.avgRate >= HIGH_RATE && "⚠️ "}
-        {t("rate", { rate: record.avgRate.toFixed(1), deals: record.deals, reduced: record.reduced })}
+        {record.reduced === 0
+          ? t("noReduction", { deals: record.deals })
+          : t("rate", { rate: record.avgRate.toFixed(1), deals: record.deals, reduced: record.reduced })}
         {!enough && <span className="font-normal text-ink/50"> · {t("few")}</span>}
       </p>
       {expected !== null && <p className="price text-ink/60">{t("expected", { amount: formatTenge(expected) })}</p>}

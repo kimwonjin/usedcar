@@ -1674,6 +1674,7 @@
     "none": "감가 기록 없음 (완료 거래 없음)",
     "rate": "방문 후 평균 감가 {rate}% · 거래 {deals}건 중 {reduced}건 감가",
     "few": "기록 적음",
-    "expected": "이 딜러의 평균 감가를 반영하면 약 {amount}"
+    "expected": "이 딜러의 평균 감가를 반영하면 약 {amount}",
+    "noReduction": "방문 후 감가 없음 · 거래 {deals}건 모두 합의가 그대로"
   }
 }
