@@ -91,6 +91,7 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
   const bidCount = (stats?.[0]?.bid_count as number | undefined) ?? 0;
   const isLive = auction.status === "live";
   const own = auction.seller_id === userId; // 딜러가 판매자로 올린 자기 차
+  const approved = dealer?.status === "approved";
   // 다른 딜러에게 팔린 경매: 낙찰가와 내 순위 (다음 입찰 참고용)
   const result =
     auction.status === "accepted" && myBid && !deal
@@ -166,8 +167,19 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
       <AuctionQa auctionId={id} role="dealer" canAsk={isLive && !own && dealer?.status === "approved"} />
 
       {isLive && own && <p className="rounded-xl bg-white p-4 text-body text-ink/70 shadow-sm">{tb("ownAuction")}</p>}
-      {isLive && !own && blockedUntil && <BidBlockNotice until={blockedUntil} />}
-      {isLive && !own && !blockedUntil && (
+      {/* 판매자·관리자·심사 중인 딜러로 들어온 경우: 입찰 칸 대신 이유를 알려 준다 */}
+      {isLive && !own && !approved && (
+        <section className="flex flex-col gap-2 rounded-xl bg-white p-4 shadow-sm">
+          <p className="text-body font-semibold">{tb(dealer ? "notApproved" : "notDealer")}</p>
+          {!dealer && (
+            <Link href="/dealer/apply" className="text-body font-semibold text-steppe">
+              {tb("applyLink")} →
+            </Link>
+          )}
+        </section>
+      )}
+      {isLive && !own && approved && blockedUntil && <BidBlockNotice until={blockedUntil} />}
+      {isLive && !own && approved && !blockedUntil && (
         <BidPanel
           auctionId={id}
           myAmount={(myBid?.amount as number | undefined) ?? null}

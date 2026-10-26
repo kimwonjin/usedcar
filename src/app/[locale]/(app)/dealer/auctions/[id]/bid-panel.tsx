@@ -57,6 +57,8 @@ export function BidPanel({
             ? t("blocked")
             : error.message.includes("overdue")
               ? t("overdue")
+          : error.message.includes("not approved")
+            ? t("notApproved")
           : error.message.includes("not live")
             ? t("closed")
             : error.message.includes("own auction")
