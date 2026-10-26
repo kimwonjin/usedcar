@@ -4,13 +4,26 @@ import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 
 // 판매 완료 후 결과 공유: 휴대폰 공유 창(카톡·WhatsApp·Telegram 등), 안 되면 링크 복사
-export function ShareSale({ dealId, car, price, bidders }: { dealId: string; car: string; price: string; bidders: number }) {
+export function ShareSale({
+  dealId,
+  car,
+  price,
+  bidders,
+  refCode,
+}: {
+  dealId: string;
+  car: string;
+  price: string;
+  bidders: number;
+  refCode: string | null;
+}) {
   const t = useTranslations("sold");
   const locale = useLocale();
   const [copied, setCopied] = useState(false);
 
   async function share() {
-    const url = `${window.location.origin}/${locale}/sold/${dealId}`;
+    // 내 추천 코드를 붙여, 링크로 들어와 판매한 친구가 생기면 보상을 받는다
+    const url = `${window.location.origin}/${locale}/sold/${dealId}${refCode ? `?ref=${refCode}` : ""}`;
     const text = t("shareText", { car, price, count: bidders });
     if (navigator.share) {
       try {

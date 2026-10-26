@@ -24,9 +24,21 @@ export type DealDetail = {
       model: string;
       year: number;
       plate_number: string;
+      vin: string | null;
+      registration_doc_paths: string[];
+      owner_verified_at: string | null;
       car_photos: { slot: string; storage_path: string }[];
     };
   };
+};
+
+// 딜러 현장 점검표 (항목별 정상·문제)
+export type Inspection = {
+  items: Record<string, "ok" | "issue">;
+  note: string | null;
+  photo_paths: string[];
+  updated_at: string;
+  photoUrls: string[];
 };
 
 export type ChatMessage = { id: string; sender_id: string; kind: "text" | "phone"; body: string; created_at: string };
@@ -49,7 +61,7 @@ export async function loadDeal(dealId: string) {
   const { data: deal } = await supabase
     .from("deals")
     .select(
-      "id, status, agreed_price, final_price, meeting_at, meeting_place, seller_id, dealer_id, seller_rating, cancel_reason, auction_id, transfer_due_at, transfer_doc_paths, transfer_submitted_at, auctions(cars(id, make, model, year, plate_number, car_photos(slot, storage_path)))",
+      "id, status, agreed_price, final_price, meeting_at, meeting_place, seller_id, dealer_id, seller_rating, cancel_reason, auction_id, transfer_due_at, transfer_doc_paths, transfer_submitted_at, auctions(cars(id, make, model, year, plate_number, vin, registration_doc_paths, owner_verified_at, car_photos(slot, storage_path)))",
     )
     .eq("id", dealId)
     .maybeSingle()
@@ -62,10 +74,25 @@ export async function loadDeal(dealId: string) {
     .eq("deal_id", dealId)
     .order("created_at");
   const rows = (claimRows ?? []) as Omit<Claim, "photoUrls">[];
-  const [urls, transferUrls] = await Promise.all([
-    signedUrlMap(supabase, "claim-photos", rows.flatMap((c) => c.photo_paths)),
+  const { data: inspectionRow } = await supabase
+    .from("deal_inspections")
+    .select("items, note, photo_paths, updated_at")
+    .eq("deal_id", dealId)
+    .maybeSingle();
+  const inspectionPaths = (inspectionRow?.photo_paths as string[] | undefined) ?? [];
+  const regDocPaths = deal.auctions.cars.registration_doc_paths ?? [];
+  const [urls, transferUrls, regUrls] = await Promise.all([
+    signedUrlMap(supabase, "claim-photos", [...rows.flatMap((c) => c.photo_paths), ...inspectionPaths]),
     signedUrlMap(supabase, "transfer-docs", deal.transfer_doc_paths ?? []),
+    // 등록증은 거래가 취소되지 않은 딜러·판매자·관리자만 읽힌다 (Storage 정책)
+    signedUrlMap(supabase, "car-docs", regDocPaths),
   ]);
+  const inspection: Inspection | null = inspectionRow
+    ? {
+        ...(inspectionRow as Omit<Inspection, "photoUrls">),
+        photoUrls: inspectionPaths.map((p) => urls[p]).filter(Boolean),
+      }
+    : null;
   const claims: Claim[] = rows.map((c) => ({
     ...c,
     photoUrls: c.photo_paths.map((p) => urls[p]).filter(Boolean),
@@ -85,6 +112,8 @@ export async function loadDeal(dealId: string) {
     deal,
     claims,
     transferDocUrls: (deal.transfer_doc_paths ?? []).map((p) => transferUrls[p]).filter(Boolean),
+    regDocUrls: regDocPaths.map((p) => regUrls[p]).filter(Boolean),
+    inspection,
     supabase,
     messages: (messages ?? []) as ChatMessage[],
     counterpartName: ((counterpart?.[0] as { name: string | null } | undefined)?.name ?? null) as string | null,

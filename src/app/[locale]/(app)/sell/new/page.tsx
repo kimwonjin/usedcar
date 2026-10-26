@@ -39,7 +39,9 @@ type DraftCar = {
   pros: string | null;
   desired_price: number | null;
   car_photos: { id: string; slot: PhotoSlot; storage_path: string; sort_order: number }[];
-  auctions: { id: string }[];
+  registration_doc_paths: string[];
+  review_status: string | null;
+  auctions: { id: string; status: string }[];
 };
 
 // S3~S5 차량 등록. ?car=id 이면 작성 중이던 차량을 이어서 등록한다.
@@ -64,23 +66,26 @@ export default async function NewCarPage({ params, searchParams }: PageProps<"/[
     const { data: car } = await supabase
       .from("cars")
       .select(
-        "id, plate_number, make, model, year, mileage_km, fuel, transmission, steering, customs_cleared, body_type, color, engine_volume, vin, accident, owners, damage, frame_damage, options, defects, spare_key, tire_state, wheel_scratches, panel_scratches, repair_needed, pros, desired_price, car_photos(id, slot, storage_path, sort_order), auctions(id)",
+        "id, plate_number, make, model, year, mileage_km, fuel, transmission, steering, customs_cleared, body_type, color, engine_volume, vin, accident, owners, damage, frame_damage, options, defects, spare_key, tire_state, wheel_scratches, panel_scratches, repair_needed, pros, desired_price, car_photos(id, slot, storage_path, sort_order), registration_doc_paths, review_status, auctions(id, status)",
       )
       .eq("id", carId)
       .eq("seller_id", user.id)
       .maybeSingle()
       .overrideTypes<DraftCar, { merge: false }>();
-    // 이미 경매에 올린 차량은 이어서 등록할 수 없다
-    if (!car || car.auctions.length > 0) return redirect({ href: "/sell", locale });
+    // 진행 중이거나 팔린 경매가 있는 차, 검수 중인 차는 고칠 수 없다 (반려된 신청은 고쳐서 다시 신청)
+    const locked = car?.auctions.some((a) => ["live", "ended", "accepted"].includes(a.status)) || car?.review_status === "pending";
+    if (!car || locked) return redirect({ href: "/sell", locale });
 
     const urls = await signedUrlMap(supabase, "car-photos", car.car_photos.map((p) => p.storage_path));
     const photos: WizardInitial["photos"] = {};
     for (const photo of [...car.car_photos].sort((a, b) => a.sort_order - b.sort_order)) {
       (photos[photo.slot] ??= []).push({ id: photo.id, path: photo.storage_path, preview: urls[photo.storage_path] ?? "" });
     }
+    const docUrls = await signedUrlMap(supabase, "car-docs", car.registration_doc_paths);
     initial = {
       carId: car.id,
       photos,
+      docs: car.registration_doc_paths.map((path) => ({ path, preview: docUrls[path] ?? "" })),
       draft: {
         plate: car.plate_number,
         make: car.make,
@@ -120,5 +125,15 @@ export default async function NewCarPage({ params, searchParams }: PageProps<"/[
     year: /^\d{4}$/.test(text(year, 4)) ? text(year, 4) : "",
   };
 
-  return <CarWizard userId={user.id} currentYear={almatyYear()} initial={initial} prefill={prefill} />;
+  // 경매 검수가 켜져 있으면 마지막 버튼을 "검수 신청"으로 보여준다
+  const { data: reviewSetting } = await (await createClient())
+    .from("app_settings")
+    .select("value")
+    .eq("key", "auction_review")
+    .maybeSingle();
+  const reviewOn = (reviewSetting?.value ?? "on") === "on";
+
+  return (
+    <CarWizard userId={user.id} currentYear={almatyYear()} initial={initial} prefill={prefill} reviewOn={reviewOn} />
+  );
 }

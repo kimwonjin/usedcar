@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Badge } from "@/components/badge";
 import { ClaimCard } from "@/components/deal/claim-card";
+import { InspectionView } from "@/components/deal/inspection";
 import { DealChat } from "@/components/deal/deal-chat";
 import { ReportButton } from "@/components/deal/report-button";
 import { ShareSale } from "@/components/deal/share-sale";
@@ -34,7 +35,7 @@ export default async function SellerDealPage({ params }: PageProps<"/[locale]/se
   if (!user) return redirect({ href: "/login?next=/sell", locale });
   const loaded = await loadDeal(id);
   if (!loaded || loaded.deal.seller_id !== user.id) notFound();
-  const { deal, claims, supabase, messages, transferDocUrls } = loaded;
+  const { deal, claims, supabase, messages, transferDocUrls, inspection } = loaded;
   const car = deal.auctions.cars;
 
   const { data: dealer } = await supabase
@@ -65,10 +66,22 @@ export default async function SellerDealPage({ params }: PageProps<"/[locale]/se
   }
 
   // 판매 결과 공유 카드에 넣을 경쟁 딜러 수
-  const bidders =
+  const [bidders, refCode] =
     deal.status === "completed"
-      ? ((await supabase.from("bids").select("id", { count: "exact", head: true }).eq("auction_id", deal.auction_id)).count ?? 0)
-      : 0;
+      ? await Promise.all([
+          supabase
+            .from("bids")
+            .select("id", { count: "exact", head: true })
+            .eq("auction_id", deal.auction_id)
+            .then(({ count }) => count ?? 0),
+          supabase
+            .from("profiles")
+            .select("referral_code")
+            .eq("id", user.id)
+            .maybeSingle()
+            .then(({ data }) => (data?.referral_code as string | null) ?? null),
+        ])
+      : [0, null];
 
   return (
     <div className="flex flex-col gap-4 pb-6">
@@ -123,6 +136,7 @@ export default async function SellerDealPage({ params }: PageProps<"/[locale]/se
       )}
 
       <MeetingForm dealId={deal.id} meetingAt={deal.meeting_at} meetingPlace={deal.meeting_place} editable={active} />
+      {inspection && <InspectionView inspection={inspection} />}
       {deal.status === "completed" && (
         <TransferStatus
           dealId={deal.id}
@@ -158,6 +172,7 @@ export default async function SellerDealPage({ params }: PageProps<"/[locale]/se
           car={`${car.make} ${car.model} ${car.year}`}
           price={formatTenge(deal.final_price ?? deal.agreed_price)}
           bidders={bidders}
+          refCode={refCode}
         />
       )}
       {reassign?.kind === "moved" && (

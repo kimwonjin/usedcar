@@ -57,7 +57,15 @@
     "continueDraft": "이어서 등록",
     "deleteDraft": "삭제",
     "deleteDraftConfirm": "작성 중인 차량을 삭제할까요? 올린 사진도 함께 지워집니다.",
-    "decideWithin": "결정 마감"
+    "decideWithin": "결정 마감",
+    "review": {
+      "title": "경매 신청",
+      "pending": "운영팀 확인 중",
+      "rejected": "보완 필요",
+      "pendingHint": "사진과 정보를 확인하고 있어요. 보통 1시간 안에 경매가 시작되고 알림을 드립니다.",
+      "reason": "보완 요청 사유",
+      "fix": "고쳐서 다시 신청하기"
+    }
   },
   "dealer": {
     "title": "경매 목록",
@@ -209,7 +217,10 @@
     "revoke": "철회",
     "revokeConfirm": "이 패널티를 철회할까요? 경고 수가 1 줄고, 7일 제한·정지였으면 풀립니다.",
     "revokeNotePlaceholder": "철회 사유 (선택, 딜러에게 보입니다)",
-    "noPenalties": "패널티 없음"
+    "noPenalties": "패널티 없음",
+    "tabReview": "검수",
+    "tabReferrals": "추천",
+    "pendingReview": "검수 대기"
   },
   "carForm": {
     "back": "이전",
@@ -348,7 +359,8 @@
       "desiredPriceHint": "입력하면 경매 결과와 비교해 보여 드립니다.",
       "start": "48시간 경매 시작",
       "promise": "연락처는 내가 고른 딜러 한 곳에게만 공개됩니다.",
-      "photosMissing": "필수 사진 7칸을 모두 채워 주세요."
+      "photosMissing": "필수 사진 7칸을 모두 채워 주세요.",
+      "submit": "검수 신청하기"
     },
     "error": "저장하지 못했습니다. 다시 시도해 주세요.",
     "plateMask": {
@@ -401,7 +413,8 @@
     },
     "startBlocked": {
       "plate": "이 번호판의 차량이 이미 경매나 거래 중입니다. 본인 차량이 맞다면 고객센터로 문의해 주세요.",
-      "tooMany": "동시에 진행할 수 있는 경매는 3대까지입니다. 진행 중인 경매가 끝난 뒤 올려 주세요."
+      "tooMany": "동시에 진행할 수 있는 경매는 3대까지입니다. 진행 중인 경매가 끝난 뒤 올려 주세요.",
+      "submitted": "이미 검수를 신청한 차량입니다. 운영팀이 확인하면 알림을 드려요."
     },
     "progress": "{pct}% 완료",
     "ready": {
@@ -415,7 +428,7 @@
       "steps": {
         "photos": {
           "title": "사진 등록",
-          "desc": "필수 사진을 올리면 바로 경매가 시작됩니다"
+          "desc": "필수 사진을 올리고 신청하면 운영팀 확인 후 경매가 시작됩니다 (보통 1시간 이내)"
         },
         "auction": {
           "title": "48시간 경매",
@@ -434,6 +447,15 @@
           "desc": "딜러가 10일 안에 명의 이전 증빙을 올리고 Satu가 확인합니다"
         }
       }
+    },
+    "ownerDocs": {
+      "title": "차량등록증 (техпаспорт) — 소유자 확인",
+      "hint": "선택이지만 올리면 딜러 화면에 '✓ 소유자 확인' 배지가 붙어 신뢰가 올라갑니다. 등록증은 운영팀과, 판매할 딜러를 고른 뒤 그 딜러에게만 보입니다.",
+      "alt": "차량등록증",
+      "remove": "삭제",
+      "add": "등록증 앞면 올리기",
+      "addBack": "뒷면 올리기",
+      "failed": "올리지 못했습니다. 다시 시도해 주세요."
     }
   },
   "dealerApply": {
@@ -476,7 +498,8 @@
     "rankOf": "{rank}위 / {count}명",
     "gap": "낙찰가와 차이",
     "pickedOther": "판매자가 가격 외 조건(평점·거래 이력 등)을 보고 다른 딜러를 골랐습니다.",
-    "gapHint": "다음 비슷한 차에 입찰할 때 참고하세요."
+    "gapHint": "다음 비슷한 차에 입찰할 때 참고하세요.",
+    "ownerVerified": "소유자 확인"
   },
   "bid": {
     "myBid": "내 입찰가",
@@ -562,7 +585,9 @@
     "desiredOptional": "비워 두면 희망가 없이 올립니다",
     "useTopBid": "최고 입찰가 {amount}로",
     "useMarket": "시세 {amount}로",
-    "clearDesired": "희망가 비우기"
+    "clearDesired": "희망가 비우기",
+    "relistSubmit": "다시 경매 신청하기 (운영팀 확인 후 시작)",
+    "relistPending": "다시 경매를 신청했어요. 운영팀이 확인하면 경매가 시작되고 알림을 드려요."
   },
   "deal": {
     "backToActivity": "내 활동",
@@ -627,7 +652,11 @@
     "dealerCancel": "거래 취소",
     "dealerCancelConfirm": "딜러 사정으로 거래를 취소하면 패널티가 쌓입니다 (1회 경고, 2회 7일 입찰 제한, 3회 입찰 정지). 취소할까요?",
     "dealerCancelHint": "딜러 사정 취소는 패널티 대상입니다",
-    "goToNextDeal": "차순위 딜러와의 새 거래로 이동"
+    "goToNextDeal": "차순위 딜러와의 새 거래로 이동",
+    "regDoc": "차량등록증",
+    "ownerVerified": "소유자 확인",
+    "regDocMissing": "판매자가 등록증을 올리지 않았습니다. 만날 때 원본과 신분증을 꼭 확인하세요.",
+    "claimNeedsInspection": "감가를 청구하려면 먼저 위 현장 점검표에서 문제 항목을 표시해 저장하세요."
   },
   "status": {
     "auction": {
@@ -829,6 +858,26 @@
     "penalty_revoked": {
       "title": "패널티가 철회되었습니다 ✓",
       "body": "운영팀이 확인 후 패널티 1건을 철회했습니다. 내 활동에서 확인하세요"
+    },
+    "admin_listing_review": {
+      "title": "새 경매 검수 요청",
+      "body": "{car} · 사진과 정보를 확인해 주세요"
+    },
+    "listing_approved": {
+      "title": "경매가 시작되었어요! 🚗",
+      "body": "{car} · 48시간 동안 딜러들이 입찰합니다"
+    },
+    "listing_rejected": {
+      "title": "경매 신청 보완이 필요해요",
+      "body": "{car} · {text}"
+    },
+    "inspection_done": {
+      "title": "딜러가 현장 점검표를 작성했어요",
+      "body": "{car} · 거래 화면에서 확인하세요"
+    },
+    "referral_reward": {
+      "title": "추천 보상이 생겼어요 🎁",
+      "body": "{amount} · 내 정보에서 확인하세요"
     }
   },
   "notificationCenter": {
@@ -1020,7 +1069,10 @@
     "modeMock": "테스트 결제 (개발용, 실제 돈 없음)",
     "modeLive": "실제 결제 (결제 업체 연결 후)",
     "dueDays": "수수료 납부 기한 (거래 완료 후 일수)",
-    "blockOnOverdue": "기한이 지난 미납 수수료가 있으면 입찰 제한"
+    "blockOnOverdue": "기한이 지난 미납 수수료가 있으면 입찰 제한",
+    "auctionReview": "경매 검수 (운영팀 승인 후 경매 시작)",
+    "auctionReviewHint": "끄면 판매자가 신청하는 즉시 경매가 시작됩니다.",
+    "referralReward": "추천 보상 금액 (₸, 양쪽 각각, 0이면 보상 없음)"
   },
   "errors": {
     "notFoundTitle": "페이지를 찾을 수 없습니다",
@@ -1484,5 +1536,96 @@
     "confirm": "{name}에게 {amount}에 판매할까요?",
     "none": "고를 수 있는 다른 입찰 딜러가 없습니다. 경매를 다시 올려 주세요.",
     "failed": "처리하지 못했습니다. 다시 시도해 주세요."
+  },
+  "adminReview": {
+    "title": "경매 검수",
+    "onHint": "판매자가 신청한 매물을 확인하고 승인하면 경매가 시작됩니다. 설정에서 검수를 끌 수 있습니다.",
+    "offHint": "지금은 검수가 꺼져 있어 신청하면 바로 경매가 시작됩니다. 아래 소유자 확인만 처리하세요.",
+    "empty": "검수를 기다리는 매물이 없습니다.",
+    "desired": "희망가",
+    "seller": "판매자",
+    "submittedAt": "신청",
+    "relist": "재경매 ({count}번째 이전 경매 있음)",
+    "photos": "사진 {count}장",
+    "docs": "차량등록증",
+    "noDocs": "차량등록증 없음",
+    "defects": "판매자 표시 하자",
+    "condition": "차량 상태 전체 보기",
+    "ownerTitle": "소유자 확인 대기 (진행 중 경매)",
+    "ownerVerified": "등록증 확인함 (번호판·VIN·이름 일치) → 딜러에게 '소유자 확인' 배지",
+    "rejectPlaceholder": "반려 사유 (판매자에게 보입니다) 예: 앞 사진이 흐립니다",
+    "reject": "반려",
+    "approve": "승인 · 경매 시작",
+    "verifyOwner": "소유자 확인",
+    "errors": {
+      "plate": "같은 번호판이 이미 경매·거래 중입니다.",
+      "tooMany": "판매자의 진행 중 경매가 3대입니다.",
+      "failed": "처리하지 못했습니다."
+    }
+  },
+  "inspection": {
+    "title": "현장 점검표",
+    "hint": "만난 자리에서 항목별로 확인해 저장하세요. 판매자에게도 보이고, 감가는 '문제' 항목이 있어야 청구할 수 있습니다.",
+    "items": {
+      "exterior": "외관 (사진·설명과 일치)",
+      "interior": "실내",
+      "engine": "엔진·소음·누유",
+      "transmission": "변속기",
+      "underbody": "하부·부식",
+      "tires": "타이어·휠",
+      "electronics": "전장·에어컨",
+      "documents": "서류·VIN·번호판 일치",
+      "mileage": "주행거리 일치",
+      "keys": "키 개수"
+    },
+    "ok": "정상",
+    "issue": "문제",
+    "notePlaceholder": "메모 (선택)",
+    "notePlaceholderIssue": "문제 항목을 구체적으로 적어 주세요. 예: 앞 범퍼 깊은 긁힘, 등록 정보에 없음",
+    "addPhoto": "점검 사진",
+    "answerAll": "모든 항목을 정상·문제 중 하나로 표시해야 저장할 수 있습니다.",
+    "failed": "저장하지 못했습니다.",
+    "saved": "저장됨",
+    "update": "점검표 수정",
+    "save": "점검표 저장",
+    "viewTitle": "딜러 현장 점검 결과",
+    "issuesFound": "문제 {count}건",
+    "allOk": "모든 항목 정상"
+  },
+  "referral": {
+    "title": "친구 초대",
+    "hint": "내 링크로 가입한 친구가 Satu로 차를 팔면 나와 친구 모두 {amount}를 받습니다.",
+    "myCode": "내 추천 코드",
+    "invited": "가입한 친구",
+    "sold": "판매 완료",
+    "pending": "받을 보상",
+    "paid": "지급 완료 {amount}",
+    "share": "초대 링크 공유하기",
+    "copied": "링크를 복사했어요",
+    "copyPrompt": "링크를 복사해 주세요",
+    "shareText": "Satu로 차를 팔면 딜러들이 경쟁해서 사요. 이 링크로 가입해서 팔면 {amount}를 드려요!",
+    "terms": "친구가 가입 7일 안에 링크로 들어와 첫 거래를 완료해야 합니다. 보상 지급은 운영팀이 확인 후 진행합니다."
+  },
+  "adminReferrals": {
+    "title": "추천 보상",
+    "referred": "추천으로 가입",
+    "pendingTotal": "지급 대기 합계",
+    "created": "발생",
+    "recipient": "받는 사람",
+    "role": "구분",
+    "referee": "추천받은 판매자",
+    "amount": "금액",
+    "status": "상태",
+    "roles": {
+      "referrer": "추천인",
+      "referee": "가입자"
+    },
+    "statuses": {
+      "paid": "지급 완료",
+      "void": "무효"
+    },
+    "empty": "아직 보상이 없습니다.",
+    "markPaid": "지급 완료",
+    "markPaidConfirm": "실제로 지급했나요? 지급 완료로 바꿉니다."
   }
 }

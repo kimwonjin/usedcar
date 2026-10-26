@@ -15,12 +15,14 @@ export function RelistButton({
   bidCount,
   desiredPrice,
   marketAvg,
+  reviewOn,
 }: {
   carId: string;
   topBid: number | null;
   bidCount: number;
   desiredPrice: number | null;
   marketAvg: number | null;
+  reviewOn: boolean;
 }) {
   const t = useTranslations("sellerAuction");
   const tf = useTranslations("carForm");
@@ -59,11 +61,15 @@ export function RelistButton({
           ? tf("startBlocked.plate")
           : error.message.includes("too many active auctions")
             ? tf("startBlocked.tooMany")
-            : t("relistFailed"),
+            : error.message.includes("already submitted")
+              ? tf("startBlocked.submitted")
+              : t("relistFailed"),
       );
       return;
     }
-    router.replace(`/sell/auctions/${data}`);
+    // 검수가 켜져 있으면 경매가 바로 만들어지지 않는다 (승인되면 알림)
+    router.replace(data ? `/sell/auctions/${data}` : "/sell");
+    router.refresh();
   }
 
   return (
@@ -118,7 +124,7 @@ export function RelistButton({
         onClick={relist}
         className="h-12 rounded-xl bg-navy text-body font-bold text-white disabled:opacity-40"
       >
-        {t("relist")}
+        {reviewOn ? t("relistSubmit") : t("relist")}
       </button>
       {error && <p className="text-caption text-danger">{error}</p>}
     </div>

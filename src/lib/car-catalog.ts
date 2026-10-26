@@ -94,6 +94,21 @@ export const FRAME_KINDS = ["repaired", "replaced"] as const;
 export type FrameKind = (typeof FRAME_KINDS)[number];
 export type FrameDamage = Partial<Record<FramePart, FrameKind>>;
 
+// 딜러 현장 점검표 항목 (감가 청구는 '문제' 항목이 있어야 한다)
+export const INSPECTION_ITEMS = [
+  "exterior",
+  "interior",
+  "engine",
+  "transmission",
+  "underbody",
+  "tires",
+  "electronics",
+  "documents",
+  "mileage",
+  "keys",
+] as const;
+export type InspectionItem = (typeof INSPECTION_ITEMS)[number];
+
 export const PANEL_SCRATCHES = ["none", "1_2", "3_4", "5_6", "7_plus"] as const;
 export type PanelScratches = (typeof PANEL_SCRATCHES)[number];
 

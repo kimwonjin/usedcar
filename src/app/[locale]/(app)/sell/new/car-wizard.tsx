@@ -36,6 +36,7 @@ import {
 import { formatKm, formatThousands } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
 import { PhotoStep, type PhotoMap } from "./photo-step";
+import { RegistrationDocs, type DocPhoto } from "./registration-docs";
 import { PriceEstimate } from "./price-estimate";
 import { ReadyStep } from "./ready-step";
 
@@ -102,7 +103,7 @@ const initialDraft: Draft = {
 
 const digitsOnly = (value: string) => value.replace(/\D/g, "");
 
-export type WizardInitial = { carId: string; draft: Draft; photos: PhotoMap };
+export type WizardInitial = { carId: string; draft: Draft; photos: PhotoMap; docs: DocPhoto[] };
 
 // S3 차량 정보 입력 → S4 사진 촬영 가이드 → S5 등록 확인. 한 화면에 질문 하나.
 export function CarWizard({
@@ -110,11 +111,13 @@ export function CarWizard({
   currentYear,
   initial,
   prefill,
+  reviewOn,
 }: {
   userId: string;
   currentYear: number;
   initial?: WizardInitial;
   prefill?: Partial<Pick<Draft, "make" | "model" | "year">>;
+  reviewOn: boolean;
 }) {
   const t = useTranslations("carForm");
   const tc = useTranslations("condition");
@@ -132,6 +135,7 @@ export function CarWizard({
   const localKey = `satu-car-draft:${userId}`;
   const [restorable, setRestorable] = useState<{ draft: Draft; stepIndex: number } | null>(null);
   const [photos, setPhotos] = useState<PhotoMap>(initial?.photos ?? {});
+  const [docs, setDocs] = useState<DocPhoto[]>(initial?.docs ?? []);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showOtherMake, setShowOtherMake] = useState(false);
@@ -243,7 +247,9 @@ export function CarWizard({
           ? t("startBlocked.plate")
           : message.includes("too many active auctions")
             ? t("startBlocked.tooMany")
-            : t("error"),
+            : message.includes("already submitted")
+              ? t("startBlocked.submitted")
+              : t("error"),
       );
     }
     setBusy(false);
@@ -693,7 +699,10 @@ export function CarWizard({
       {step === "ready" && <ReadyStep car={`${draft.make} ${draft.model} ${draft.year}`} />}
 
       {step === "photos" && carId && (
-        <PhotoStep userId={userId} carId={carId} photos={photos} onChange={setPhotos} />
+        <>
+          <PhotoStep userId={userId} carId={carId} photos={photos} onChange={setPhotos} />
+          <RegistrationDocs userId={userId} carId={carId} docs={docs} onChange={setDocs} />
+        </>
       )}
 
       {step === "review" && (
@@ -803,7 +812,7 @@ export function CarWizard({
           onClick={next}
           className="h-14 rounded-xl bg-navy text-subtitle font-bold text-white disabled:opacity-40"
         >
-          {busy ? t("saving") : step === "review" ? t("review.start") : step === "ready" ? `📷 ${t("ready.upload")}` : t("next")}
+          {busy ? t("saving") : step === "review" ? (reviewOn ? t("review.submit") : t("review.start")) : step === "ready" ? `📷 ${t("ready.upload")}` : t("next")}
         </button>
         {step === "ready" && (
           // 작성 중인 차량으로 저장돼 있어서, 내 차 팔기 화면에서 이어서 올릴 수 있다

@@ -12,6 +12,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/[locale]/a
       <TabsNav
         tabs={[
           { href: "/admin", label: t("tabDashboard"), exact: true },
+          { href: "/admin/review", label: t("tabReview") },
           { href: "/admin/insights", label: t("tabInsights") },
           { href: "/admin/dealers", label: t("tabDealers") },
           { href: "/admin/auctions", label: t("tabAuctions") },
@@ -21,6 +22,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/[locale]/a
           { href: "/admin/support", label: t("tabSupport") },
           { href: "/admin/payments", label: t("tabPayments") },
           { href: "/admin/users", label: t("tabUsers") },
+          { href: "/admin/referrals", label: t("tabReferrals") },
           { href: "/admin/notices", label: t("tabNotices") },
           { href: "/admin/settings", label: t("tabSettings") },
         ]}

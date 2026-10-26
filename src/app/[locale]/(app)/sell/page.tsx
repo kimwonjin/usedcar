@@ -16,6 +16,17 @@ import { DeleteDraftButton } from "./delete-draft-button";
 
 type DealSummary = { id: string; status: string; agreed_price: number; final_price: number | null; created_at: string };
 
+type SellerCar = {
+  id: string;
+  make: string;
+  model: string;
+  year: number;
+  review_status: "pending" | "approved" | "rejected" | null;
+  review_note: string | null;
+  submitted_at: string | null;
+  auctions: { id: string; status: string }[];
+};
+
 type SellerAuction = {
   id: string;
   status: string;
@@ -45,13 +56,16 @@ export default async function SellerHome({ params }: PageProps<"/[locale]/sell">
     // 경매에 한 번도 올리지 않은 차량 = 등록하다 멈춘 차량
     supabase
       .from("cars")
-      .select("id, make, model, year, auctions(id)")
+      .select("id, make, model, year, review_status, review_note, submitted_at, auctions(id, status)")
       .eq("seller_id", userId)
       .order("created_at", { ascending: false })
-      .overrideTypes<{ id: string; make: string; model: string; year: number; auctions: { id: string }[] }[], { merge: false }>(),
+      .overrideTypes<SellerCar[], { merge: false }>(),
   ]);
   const auctions = data ?? [];
-  const drafts = (carRows ?? []).filter((car) => car.auctions.length === 0);
+  const cars = carRows ?? [];
+  // 운영팀 검수 중이거나 반려된 신청 (처음 등록·다시 올리기 모두)
+  const inReview = cars.filter((car) => car.review_status === "pending" || car.review_status === "rejected");
+  const drafts = cars.filter((car) => car.auctions.length === 0 && !car.review_status);
 
   const live = auctions.filter((a) => a.status === "live");
   const ended = auctions.filter((a) => a.status === "ended");
@@ -73,6 +87,44 @@ export default async function SellerHome({ params }: PageProps<"/[locale]/sell">
       {auctions.length > 0 && <InstallPrompt />}
       {auctions.length > 0 && <PushToggle compact />}
 
+      {inReview.length > 0 && (
+        <Section title={t("review.title")}>
+          {inReview.map((car) => (
+            <div
+              key={car.id}
+              className={`flex flex-col gap-2 rounded-xl bg-white p-4 shadow-sm ${car.review_status === "rejected" ? "border border-danger/40" : ""}`}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-subtitle font-semibold">
+                  {car.make} {car.model} · {car.year}
+                </span>
+                <span
+                  className={`shrink-0 rounded-full px-2.5 py-1 text-caption font-semibold ${
+                    car.review_status === "pending" ? "bg-steppe/10 text-navy" : "bg-danger/10 text-danger"
+                  }`}
+                >
+                  {car.review_status === "pending" ? `⏳ ${t("review.pending")}` : t("review.rejected")}
+                </span>
+              </div>
+              {car.review_status === "pending" ? (
+                <p className="text-caption text-ink/60">{t("review.pendingHint")}</p>
+              ) : (
+                <>
+                  <p className="rounded-lg bg-danger/5 p-3 text-body">
+                    <span className="text-caption text-ink/60">{t("review.reason")}</span>
+                    <br />
+                    {car.review_note}
+                  </p>
+                  <Link href={`/sell/new?car=${car.id}`} className="text-body font-semibold text-steppe">
+                    {t("review.fix")} →
+                  </Link>
+                </>
+              )}
+            </div>
+          ))}
+        </Section>
+      )}
+
       {drafts.length > 0 && (
         <Section title={t("drafts")}>
           {drafts.map((car) => (
@@ -91,7 +143,7 @@ export default async function SellerHome({ params }: PageProps<"/[locale]/sell">
         </Section>
       )}
 
-      {auctions.length === 0 && drafts.length === 0 && (
+      {auctions.length === 0 && drafts.length === 0 && inReview.length === 0 && (
         <div className="rounded-xl bg-white p-6 text-center shadow-sm">
           <p className="text-ink/60">{t("empty")}</p>
         </div>

@@ -37,6 +37,7 @@ type AuctionDetail = {
     color: string | null;
     engine_volume: number | null;
     vin: string | null;
+    owner_verified_at: string | null;
     defects: string | null;
     car_photos: { slot: string; storage_path: string; sort_order: number }[];
   };
@@ -61,7 +62,7 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
       supabase
         .from("auctions")
         .select(
-          "id, seller_id, status, ends_at, winning_bid_id, cars(make, model, year, mileage_km, fuel, transmission, steering, customs_cleared, body_type, color, engine_volume, vin, defects, options, accident, owners, damage, frame_damage, spare_key, tire_state, wheel_scratches, panel_scratches, repair_needed, pros, car_photos(slot, storage_path, sort_order))",
+          "id, seller_id, status, ends_at, winning_bid_id, cars(make, model, year, mileage_km, fuel, transmission, steering, customs_cleared, body_type, color, engine_volume, vin, owner_verified_at, defects, options, accident, owners, damage, frame_damage, spare_key, tire_state, wheel_scratches, panel_scratches, repair_needed, pros, car_photos(slot, storage_path, sort_order))",
         )
         .eq("id", id)
         .maybeSingle()
@@ -118,6 +119,7 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
     <div className="flex flex-col gap-4 pb-4">
       <PageHeader title={`${car.make} ${car.model}`} backHref="/dealer" backLabel={t("backToList")}>
         <div className="flex items-center gap-2">
+          {car.owner_verified_at && <Badge tone="verified">✓ {t("ownerVerified")}</Badge>}
           {isLive && !own && <FavoriteButton auctionId={id} dealerId={userId} initial={Boolean(fav)} className="border border-ink/10" />}
           <StatusBadge kind="auction" status={auction.status} />
         </div>

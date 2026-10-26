@@ -1,6 +1,7 @@
 import type { Locale } from "@/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PushToggle } from "@/components/push-toggle";
+import { ReferralCard, type ReferralStats } from "@/components/referral";
 import { StatusBadge } from "@/components/status-badge";
 import { Link, redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
@@ -20,12 +21,15 @@ export default async function AccountPage({ params }: PageProps<"/[locale]/accou
   const userId = await getUserId();
   if (!userId) return redirect({ href: "/login", locale });
   const supabase = await createClient();
-  const [user, { data: profile }, dealer, { data: watches }] = await Promise.all([
+  const [user, { data: profile }, dealer, { data: watches }, { data: referral }, { data: rewardSetting }] = await Promise.all([
     getCurrentUser(),
     supabase.from("profiles").select("full_name, notify_new_auction, notify_makes, notify_year_from, notify_year_to, notify_max_km, notify_no_accident, push_muted, push_quiet_night").eq("id", userId).maybeSingle(),
     getDealer(userId),
     supabase.from("price_watches").select("id, make, model, year").order("created_at"),
+    supabase.rpc("my_referral_stats"),
+    supabase.from("app_settings").select("value").eq("key", "referral_reward").maybeSingle(),
   ]);
+  const referralStats = ((referral ?? []) as ReferralStats[])[0];
   if (!user) return redirect({ href: "/login", locale });
 
   return (
@@ -58,6 +62,8 @@ export default async function AccountPage({ params }: PageProps<"/[locale]/accou
           ))}
         </div>
       </section>
+
+      {referralStats?.code && <ReferralCard stats={referralStats} reward={Number(rewardSetting?.value ?? 0)} />}
 
       <PushToggle />
 

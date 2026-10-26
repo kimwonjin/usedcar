@@ -70,7 +70,13 @@ export function FeeBandsEditor({ initial }: { initial: FeeBand[] }) {
   );
 }
 
-type Settings = { payments_mode: string; fee_due_days: string; block_bidding_on_overdue: string };
+type Settings = {
+  payments_mode: string;
+  fee_due_days: string;
+  block_bidding_on_overdue: string;
+  auction_review: string;
+  referral_reward: string;
+};
 
 export function SettingsForm({ initial }: { initial: Settings }) {
   const t = useTranslations("adminSettings");
@@ -117,9 +123,30 @@ export function SettingsForm({ initial }: { initial: Settings }) {
         />
         {t("blockOnOverdue")}
       </label>
+      <label className="flex items-start gap-2 text-body">
+        <input
+          type="checkbox"
+          checked={values.auction_review === "on"}
+          onChange={(e) => setValues({ ...values, auction_review: e.target.checked ? "on" : "off" })}
+          className="mt-1"
+        />
+        <span>
+          {t("auctionReview")}
+          <span className="block text-caption text-ink/60">{t("auctionReviewHint")}</span>
+        </span>
+      </label>
+      <label className="flex flex-col gap-1">
+        <span className="text-caption text-ink/60">{t("referralReward")}</span>
+        <input
+          inputMode="numeric"
+          value={values.referral_reward}
+          onChange={(e) => setValues({ ...values, referral_reward: e.target.value.replace(/\D/g, "").slice(0, 7) })}
+          className="h-10 rounded-lg border border-ink/15 bg-white px-3"
+        />
+      </label>
       <button
         type="button"
-        disabled={state === "busy" || !values.fee_due_days}
+        disabled={state === "busy" || !values.fee_due_days || values.referral_reward === ""}
         onClick={save}
         className="h-11 rounded-lg bg-navy font-semibold text-white disabled:opacity-40"
       >

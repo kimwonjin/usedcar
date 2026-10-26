@@ -124,23 +124,31 @@ export default async function SellerAuctionPage({ params }: PageProps<"/[locale]
     );
   } else {
     // 다시 올리기 전 참고: 지난 경매 최고 입찰가·입찰 수, 비슷한 차 시세
-    const [interest, estimate, { data: bidRows }] = await Promise.all([
+    const [interest, estimate, { data: bidRows }, { data: reviewSetting }, { data: carReview }] = await Promise.all([
       loadInterest(),
       loadEstimate(),
       supabase.from("bids").select("amount").eq("auction_id", id),
+      supabase.from("app_settings").select("value").eq("key", "auction_review").maybeSingle(),
+      supabase.from("cars").select("review_status").eq("id", auction.car_id).maybeSingle(),
     ]);
     const amounts = ((bidRows ?? []) as { amount: number }[]).map((b) => b.amount);
     body = (
       <>
         <div className="flex flex-col gap-4 rounded-xl bg-white p-5 shadow-sm">
           <p className="text-body">{t(`closedMessage.${auction.status}` as Parameters<typeof t>[0])}</p>
-          <RelistButton
-            carId={auction.car_id}
-            topBid={amounts.length ? Math.max(...amounts) : null}
-            bidCount={amounts.length}
-            desiredPrice={car.desired_price}
-            marketAvg={estimate && estimate.sample > 0 ? estimate.avg_price : null}
-          />
+          {/* 다시 신청해서 검수 중이면 버튼 대신 안내 */}
+          {carReview?.review_status === "pending" ? (
+            <p className="rounded-lg bg-steppe/10 p-3 text-body text-navy">⏳ {t("relistPending")}</p>
+          ) : (
+            <RelistButton
+              carId={auction.car_id}
+              topBid={amounts.length ? Math.max(...amounts) : null}
+              bidCount={amounts.length}
+              desiredPrice={car.desired_price}
+              marketAvg={estimate && estimate.sample > 0 ? estimate.avg_price : null}
+              reviewOn={(reviewSetting?.value ?? "on") === "on"}
+            />
+          )}
         </div>
         <AuctionInterest
           viewers={interest.viewers}

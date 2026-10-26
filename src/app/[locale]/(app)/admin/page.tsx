@@ -31,7 +31,7 @@ export default async function AdminDashboard({ params }: PageProps<"/[locale]/ad
     return count ?? 0;
   };
 
-  const [today, live, ended, accepted, pendingDealers, pendingClaims, openReports, { data: dealRows }] = await Promise.all([
+  const [today, live, ended, accepted, pendingDealers, pendingClaims, openReports, pendingReview, { data: dealRows }] = await Promise.all([
     supabase
       .from("auctions")
       .select("*", { count: "exact", head: true })
@@ -43,6 +43,7 @@ export default async function AdminDashboard({ params }: PageProps<"/[locale]/ad
     count("dealers", "status", "pending"),
     count("depreciation_claims", "status", "submitted"),
     count("reports", "status", "open"),
+    count("cars", "review_status", "pending"),
     supabase.from("deals").select("agreed_price, final_price, completed_at").eq("status", "completed"),
   ]);
 
@@ -61,6 +62,7 @@ export default async function AdminDashboard({ params }: PageProps<"/[locale]/ad
 
   // 숫자를 누르면 해당 상태로 걸러진 목록으로 이동한다
   const cards = [
+    [t("pendingReview"), pendingReview, "/admin/review"],
     [t("today"), today, "/admin/auctions"],
     [t("live"), live, "/admin/auctions?status=live"],
     [t("ended"), ended, "/admin/auctions?status=ended"],

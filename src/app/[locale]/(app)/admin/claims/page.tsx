@@ -2,6 +2,8 @@ import type { Locale } from "@/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AdminOnly } from "@/components/admin-only";
 import { ConditionSummary, type CarCondition } from "@/components/condition-summary";
+import { InspectionView } from "@/components/deal/inspection";
+import { PhotoStrip } from "@/components/photo-strip";
 import { StatusBadge } from "@/components/status-badge";
 import { Link } from "@/i18n/navigation";
 import { requireAdmin } from "@/lib/auth";
@@ -25,6 +27,7 @@ type AdminClaim = {
   dealers: { business_name: string } | null;
   deals: {
     agreed_price: number;
+    deal_inspections: { items: Record<string, "ok" | "issue">; note: string | null; photo_paths: string[]; updated_at: string } | null;
     auctions: {
       cars: CarCondition & { make: string; model: string; year: number; defects: string | null; car_photos: { slot: string; storage_path: string }[] };
     };
@@ -46,7 +49,7 @@ export default async function AdminClaims({ params, searchParams }: PageProps<"/
   const { data } = await supabase
     .from("depreciation_claims")
     .select(
-      "id, amount, reason, photo_paths, status, seller_comment, admin_note, created_at, dealers(business_name), deals(agreed_price, auctions(cars(make, model, year, defects, options, accident, owners, damage, frame_damage, spare_key, tire_state, wheel_scratches, panel_scratches, repair_needed, pros, car_photos(slot, storage_path))))",
+      "id, amount, reason, photo_paths, status, seller_comment, admin_note, created_at, dealers(business_name), deals(agreed_price, deal_inspections(items, note, photo_paths, updated_at), auctions(cars(make, model, year, defects, options, accident, owners, damage, frame_damage, spare_key, tire_state, wheel_scratches, panel_scratches, repair_needed, pros, car_photos(slot, storage_path))))",
     )
     .eq("status", status)
     .order("created_at", { ascending: status === "submitted" })
@@ -55,7 +58,7 @@ export default async function AdminClaims({ params, searchParams }: PageProps<"/
 
   const [sellerUrls, dealerUrls] = await Promise.all([
     signedUrlMap(supabase, "car-photos", claims.flatMap((c) => c.deals.auctions.cars.car_photos.map((p) => p.storage_path))),
-    signedUrlMap(supabase, "claim-photos", claims.flatMap((c) => c.photo_paths)),
+    signedUrlMap(supabase, "claim-photos", claims.flatMap((c) => [...c.photo_paths, ...(c.deals.deal_inspections?.photo_paths ?? [])])),
   ]);
 
   return (
@@ -128,6 +131,15 @@ export default async function AdminClaims({ params, searchParams }: PageProps<"/
               </div>
             </div>
 
+            {claim.deals.deal_inspections && (
+              <InspectionView
+                inspection={{
+                  ...claim.deals.deal_inspections,
+                  photoUrls: claim.deals.deal_inspections.photo_paths.map((p) => dealerUrls[p]).filter(Boolean),
+                }}
+              />
+            )}
+
             <details>
               <summary className="cursor-pointer text-caption font-semibold text-steppe">{t("sellerCondition")}</summary>
               <div className="mt-2">
@@ -148,22 +160,6 @@ export default async function AdminClaims({ params, searchParams }: PageProps<"/
           </article>
         );
       })}
-    </div>
-  );
-}
-
-function PhotoStrip({ title, urls }: { title: string; urls: string[] }) {
-  return (
-    <div className="flex flex-col gap-1">
-      <p className="text-caption font-semibold">{title}</p>
-      <div className="grid grid-cols-4 gap-1">
-        {urls.map((url) => (
-          <a key={url} href={url} target="_blank" rel="noreferrer" className="aspect-square overflow-hidden rounded bg-ink/5">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={url} alt="" className="size-full object-cover" />
-          </a>
-        ))}
-      </div>
     </div>
   );
 }

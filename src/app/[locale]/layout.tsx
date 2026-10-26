@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AnnouncementBanner } from "@/components/announcement-banner";
+import { ReferralCapture } from "@/components/referral";
 import { Header } from "@/components/header";
 import { SiteFooter } from "@/components/site-footer";
 import { routing } from "@/i18n/routing";
@@ -62,6 +63,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider>
           <Header />
           <AnnouncementBanner />
+          <ReferralCapture />
           {/* 관리자 화면(.admin-wide)은 PC용으로 넓게 */}
           <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-6 has-[.admin-wide]:max-w-6xl print:max-w-none print:p-0">
             {children}

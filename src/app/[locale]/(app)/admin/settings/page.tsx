@@ -32,6 +32,8 @@ export default async function AdminSettings({ params }: PageProps<"/[locale]/adm
             payments_mode: values.payments_mode ?? "mock",
             fee_due_days: values.fee_due_days ?? "7",
             block_bidding_on_overdue: values.block_bidding_on_overdue ?? "true",
+            auction_review: values.auction_review ?? "on",
+            referral_reward: values.referral_reward ?? "5000",
           }}
         />
       </section>
