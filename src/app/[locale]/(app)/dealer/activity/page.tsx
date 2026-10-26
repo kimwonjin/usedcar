@@ -2,7 +2,7 @@ import type { Locale } from "@/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Badge } from "@/components/badge";
 import { BidBlockNotice } from "@/components/bid-block-notice";
-import { DealerGradeBadge } from "@/components/dealer-grade";
+import { DealerGradeBadge, DepreciationInfo } from "@/components/dealer-grade";
 import { ReviewList, type DealerReview } from "@/components/dealer-profile";
 import { DealerTabs } from "@/components/dealer-tabs";
 import { Stars } from "@/components/stars";
@@ -10,7 +10,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { Link, redirect } from "@/i18n/navigation";
 import { getDealer, getUserId } from "@/lib/auth";
 import { formatDateTime } from "@/lib/datetime";
-import { loadDealerGrades } from "@/lib/dealer-grades";
+import { loadDealerDepreciation, loadDealerGrades } from "@/lib/dealer-grades";
 import { dealerFee, loadFeeBands } from "@/lib/fees";
 import { formatTenge } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
@@ -110,7 +110,11 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
   };
 
   // 판매자가 딜러를 고를 때 보는 내 등급
-  const myGrade = (await loadDealerGrades(supabase, [userId]))[userId];
+  const [grades, depreciation] = await Promise.all([
+    loadDealerGrades(supabase, [userId]),
+    loadDealerDepreciation(supabase, [userId]),
+  ]);
+  const myGrade = grades[userId];
   const tg = await getTranslations("dealerGrade");
 
   return (
@@ -129,6 +133,13 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
           )}
         </div>
         <p className="text-caption text-ink/60">{tg("criteria")}</p>
+        <div className="mt-1 flex items-start justify-between gap-2 border-t border-ink/10 pt-2">
+          <span className="text-caption text-ink/60">{tg("myDepreciation")}</span>
+          <div className="text-right">
+            <DepreciationInfo record={depreciation[userId]} />
+          </div>
+        </div>
+        <p className="text-caption text-ink/60">{tg("depreciationHint")}</p>
       </section>
 
       <section className="grid grid-cols-3 gap-2">

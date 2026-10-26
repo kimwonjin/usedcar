@@ -3,10 +3,11 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { DealerProfileButton } from "@/components/dealer-profile";
-import { DealerGradeBadge, type DealerGrade } from "@/components/dealer-grade";
+import { DealerGradeBadge, DepreciationInfo, type DealerGrade } from "@/components/dealer-grade";
 import { Stars } from "@/components/stars";
 import { useRouter } from "@/i18n/navigation";
 import { formatDate } from "@/lib/datetime";
+import type { DealerDepreciation } from "@/lib/dealer-grades";
 import { formatTenge } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
 import type { TopBid } from "../../auctions/[id]/result-picker";
@@ -17,11 +18,13 @@ export function ReassignPicker({
   bids,
   until,
   grades,
+  depreciation,
 }: {
   auctionId: string;
   bids: TopBid[];
   until: string;
   grades: Record<string, DealerGrade>;
+  depreciation: Record<string, DealerDepreciation>;
 }) {
   const t = useTranslations("reassign");
   const ts = useTranslations("sellerAuction");
@@ -74,6 +77,7 @@ export function ReassignPicker({
                     <Stars rating={bid.dealer_rating} />
                     <span>{ts("dealerDeals", { count: bid.completed_deals })}</span>
                   </span>
+                  <DepreciationInfo record={depreciation[bid.dealer_id]} amount={bid.amount} />
                 </button>
                 <div className="flex justify-end px-2 pt-1">
                   <DealerProfileButton dealerId={bid.dealer_id} dealerName={bid.dealer_name} />

@@ -6,9 +6,10 @@ import { Badge } from "@/components/badge";
 import { Countdown } from "@/components/countdown";
 import { MarketReference, vsMarket, type MarketEstimate } from "@/components/market-reference";
 import { DealerProfileButton } from "@/components/dealer-profile";
-import { DealerGradeBadge, type DealerGrade } from "@/components/dealer-grade";
+import { DealerGradeBadge, DepreciationInfo, type DealerGrade } from "@/components/dealer-grade";
 import { Stars } from "@/components/stars";
 import { useRouter } from "@/i18n/navigation";
+import type { DealerDepreciation } from "@/lib/dealer-grades";
 import { formatTenge } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
 
@@ -29,6 +30,7 @@ export function ResultPicker({
   estimate,
   deadline,
   grades,
+  depreciation,
 }: {
   auctionId: string;
   bids: TopBid[];
@@ -36,6 +38,7 @@ export function ResultPicker({
   estimate: MarketEstimate | null;
   deadline: string;
   grades: Record<string, DealerGrade>;
+  depreciation: Record<string, DealerDepreciation>;
 }) {
   const tm = useTranslations("market");
   const t = useTranslations("sellerAuction");
@@ -108,6 +111,7 @@ export function ResultPicker({
                     <Stars rating={bid.dealer_rating} />
                     <span>{t("dealerDeals", { count: bid.completed_deals })}</span>
                   </p>
+                  <DepreciationInfo record={depreciation[bid.dealer_id]} amount={bid.amount} />
                   {vsMarket(bid.amount, estimate) !== null && (
                     <p className="price text-caption text-ink/60">
                       {tm("vsMarket", { pct: `${vsMarket(bid.amount, estimate)! >= 0 ? "+" : ""}${vsMarket(bid.amount, estimate)}` })}
@@ -130,6 +134,7 @@ export function ResultPicker({
         })}
       </ul>
 
+      <p className="text-caption text-ink/60">{t("depreciationHint")}</p>
       <p className="text-caption text-ink/70">{t("promise")}</p>
       {error && (
         <p className="text-caption text-danger">{t(error === "deadline" ? "deadlinePassed" : "decisionFailed")}</p>
