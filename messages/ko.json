@@ -220,7 +220,8 @@
     "noPenalties": "패널티 없음",
     "tabReview": "검수",
     "tabReferrals": "추천",
-    "pendingReview": "검수 대기"
+    "pendingReview": "검수 대기",
+    "tabAudit": "작업 기록"
   },
   "carForm": {
     "back": "이전",
@@ -1638,5 +1639,32 @@
     "caution": "최근 거래 취소 이력",
     "myGrade": "판매자에게 보이는 내 등급",
     "criteria": "🏆 우수: 완료 5건 이상·평점 4.5 이상·최근 180일 딜러 책임 취소 없음 / ✓ 신뢰: 완료 1건 이상·평점 4.0 이상 / ⚠️ 최근 180일 딜러 책임 취소 2건 이상이면 판매자에게 주의 표시가 보입니다."
+  },
+  "adminAudit": {
+    "title": "관리자 작업 기록",
+    "hint": "관리자가 바꾼 내용이 자동으로 남습니다 (최근 200건). 기록은 고치거나 지울 수 없습니다.",
+    "all": "전체",
+    "empty": "기록이 없습니다.",
+    "ops": {
+      "INSERT": "추가",
+      "UPDATE": "변경",
+      "DELETE": "삭제"
+    },
+    "tables": {
+      "cars": "차량·검수",
+      "dealers": "딜러",
+      "dealer_penalties": "패널티",
+      "auctions": "경매",
+      "deals": "거래",
+      "depreciation_claims": "감가",
+      "payments": "결제",
+      "referral_rewards": "추천 보상",
+      "app_settings": "설정",
+      "fee_bands": "수수료",
+      "announcements": "공지",
+      "reports": "신고",
+      "profiles": "사용자",
+      "deal_inspections": "점검표"
+    }
   }
 }

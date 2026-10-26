@@ -24,6 +24,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/[locale]/a
           { href: "/admin/users", label: t("tabUsers") },
           { href: "/admin/referrals", label: t("tabReferrals") },
           { href: "/admin/notices", label: t("tabNotices") },
+          { href: "/admin/audit", label: t("tabAudit") },
           { href: "/admin/settings", label: t("tabSettings") },
         ]}
       />
