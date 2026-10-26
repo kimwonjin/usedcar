@@ -37,6 +37,7 @@ import { formatKm, formatThousands } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
 import { PhotoStep, type PhotoMap } from "./photo-step";
 import { PriceEstimate } from "./price-estimate";
+import { ReadyStep } from "./ready-step";
 
 type Draft = {
   plate: string;
@@ -67,7 +68,7 @@ type Draft = {
   desiredPrice: string;
 };
 
-const STEPS = ["plate", "make", "model", "year", "mileage", "details", "specs", "history", "damage", "condition", "options", "defects", "photos", "review"] as const;
+const STEPS = ["plate", "make", "model", "year", "mileage", "details", "specs", "history", "damage", "condition", "options", "defects", "ready", "photos", "review"] as const;
 type Step = (typeof STEPS)[number];
 
 const initialDraft: Draft = {
@@ -122,7 +123,8 @@ export function CarWizard({
   const [stepIndex, setStepIndex] = useState(() => {
     if (!initial) return 0;
     const complete = REQUIRED_SLOTS.every((slot) => initial.photos[slot]?.length);
-    return STEPS.indexOf(complete ? "review" : "photos");
+    const none = Object.values(initial.photos).every((list) => !list?.length);
+    return STEPS.indexOf(complete ? "review" : none ? "ready" : "photos");
   });
   const [draft, setDraft] = useState<Draft>(initial?.draft ?? { ...initialDraft, ...prefill });
   const [carId, setCarId] = useState<string | null>(initial?.carId ?? null);
@@ -162,6 +164,7 @@ export function CarWizard({
     options: true,
     // 정비·수리가 필요하다고 했으면 어떤 부분인지 적어야 한다
     defects: draft.repairNeeded !== "yes" || draft.defects.trim().length >= 2,
+    ready: true,
     photos: photosComplete,
     review: photosComplete,
   };
@@ -687,6 +690,8 @@ export function CarWizard({
         </Question>
       )}
 
+      {step === "ready" && <ReadyStep car={`${draft.make} ${draft.model} ${draft.year}`} />}
+
       {step === "photos" && carId && (
         <PhotoStep userId={userId} carId={carId} photos={photos} onChange={setPhotos} />
       )}
@@ -798,8 +803,14 @@ export function CarWizard({
           onClick={next}
           className="h-14 rounded-xl bg-navy text-subtitle font-bold text-white disabled:opacity-40"
         >
-          {busy ? t("saving") : step === "review" ? t("review.start") : t("next")}
+          {busy ? t("saving") : step === "review" ? t("review.start") : step === "ready" ? `📷 ${t("ready.upload")}` : t("next")}
         </button>
+        {step === "ready" && (
+          // 작성 중인 차량으로 저장돼 있어서, 내 차 팔기 화면에서 이어서 올릴 수 있다
+          <button type="button" onClick={() => router.push("/sell")} className="h-11 text-body text-ink/60">
+            {t("ready.later")}
+          </button>
+        )}
       </div>
     </div>
   );
