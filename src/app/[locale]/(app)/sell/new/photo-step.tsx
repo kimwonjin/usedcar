@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 import { MULTI_PHOTO_SLOTS, PHOTO_SLOTS, REQUIRED_SLOTS, isRequiredSlot, type PhotoSlot } from "@/lib/car-catalog";
 import { compressImage } from "@/lib/image";
+import { checkPhotoQuality } from "@/lib/photo-quality";
 import { createClient } from "@/lib/supabase/client";
 import { PlateMaskEditor } from "./plate-mask-editor";
 import { SlotPictogram } from "./slot-pictogram";
@@ -54,6 +55,11 @@ export function PhotoStep({
     setError(null);
     try {
       const blob = await compressImage(file);
+      // 어둡거나 흔들린 사진이면 다시 찍을지 묻는다 (판단이 틀릴 수 있어 막지는 않는다)
+      const quality = await checkPhotoQuality(blob);
+      if (quality && (quality.dark || quality.blurry)) {
+        if (!confirm(t(quality.dark ? "photos.quality.dark" : "photos.quality.blurry"))) return;
+      }
       if (PLATE_SLOTS.includes(slot)) setMasking({ slot, blob });
       else await save(slot, blob);
     } catch {
