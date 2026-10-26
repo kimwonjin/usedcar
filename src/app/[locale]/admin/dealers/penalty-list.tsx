@@ -1,7 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { formatDateTime } from "@/lib/datetime";
 import { createClient } from "@/lib/supabase/client";
@@ -25,6 +25,8 @@ export function PenaltyList({ penalties }: { penalties: PenaltyRow[] }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [error, setError] = useState(false);
+  // 새로 고침이 끝날 때까지 버튼을 막아 두 번 누르지 않게 한다
+  const [refreshing, startRefresh] = useTransition();
 
   async function revoke(id: string) {
     if (!confirm(t("revokeConfirm"))) return;
@@ -33,7 +35,7 @@ export function PenaltyList({ penalties }: { penalties: PenaltyRow[] }) {
     const { error } = await createClient().rpc("revoke_penalty", { p_penalty_id: id, p_note: notes[id]?.trim() ?? "" });
     setBusy(null);
     if (error) setError(true);
-    else router.refresh();
+    else startRefresh(() => router.refresh());
   }
 
   if (penalties.length === 0) return null;
@@ -64,7 +66,7 @@ export function PenaltyList({ penalties }: { penalties: PenaltyRow[] }) {
                 />
                 <button
                   type="button"
-                  disabled={busy !== null}
+                  disabled={busy !== null || refreshing}
                   onClick={() => revoke(p.id)}
                   className="h-8 rounded border border-ink/20 px-3 font-semibold disabled:opacity-40"
                 >

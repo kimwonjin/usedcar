@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
 import type { DealerStatus } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/client";
@@ -18,6 +18,7 @@ export function DealerActions({
   const [busy, setBusy] = useState(false);
   const [reason, setReason] = useState("");
   const [error, setError] = useState(false);
+  const [refreshing, startRefresh] = useTransition();
 
   async function review(next: DealerStatus) {
     setBusy(true);
@@ -29,7 +30,7 @@ export function DealerActions({
     });
     setBusy(false);
     if (error) setError(true);
-    else router.refresh();
+    else startRefresh(() => router.refresh());
   }
 
   // 관리자 경고: 노쇼·취소와 같은 단계로 쌓이고 이력에 남는다 (사유는 위 입력칸)
@@ -41,7 +42,7 @@ export function DealerActions({
     if (error) setError(true);
     else {
       setReason("");
-      router.refresh();
+      startRefresh(() => router.refresh());
     }
   }
 
@@ -49,7 +50,7 @@ export function DealerActions({
   return (
     <div className="flex min-w-48 flex-col gap-2">
       {(status === "pending" || status === "rejected" || status === "suspended") && (
-        <button type="button" disabled={busy} onClick={() => review("approved")} className={`${button} bg-success text-white`}>
+        <button type="button" disabled={busy || refreshing} onClick={() => review("approved")} className={`${button} bg-success text-white`}>
           {status === "suspended" ? t("unsuspend") : t("approve")}
         </button>
       )}
@@ -62,17 +63,17 @@ export function DealerActions({
             className="h-10 rounded-lg border border-ink/15 px-3 text-caption"
           />
           {status === "pending" && (
-            <button type="button" disabled={busy || !reason.trim()} onClick={() => review("rejected")} className={`${button} border border-danger text-danger`}>
+            <button type="button" disabled={busy || refreshing || !reason.trim()} onClick={() => review("rejected")} className={`${button} border border-danger text-danger`}>
               {t("reject")}
             </button>
           )}
           {status === "approved" && (
             <>
-              <button type="button" disabled={busy || !reason.trim()} onClick={warn} className={`${button} border border-ink/20`}>
+              <button type="button" disabled={busy || refreshing || !reason.trim()} onClick={warn} className={`${button} border border-ink/20`}>
                 {t("warn")}
               </button>
               <p className="max-w-56 text-caption text-ink/50">{t("warnHint")}</p>
-              <button type="button" disabled={busy} onClick={() => review("suspended")} className={`${button} bg-danger text-white`}>
+              <button type="button" disabled={busy || refreshing} onClick={() => review("suspended")} className={`${button} bg-danger text-white`}>
                 {t("suspend")}
               </button>
             </>
