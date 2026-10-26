@@ -5,6 +5,7 @@ import { Badge } from "@/components/badge";
 import { ClaimCard } from "@/components/deal/claim-card";
 import { DealChat } from "@/components/deal/deal-chat";
 import { ReportButton } from "@/components/deal/report-button";
+import { ShareSale } from "@/components/deal/share-sale";
 import { MeetingForm } from "@/components/deal/meeting-form";
 import { TransferGuide } from "@/components/deal/transfer-guide";
 import { TransferStatus } from "@/components/deal/transfer-status";
@@ -40,6 +41,11 @@ export default async function SellerDealPage({ params }: PageProps<"/[locale]/se
   const active = deal.status === "scheduled" || deal.status === "depreciation_review";
   const approvedDeduction = claims.filter((c) => c.status === "approved").reduce((sum, c) => sum + c.amount, 0);
   const expected = deal.agreed_price - approvedDeduction;
+  // 판매 결과 공유 카드에 넣을 경쟁 딜러 수
+  const bidders =
+    deal.status === "completed"
+      ? ((await supabase.from("bids").select("id", { count: "exact", head: true }).eq("auction_id", deal.auction_id)).count ?? 0)
+      : 0;
 
   return (
     <div className="flex flex-col gap-4 pb-6">
@@ -122,6 +128,14 @@ export default async function SellerDealPage({ params }: PageProps<"/[locale]/se
         <p className="rounded-xl bg-white p-4 text-caption text-ink/70 shadow-sm">
           {t("cancelledReason")}: {t(`reasons.${deal.cancel_reason}` as Parameters<typeof t>[0])}
         </p>
+      )}
+      {deal.status === "completed" && (
+        <ShareSale
+          dealId={deal.id}
+          car={`${car.make} ${car.model} ${car.year}`}
+          price={formatTenge(deal.final_price ?? deal.agreed_price)}
+          bidders={bidders}
+        />
       )}
       <DealActions dealId={deal.id} status={deal.status} />
       <ReportButton dealId={deal.id} />

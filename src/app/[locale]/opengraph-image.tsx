@@ -2,6 +2,7 @@ import { ImageResponse } from "next/og";
 import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { routing } from "@/i18n/routing";
+import { loadOgFonts } from "@/lib/og-fonts";
 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
@@ -10,22 +11,6 @@ export async function generateImageMetadata({ params }: { params: Promise<{ loca
   const { locale } = await params;
   const t = await getTranslations({ locale: hasLocale(routing.locales, locale) ? locale : "ru", namespace: "meta" });
   return [{ id: "share", alt: t("ogAlt"), size, contentType }];
-}
-
-// 필요한 글자만 담은 글꼴을 Google Fonts에서 받는다 (한글·키릴 문자 표시용). 실패하면 기본 글꼴로 그린다
-async function loadFont(family: string, text: string, weight: number) {
-  try {
-    const css = await (
-      await fetch(
-        `https://fonts.googleapis.com/css2?family=${family.replace(/ /g, "+")}:wght@${weight}&text=${encodeURIComponent(text)}`,
-      )
-    ).text();
-    const url = css.match(/src: url\((.+?)\) format\('(opentype|truetype)'\)/)?.[1];
-    if (!url) return null;
-    return await (await fetch(url)).arrayBuffer();
-  } catch {
-    return null;
-  }
 }
 
 // 링크 공유 미리보기 이미지 (언어별)
@@ -37,17 +22,7 @@ export default async function Image({ params }: { params: Promise<{ locale: stri
   const headline = tl("headline");
   const points = [t("ogPoint1"), t("ogPoint2"), t("ogPoint3")];
   const allText = ["Satu", "Almaty", headline, ...points, "✓"].join("");
-  // 한글은 Noto Sans KR, 그 글꼴에 없는 ₸ 등은 Noto Sans 로 대신 그린다
-  const families = ["Noto Sans KR", "Noto Sans"];
-  const loaded = await Promise.all(
-    families.flatMap((name) =>
-      ([700, 400] as const).map(async (weight) => {
-        const data = await loadFont(name, allText, weight);
-        return data ? { name, data, weight, style: "normal" as const } : null;
-      }),
-    ),
-  );
-  const fonts = loaded.filter((f) => f !== null);
+  const { fonts, fontFamily } = await loadOgFonts(allText);
 
   return new ImageResponse(
     (
@@ -61,7 +36,7 @@ export default async function Image({ params }: { params: Promise<{ locale: stri
           padding: "64px 72px",
           background: "#14213D",
           color: "#FFFFFF",
-          fontFamily: fonts.length ? families.join(", ") : undefined,
+          fontFamily,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
