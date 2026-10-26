@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useState, type ReactNode } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { DamageDiagram, DamageLegend } from "@/components/damage-diagram";
+import { FrameDamagePicker } from "@/components/frame-damage";
 import {
   ACCIDENTS,
   BODY_TYPES,
@@ -24,6 +25,7 @@ import {
   type CarColor,
   type CarOption,
   type DamageMap,
+  type FrameDamage,
   type Fuel,
   type Panel,
   type PanelScratches,
@@ -53,6 +55,7 @@ type Draft = {
   accident: Accident | "";
   owners: string;
   damage: DamageMap;
+  frameDamage: FrameDamage;
   spareKey: "" | "yes" | "no";
   tireState: TireState | "";
   wheelScratches: string;
@@ -84,6 +87,7 @@ const initialDraft: Draft = {
   accident: "",
   owners: "",
   damage: {},
+  frameDamage: {},
   spareKey: "",
   tireState: "",
   wheelScratches: "",
@@ -183,6 +187,7 @@ export function CarWizard({
       accident: draft.accident || null,
       owners: Number(draft.owners) || null,
       damage: draft.damage,
+      frame_damage: draft.frameDamage,
       options: draft.options,
       defects: draft.defects.trim() || null,
       spare_key: draft.spareKey === "" ? null : draft.spareKey === "yes",
@@ -529,6 +534,10 @@ export function CarWizard({
 
       {step === "damage" && (
         <Question title={tc("damageStep.title")} hint={tc("damageStep.hint")}>
+          <div>
+            <p className="text-body font-semibold">{tc("frame.outerTitle")}</p>
+            <p className="text-caption text-steppe">{tc("frame.outerHint")}</p>
+          </div>
           <div className="flex gap-4">
             <DamageDiagram
               damage={draft.damage}
@@ -566,6 +575,24 @@ export function CarWizard({
             </div>
           </div>
           <DamageLegend />
+          <div className="flex flex-col gap-2 border-t border-ink/10 pt-4">
+            <p className="text-body font-semibold">{tc("frame.title")}</p>
+            <p className="-mt-1 text-caption text-steppe">{tc("frame.hint")}</p>
+            <FrameDamagePicker
+              value={draft.frameDamage}
+              onChange={(frameDamage) =>
+                // 골격 교환·판금이 있으면 큰 사고 (DB에서도 같은 규칙으로 맞춘다)
+                setDraft((prev) => ({
+                  ...prev,
+                  frameDamage,
+                  accident: Object.keys(frameDamage).length ? "major" : prev.accident,
+                }))
+              }
+            />
+            {Object.keys(draft.frameDamage).length > 0 && (
+              <p className="rounded-lg bg-danger/10 p-3 text-caption text-danger">{tc("frame.autoMajor")}</p>
+            )}
+          </div>
         </Question>
       )}
 
@@ -703,6 +730,10 @@ export function CarWizard({
               {Object.keys(draft.damage).length
                 ? tc("damageCount", { count: Object.keys(draft.damage).length })
                 : tc("noDamage")}
+              {" · "}
+              {Object.keys(draft.frameDamage).length
+                ? tc("frame.count", { count: Object.keys(draft.frameDamage).length })
+                : tc("frame.none")}
             </ReviewRow>
             <ReviewRow label={tc("detail.short")} onEdit={() => goTo("condition")} editLabel={t("review.edit")}>
               {[

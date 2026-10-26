@@ -11,7 +11,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { Link, redirect } from "@/i18n/navigation";
 import { decisionDeadline } from "@/lib/auction-rules";
 import { getCurrentUser } from "@/lib/auth";
-import type { DamageMap } from "@/lib/car-catalog";
+import type { DamageMap, FrameDamage } from "@/lib/car-catalog";
 import { currentDeal } from "@/lib/supabase/rows";
 import { createClient } from "@/lib/supabase/server";
 import { LiveAuction } from "./live-auction";
@@ -26,7 +26,7 @@ type SellerAuctionDetail = {
   ends_at: string;
   car_id: string;
   seller_id: string;
-  cars: { make: string; model: string; year: number; desired_price: number | null; defects: string | null; damage: DamageMap | null };
+  cars: { make: string; model: string; year: number; desired_price: number | null; defects: string | null; damage: DamageMap | null; frame_damage: FrameDamage | null };
   deals: DealRef | DealRef[] | null;
 };
 
@@ -45,7 +45,7 @@ export default async function SellerAuctionPage({ params }: PageProps<"/[locale]
   const supabase = await createClient();
   const { data: auction } = await supabase
     .from("auctions")
-    .select("id, status, starts_at, ends_at, car_id, seller_id, cars(make, model, year, desired_price, defects, damage), deals(id, status, created_at)")
+    .select("id, status, starts_at, ends_at, car_id, seller_id, cars(make, model, year, desired_price, defects, damage, frame_damage), deals(id, status, created_at)")
     .eq("id", id)
     .maybeSingle()
     .overrideTypes<SellerAuctionDetail, { merge: false }>();
@@ -92,7 +92,7 @@ export default async function SellerAuctionPage({ params }: PageProps<"/[locale]
         <MarketReference estimate={estimate} />
         <AuctionInterest viewers={interest.viewers} favorites={interest.favorites} />
         <AuctionQa auctionId={id} role="seller" canAnswer />
-        <LiveEdits carId={auction.car_id} userId={user.id} defects={car.defects} damage={car.damage ?? {}} />
+        <LiveEdits carId={auction.car_id} userId={user.id} defects={car.defects} damage={car.damage ?? {}} frameDamage={car.frame_damage ?? {}} />
       </>
     );
   } else if (auction.status === "ended") {

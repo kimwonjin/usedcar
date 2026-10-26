@@ -72,6 +72,28 @@ export type Accident = (typeof ACCIDENTS)[number];
 // 차량 상태 상세 (딜러 가격 산정용 선택지)
 export const TIRE_STATES = ["ok", "front", "rear", "all"] as const;
 export type TireState = (typeof TIRE_STATES)[number];
+// 골격 부위 (교환·판금이 있으면 큰 사고로 분류). 화면에서는 앞쪽·옆과 바닥·뒤쪽으로 묶어 보여준다
+export const FRAME_GROUPS = {
+  front: [
+    "front_panel",
+    "cross_member",
+    "inside_panel_l",
+    "inside_panel_r",
+    "front_side_member_l",
+    "front_side_member_r",
+    "front_wheelhouse_l",
+    "front_wheelhouse_r",
+    "dash_panel",
+  ],
+  middle: ["pillar_l", "pillar_r", "side_sill_l", "side_sill_r", "floor_panel"],
+  rear: ["rear_wheelhouse_l", "rear_wheelhouse_r", "rear_side_member_l", "rear_side_member_r", "trunk_floor", "rear_panel"],
+} as const;
+export type FramePart = (typeof FRAME_GROUPS)[keyof typeof FRAME_GROUPS][number];
+export const FRAME_PARTS = Object.values(FRAME_GROUPS).flat() as FramePart[];
+export const FRAME_KINDS = ["repaired", "replaced"] as const;
+export type FrameKind = (typeof FRAME_KINDS)[number];
+export type FrameDamage = Partial<Record<FramePart, FrameKind>>;
+
 export const PANEL_SCRATCHES = ["none", "1_2", "3_4", "5_6", "7_plus"] as const;
 export type PanelScratches = (typeof PANEL_SCRATCHES)[number];
 

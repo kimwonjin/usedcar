@@ -3,8 +3,9 @@
 import { useTranslations } from "next-intl";
 import { useRef, useState } from "react";
 import { DamageDiagram, DamageLegend } from "@/components/damage-diagram";
+import { FrameDamagePicker } from "@/components/frame-damage";
 import { useRouter } from "@/i18n/navigation";
-import { DAMAGE_KINDS, type DamageMap, type Panel } from "@/lib/car-catalog";
+import { DAMAGE_KINDS, type DamageMap, type FrameDamage, type Panel } from "@/lib/car-catalog";
 import { createClient } from "@/lib/supabase/client";
 import { uploadPhoto } from "@/lib/upload";
 
@@ -15,11 +16,13 @@ export function LiveEdits({
   userId,
   defects,
   damage: savedDamage,
+  frameDamage: savedFrame,
 }: {
   carId: string;
   userId: string;
   defects: string | null;
   damage: DamageMap;
+  frameDamage: FrameDamage;
 }) {
   const t = useTranslations("liveEdits");
   const tc = useTranslations("condition");
@@ -28,7 +31,10 @@ export function LiveEdits({
   // 마지막으로 저장된 표시. 이 부위들은 지울 수 없다
   const [baseline, setBaseline] = useState<DamageMap>(savedDamage);
   const [damageSaved, setDamageSaved] = useState(false);
-  const damageChanged = !sameDamage(damage, baseline);
+  // 골격: 저장된 부위는 지우거나 낮출 수 없다
+  const [frame, setFrame] = useState<FrameDamage>(savedFrame);
+  const [frameBaseline, setFrameBaseline] = useState<FrameDamage>(savedFrame);
+  const damageChanged = !sameDamage(damage, baseline) || !sameDamage(frame, frameBaseline);
   const router = useRouter();
   const [text, setText] = useState(defects ?? "");
   const [saved, setSaved] = useState(false);
@@ -52,11 +58,12 @@ export function LiveEdits({
   async function saveDamage() {
     setBusy(true);
     setError(false);
-    const { error } = await createClient().from("cars").update({ damage }).eq("id", carId);
+    const { error } = await createClient().from("cars").update({ damage, frame_damage: frame }).eq("id", carId);
     setBusy(false);
     if (error) setError(true);
     else {
       setBaseline(damage);
+      setFrameBaseline(frame);
       setDamageSaved(true);
     }
   }
@@ -148,6 +155,15 @@ export function LiveEdits({
             </div>
           </div>
           <DamageLegend />
+          <span className="pt-2 text-caption text-ink/60">{tc("frame.title")}</span>
+          <FrameDamagePicker
+            value={frame}
+            locked={frameBaseline}
+            onChange={(next) => {
+              setFrame(next);
+              setDamageSaved(false);
+            }}
+          />
           <p className="text-caption text-ink/50">{t("damageLocked")}</p>
           <button
             type="button"
@@ -184,7 +200,8 @@ export function LiveEdits({
 }
 
 // DB(jsonb)는 키 순서를 바꿔 돌려주므로 순서와 무관하게 비교한다
-function sameDamage(a: DamageMap, b: DamageMap) {
-  const keys = Object.keys(a) as (keyof DamageMap)[];
+// jsonb는 키 순서를 바꿔 돌려주므로 순서와 무관하게 비교한다 (외판·골격 공용)
+function sameDamage(a: Record<string, string | undefined>, b: Record<string, string | undefined>) {
+  const keys = Object.keys(a);
   return keys.length === Object.keys(b).length && keys.every((k) => a[k] === b[k]);
 }

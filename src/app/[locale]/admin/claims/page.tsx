@@ -46,7 +46,7 @@ export default async function AdminClaims({ params, searchParams }: PageProps<"/
   const { data } = await supabase
     .from("depreciation_claims")
     .select(
-      "id, amount, reason, photo_paths, status, seller_comment, admin_note, created_at, dealers(business_name), deals(agreed_price, auctions(cars(make, model, year, defects, options, accident, owners, damage, spare_key, tire_state, wheel_scratches, panel_scratches, repair_needed, pros, car_photos(slot, storage_path))))",
+      "id, amount, reason, photo_paths, status, seller_comment, admin_note, created_at, dealers(business_name), deals(agreed_price, auctions(cars(make, model, year, defects, options, accident, owners, damage, frame_damage, spare_key, tire_state, wheel_scratches, panel_scratches, repair_needed, pros, car_photos(slot, storage_path))))",
     )
     .eq("status", status)
     .order("created_at", { ascending: status === "submitted" })

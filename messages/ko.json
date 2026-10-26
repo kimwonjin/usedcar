@@ -1118,6 +1118,47 @@
       "repairLabel": "정비·수리",
       "pros": "판매자가 말한 장점",
       "needed": "필요"
+    },
+    "frame": {
+      "title": "골격",
+      "hint": "필러·휠하우스·사이드멤버·플로어 등 차체 뼈대입니다. 교환·판금이 있으면 큰 사고(유사고)로 분류됩니다.",
+      "tapHint": "누를 때마다 판금·용접 → 교환 → 이상 없음 순으로 바뀝니다. 없으면 그냥 다음을 누르세요.",
+      "none": "골격 이상 없음",
+      "count": "골격 {count}곳",
+      "autoMajor": "골격 수리가 있어 사고 이력이 '큰 사고 (골격·에어백)'로 바뀌었습니다.",
+      "groups": {
+        "front": "앞쪽",
+        "middle": "옆·바닥",
+        "rear": "뒤쪽"
+      },
+      "kinds": {
+        "repaired": "판금·용접",
+        "replaced": "교환"
+      },
+      "parts": {
+        "front_panel": "프론트 패널",
+        "cross_member": "크로스멤버",
+        "inside_panel_l": "왼쪽 인사이드 패널",
+        "inside_panel_r": "오른쪽 인사이드 패널",
+        "front_side_member_l": "왼쪽 앞 사이드멤버",
+        "front_side_member_r": "오른쪽 앞 사이드멤버",
+        "front_wheelhouse_l": "왼쪽 앞 휠하우스",
+        "front_wheelhouse_r": "오른쪽 앞 휠하우스",
+        "dash_panel": "대시 패널",
+        "pillar_l": "왼쪽 필러",
+        "pillar_r": "오른쪽 필러",
+        "side_sill_l": "왼쪽 사이드실",
+        "side_sill_r": "오른쪽 사이드실",
+        "floor_panel": "플로어 패널",
+        "rear_wheelhouse_l": "왼쪽 뒤 휠하우스",
+        "rear_wheelhouse_r": "오른쪽 뒤 휠하우스",
+        "rear_side_member_l": "왼쪽 뒤 사이드멤버",
+        "rear_side_member_r": "오른쪽 뒤 사이드멤버",
+        "trunk_floor": "트렁크 플로어",
+        "rear_panel": "리어 패널"
+      },
+      "outerTitle": "외판",
+      "outerHint": "문·펜더·범퍼·보닛 등. 교환·도색해도 단순 사고로 분류됩니다."
     }
   },
   "meta": {

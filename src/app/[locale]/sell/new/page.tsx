@@ -28,6 +28,7 @@ type DraftCar = {
   accident: WizardInitial["draft"]["accident"] | null;
   owners: number | null;
   damage: WizardInitial["draft"]["damage"] | null;
+  frame_damage: WizardInitial["draft"]["frameDamage"] | null;
   options: WizardInitial["draft"]["options"] | null;
   defects: string | null;
   spare_key: boolean | null;
@@ -63,7 +64,7 @@ export default async function NewCarPage({ params, searchParams }: PageProps<"/[
     const { data: car } = await supabase
       .from("cars")
       .select(
-        "id, plate_number, make, model, year, mileage_km, fuel, transmission, steering, customs_cleared, body_type, color, engine_volume, vin, accident, owners, damage, options, defects, spare_key, tire_state, wheel_scratches, panel_scratches, repair_needed, pros, desired_price, car_photos(id, slot, storage_path, sort_order), auctions(id)",
+        "id, plate_number, make, model, year, mileage_km, fuel, transmission, steering, customs_cleared, body_type, color, engine_volume, vin, accident, owners, damage, frame_damage, options, defects, spare_key, tire_state, wheel_scratches, panel_scratches, repair_needed, pros, desired_price, car_photos(id, slot, storage_path, sort_order), auctions(id)",
       )
       .eq("id", carId)
       .eq("seller_id", user.id)
@@ -97,6 +98,7 @@ export default async function NewCarPage({ params, searchParams }: PageProps<"/[
         accident: car.accident ?? "",
         owners: car.owners ? String(Math.min(car.owners, 4)) : "",
         damage: car.damage ?? {},
+        frameDamage: car.frame_damage ?? {},
         options: car.options ?? [],
         defects: car.defects ?? "",
         spareKey: car.spare_key === null ? "" : car.spare_key ? "yes" : "no",

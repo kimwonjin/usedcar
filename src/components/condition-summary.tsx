@@ -1,14 +1,16 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { PANELS, type DamageMap } from "@/lib/car-catalog";
+import { PANELS, type DamageMap, type FrameDamage } from "@/lib/car-catalog";
 import { DamageDiagram, DamageLegend } from "./damage-diagram";
+import { FrameDamageList } from "./frame-damage";
 
 export type CarCondition = {
   options: string[] | null;
   accident: string | null;
   owners: number | null;
   damage: DamageMap | null;
+  frame_damage?: FrameDamage | null;
   // 상태 상세 (예전에 등록한 차는 없을 수 있다)
   spare_key?: boolean | null;
   tire_state?: string | null;
@@ -110,6 +112,8 @@ export function ConditionSummary({ condition }: { condition: CarCondition }) {
           )}
         </div>
       </div>
+
+      <FrameDamageList value={condition.frame_damage ?? null} />
 
       {condition.pros && (
         <div className="rounded-lg bg-steppe/5 p-3">
