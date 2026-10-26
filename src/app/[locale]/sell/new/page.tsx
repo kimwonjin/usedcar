@@ -30,6 +30,12 @@ type DraftCar = {
   damage: WizardInitial["draft"]["damage"] | null;
   options: WizardInitial["draft"]["options"] | null;
   defects: string | null;
+  spare_key: boolean | null;
+  tire_state: WizardInitial["draft"]["tireState"] | null;
+  wheel_scratches: number | null;
+  panel_scratches: WizardInitial["draft"]["panelScratches"] | null;
+  repair_needed: boolean | null;
+  pros: string | null;
   desired_price: number | null;
   car_photos: { id: string; slot: PhotoSlot; storage_path: string; sort_order: number }[];
   auctions: { id: string }[];
@@ -57,7 +63,7 @@ export default async function NewCarPage({ params, searchParams }: PageProps<"/[
     const { data: car } = await supabase
       .from("cars")
       .select(
-        "id, plate_number, make, model, year, mileage_km, fuel, transmission, steering, customs_cleared, body_type, color, engine_volume, vin, accident, owners, damage, options, defects, desired_price, car_photos(id, slot, storage_path, sort_order), auctions(id)",
+        "id, plate_number, make, model, year, mileage_km, fuel, transmission, steering, customs_cleared, body_type, color, engine_volume, vin, accident, owners, damage, options, defects, spare_key, tire_state, wheel_scratches, panel_scratches, repair_needed, pros, desired_price, car_photos(id, slot, storage_path, sort_order), auctions(id)",
       )
       .eq("id", carId)
       .eq("seller_id", user.id)
@@ -93,6 +99,12 @@ export default async function NewCarPage({ params, searchParams }: PageProps<"/[
         damage: car.damage ?? {},
         options: car.options ?? [],
         defects: car.defects ?? "",
+        spareKey: car.spare_key === null ? "" : car.spare_key ? "yes" : "no",
+        tireState: car.tire_state ?? "",
+        wheelScratches: car.wheel_scratches === null ? "" : String(car.wheel_scratches),
+        panelScratches: car.panel_scratches ?? "",
+        repairNeeded: car.repair_needed === null ? "" : car.repair_needed ? "yes" : "no",
+        pros: car.pros ?? "",
         desiredPrice: car.desired_price ? String(car.desired_price) : "",
       },
     };

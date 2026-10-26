@@ -14,7 +14,9 @@ import {
   MIN_YEAR,
   POPULAR_MAKES,
   REQUIRED_SLOTS,
+  PANEL_SCRATCHES,
   STEERINGS,
+  TIRE_STATES,
   TRANSMISSIONS,
   VIN_PATTERN,
   type Accident,
@@ -24,7 +26,9 @@ import {
   type DamageMap,
   type Fuel,
   type Panel,
+  type PanelScratches,
   type Steering,
+  type TireState,
   type Transmission,
 } from "@/lib/car-catalog";
 import { formatKm, formatThousands } from "@/lib/format";
@@ -49,12 +53,18 @@ type Draft = {
   accident: Accident | "";
   owners: string;
   damage: DamageMap;
+  spareKey: "" | "yes" | "no";
+  tireState: TireState | "";
+  wheelScratches: string;
+  panelScratches: PanelScratches | "";
+  repairNeeded: "" | "yes" | "no";
   options: CarOption[];
   defects: string;
+  pros: string;
   desiredPrice: string;
 };
 
-const STEPS = ["plate", "make", "model", "year", "mileage", "details", "specs", "history", "damage", "options", "defects", "photos", "review"] as const;
+const STEPS = ["plate", "make", "model", "year", "mileage", "details", "specs", "history", "damage", "condition", "options", "defects", "photos", "review"] as const;
 type Step = (typeof STEPS)[number];
 
 const initialDraft: Draft = {
@@ -74,8 +84,14 @@ const initialDraft: Draft = {
   accident: "",
   owners: "",
   damage: {},
+  spareKey: "",
+  tireState: "",
+  wheelScratches: "",
+  panelScratches: "",
+  repairNeeded: "",
   options: [],
   defects: "",
+  pros: "",
   desiredPrice: "",
 };
 
@@ -137,8 +153,11 @@ export function CarWizard({
     specs: draft.bodyType !== "" && (draft.vin === "" || VIN_PATTERN.test(draft.vin)) && engineOk,
     history: draft.accident !== "" && draft.owners !== "",
     damage: true,
+    condition:
+      draft.spareKey !== "" && draft.tireState !== "" && draft.wheelScratches !== "" && draft.panelScratches !== "" && draft.repairNeeded !== "",
     options: true,
-    defects: true,
+    // 정비·수리가 필요하다고 했으면 어떤 부분인지 적어야 한다
+    defects: draft.repairNeeded !== "yes" || draft.defects.trim().length >= 2,
     photos: photosComplete,
     review: photosComplete,
   };
@@ -166,6 +185,12 @@ export function CarWizard({
       damage: draft.damage,
       options: draft.options,
       defects: draft.defects.trim() || null,
+      spare_key: draft.spareKey === "" ? null : draft.spareKey === "yes",
+      tire_state: draft.tireState || null,
+      wheel_scratches: draft.wheelScratches === "" ? null : Number(draft.wheelScratches),
+      panel_scratches: draft.panelScratches || null,
+      repair_needed: draft.repairNeeded === "" ? null : draft.repairNeeded === "yes",
+      pros: draft.pros.trim() || null,
     };
     if (carId) {
       const { error } = await supabase.from("cars").update(row).eq("id", carId);
@@ -297,8 +322,8 @@ export function CarWizard({
             style={{ width: `${((stepIndex + 1) / STEPS.length) * 100}%` }}
           />
         </div>
-        <span className="price text-caption text-ink/60">
-          {stepIndex + 1}/{STEPS.length}
+        <span className="price shrink-0 text-caption font-semibold text-ink/60">
+          {t("progress", { pct: Math.round(((stepIndex + 1) / STEPS.length) * 100) })}
         </span>
       </div>
 
@@ -544,6 +569,48 @@ export function CarWizard({
         </Question>
       )}
 
+      {step === "condition" && (
+        <Question title={tc("detail.title")} hint={tc("detail.hint")}>
+          <ChoiceGroup label={tc("detail.spareKey")}>
+            <Chip selected={draft.spareKey === "yes"} onClick={() => set("spareKey", "yes")}>
+              🔑🔑 {tc("detail.spareKeyYes")}
+            </Chip>
+            <Chip selected={draft.spareKey === "no"} onClick={() => set("spareKey", "no")}>
+              🔑 {tc("detail.spareKeyNo")}
+            </Chip>
+          </ChoiceGroup>
+          <ChoiceGroup label={tc("detail.tires")} hint={tc("detail.tiresHint")}>
+            {TIRE_STATES.map((value) => (
+              <Chip key={value} selected={draft.tireState === value} onClick={() => set("tireState", value)}>
+                {tc(`detail.tireStates.${value}`)}
+              </Chip>
+            ))}
+          </ChoiceGroup>
+          <ChoiceGroup label={tc("detail.wheels")}>
+            {["0", "1", "2", "3", "4"].map((value) => (
+              <Chip key={value} selected={draft.wheelScratches === value} onClick={() => set("wheelScratches", value)}>
+                {value === "0" ? tc("detail.none") : tc("detail.wheelsCount", { count: Number(value) })}
+              </Chip>
+            ))}
+          </ChoiceGroup>
+          <ChoiceGroup label={tc("detail.panels")} hint={tc("detail.panelsHint")}>
+            {PANEL_SCRATCHES.map((value) => (
+              <Chip key={value} selected={draft.panelScratches === value} onClick={() => set("panelScratches", value)}>
+                {tc(`detail.panelScratches.${value}`)}
+              </Chip>
+            ))}
+          </ChoiceGroup>
+          <ChoiceGroup label={tc("detail.repair")}>
+            <Chip selected={draft.repairNeeded === "no"} onClick={() => set("repairNeeded", "no")}>
+              {tc("detail.none")}
+            </Chip>
+            <Chip selected={draft.repairNeeded === "yes"} onClick={() => set("repairNeeded", "yes")}>
+              {tc("detail.repairYes")}
+            </Chip>
+          </ChoiceGroup>
+        </Question>
+      )}
+
       {step === "options" && (
         <Question title={tc("optionsStep.title")} hint={tc("optionsStep.hint")}>
           <div className="grid grid-cols-2 gap-2">
@@ -567,7 +634,10 @@ export function CarWizard({
       )}
 
       {step === "defects" && (
-        <Question title={t("defects.title")} hint={t("defects.hint")}>
+        <Question
+          title={t("defects.title")}
+          hint={draft.repairNeeded === "yes" ? t("defects.repairHint") : t("defects.hint")}
+        >
           <textarea
             value={draft.defects}
             onChange={(e) => set("defects", e.target.value)}
@@ -576,6 +646,17 @@ export function CarWizard({
             maxLength={500}
             className="rounded-xl border border-ink/15 bg-white p-4 text-body"
           />
+          <label className="flex flex-col gap-1.5">
+            <span className="text-body font-semibold">{t("defects.prosTitle")}</span>
+            <textarea
+              value={draft.pros}
+              onChange={(e) => set("pros", e.target.value)}
+              placeholder={t("defects.prosPlaceholder")}
+              rows={3}
+              maxLength={500}
+              className="rounded-xl border border-ink/15 bg-white p-4 text-body"
+            />
+          </label>
         </Question>
       )}
 
@@ -623,12 +704,29 @@ export function CarWizard({
                 ? tc("damageCount", { count: Object.keys(draft.damage).length })
                 : tc("noDamage")}
             </ReviewRow>
+            <ReviewRow label={tc("detail.short")} onEdit={() => goTo("condition")} editLabel={t("review.edit")}>
+              {[
+                draft.spareKey && `${tc("detail.spareKeyLabel")} ${tc(draft.spareKey === "yes" ? "detail.has" : "detail.hasNot")}`,
+                draft.tireState && `${tc("detail.tiresLabel")}: ${tc(`detail.tireStates.${draft.tireState}`)}`,
+                draft.wheelScratches !== "" &&
+                  `${tc("detail.wheelsLabel")}: ${draft.wheelScratches === "0" ? tc("detail.none") : tc("detail.wheelsCount", { count: Number(draft.wheelScratches) })}`,
+                draft.panelScratches && `${tc("detail.panelsLabel")}: ${tc(`detail.panelScratches.${draft.panelScratches}`)}`,
+                draft.repairNeeded && `${tc("detail.repairLabel")}: ${tc(draft.repairNeeded === "yes" ? "detail.repairYes" : "detail.none")}`,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </ReviewRow>
             <ReviewRow label={tc("options")} onEdit={() => goTo("options")} editLabel={t("review.edit")}>
               {draft.options.length ? draft.options.map((o) => tc(`optionNames.${o}`)).join(", ") : tc("noOptions")}
             </ReviewRow>
             <ReviewRow label={t("review.defects")} onEdit={() => goTo("defects")} editLabel={t("review.edit")}>
               {draft.defects.trim() || t("defects.none")}
             </ReviewRow>
+            {draft.pros.trim() && (
+              <ReviewRow label={tc("detail.pros")} onEdit={() => goTo("defects")} editLabel={t("review.edit")}>
+                {draft.pros.trim()}
+              </ReviewRow>
+            )}
             <ReviewRow label={t("review.photos")} onEdit={() => goTo("photos")} editLabel={t("review.edit")}>
               {t("review.photoCount", {
                 count: Object.values(photos).reduce((sum, list) => sum + (list?.length ?? 0), 0),
@@ -713,10 +811,11 @@ function Chip({
   );
 }
 
-function ChoiceGroup({ label, children }: { label: string; children: ReactNode }) {
+function ChoiceGroup({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
   return (
     <fieldset className="flex flex-col gap-2">
       <legend className="mb-2 text-caption text-ink/60">{label}</legend>
+      {hint && <p className="-mt-2 text-caption text-steppe">{hint}</p>}
       <div className="flex flex-wrap gap-2">{children}</div>
     </fieldset>
   );

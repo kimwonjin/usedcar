@@ -61,7 +61,7 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
       supabase
         .from("auctions")
         .select(
-          "id, seller_id, status, ends_at, winning_bid_id, cars(make, model, year, mileage_km, fuel, transmission, steering, customs_cleared, body_type, color, engine_volume, vin, defects, options, accident, owners, damage, car_photos(slot, storage_path, sort_order))",
+          "id, seller_id, status, ends_at, winning_bid_id, cars(make, model, year, mileage_km, fuel, transmission, steering, customs_cleared, body_type, color, engine_volume, vin, defects, options, accident, owners, damage, spare_key, tire_state, wheel_scratches, panel_scratches, repair_needed, pros, car_photos(slot, storage_path, sort_order))",
         )
         .eq("id", id)
         .maybeSingle()

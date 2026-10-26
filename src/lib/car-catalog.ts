@@ -69,6 +69,12 @@ export type CarOption = (typeof CAR_OPTIONS)[number];
 export const ACCIDENTS = ["none", "minor", "major"] as const;
 export type Accident = (typeof ACCIDENTS)[number];
 
+// 차량 상태 상세 (딜러 가격 산정용 선택지)
+export const TIRE_STATES = ["ok", "front", "rear", "all"] as const;
+export type TireState = (typeof TIRE_STATES)[number];
+export const PANEL_SCRATCHES = ["none", "1_2", "3_4", "5_6", "7_plus"] as const;
+export type PanelScratches = (typeof PANEL_SCRATCHES)[number];
+
 // 위에서 본 차량 외판 부위. 왼쪽 = 운전석 기준 왼쪽
 export const PANELS = [
   "front_bumper",
