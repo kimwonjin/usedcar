@@ -1116,7 +1116,8 @@
       "wheelsLabel": "휠 스크래치",
       "panelsLabel": "외판 스크래치",
       "repairLabel": "정비·수리",
-      "pros": "판매자가 말한 장점"
+      "pros": "판매자가 말한 장점",
+      "needed": "필요"
     }
   },
   "meta": {

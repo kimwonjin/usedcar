@@ -50,7 +50,7 @@ export function ConditionSummary({ condition }: { condition: CarCondition }) {
     ],
     [
       t("detail.repairLabel"),
-      condition.repair_needed == null ? na : t(condition.repair_needed ? "detail.repairYes" : "detail.none"),
+      condition.repair_needed == null ? na : t(condition.repair_needed ? "detail.needed" : "detail.none"),
       condition.repair_needed === true,
     ],
   ];
@@ -81,7 +81,7 @@ export function ConditionSummary({ condition }: { condition: CarCondition }) {
         </div>
       </dl>
 
-      <dl className="grid grid-cols-2 gap-2 text-caption">
+      <dl className="grid grid-cols-1 gap-2 text-caption sm:grid-cols-2">
         {details.map(([label, value, warn]) => (
           <div key={label} className="flex items-center justify-between gap-2 rounded-lg border border-ink/10 px-3 py-2">
             <dt className="text-ink/60">{label}</dt>

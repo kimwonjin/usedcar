@@ -814,7 +814,7 @@ function Chip({
 function ChoiceGroup({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
   return (
     <fieldset className="flex flex-col gap-2">
-      <legend className="mb-2 text-caption text-ink/60">{label}</legend>
+      <legend className="mb-2 text-body font-semibold text-ink">{label}</legend>
       {hint && <p className="-mt-2 text-caption text-steppe">{hint}</p>}
       <div className="flex flex-wrap gap-2">{children}</div>
     </fieldset>
