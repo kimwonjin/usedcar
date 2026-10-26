@@ -6,6 +6,7 @@ import { Badge } from "@/components/badge";
 import { Countdown } from "@/components/countdown";
 import { MarketReference, vsMarket, type MarketEstimate } from "@/components/market-reference";
 import { DealerProfileButton } from "@/components/dealer-profile";
+import { DealerGradeBadge, type DealerGrade } from "@/components/dealer-grade";
 import { Stars } from "@/components/stars";
 import { useRouter } from "@/i18n/navigation";
 import { formatTenge } from "@/lib/format";
@@ -27,12 +28,14 @@ export function ResultPicker({
   desiredPrice,
   estimate,
   deadline,
+  grades,
 }: {
   auctionId: string;
   bids: TopBid[];
   desiredPrice: number | null;
   estimate: MarketEstimate | null;
   deadline: string;
+  grades: Record<string, DealerGrade>;
 }) {
   const tm = useTranslations("market");
   const t = useTranslations("sellerAuction");
@@ -101,6 +104,7 @@ export function ResultPicker({
                   <p className="price text-subtitle font-bold">{formatTenge(bid.amount)}</p>
                   <p className="flex flex-wrap items-center gap-x-2 text-caption text-ink/60">
                     <span className="font-semibold text-ink">{bid.dealer_name}</span>
+                    <DealerGradeBadge grade={grades[bid.dealer_id]} />
                     <Stars rating={bid.dealer_rating} />
                     <span>{t("dealerDeals", { count: bid.completed_deals })}</span>
                   </p>

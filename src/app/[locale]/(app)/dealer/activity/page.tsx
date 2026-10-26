@@ -2,6 +2,7 @@ import type { Locale } from "@/i18n/routing";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Badge } from "@/components/badge";
 import { BidBlockNotice } from "@/components/bid-block-notice";
+import { DealerGradeBadge } from "@/components/dealer-grade";
 import { ReviewList, type DealerReview } from "@/components/dealer-profile";
 import { DealerTabs } from "@/components/dealer-tabs";
 import { Stars } from "@/components/stars";
@@ -9,6 +10,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { Link, redirect } from "@/i18n/navigation";
 import { getDealer, getUserId } from "@/lib/auth";
 import { formatDateTime } from "@/lib/datetime";
+import { loadDealerGrades } from "@/lib/dealer-grades";
 import { dealerFee, loadFeeBands } from "@/lib/fees";
 import { formatTenge } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
@@ -107,11 +109,27 @@ export default async function DealerActivity({ params }: PageProps<"/[locale]/de
     return <Badge tone="neutral">{t("lost")}</Badge>;
   };
 
+  // 판매자가 딜러를 고를 때 보는 내 등급
+  const myGrade = (await loadDealerGrades(supabase, [userId]))[userId];
+  const tg = await getTranslations("dealerGrade");
+
   return (
     <div className="flex flex-col gap-4 pb-6">
       <DealerTabs />
 
       {blockedUntil && <BidBlockNotice until={blockedUntil} />}
+
+      <section className="flex flex-col gap-1.5 rounded-xl bg-white p-4 shadow-sm">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-caption text-ink/60">{tg("myGrade")}</span>
+          {myGrade && myGrade !== "standard" ? (
+            <DealerGradeBadge grade={myGrade} />
+          ) : (
+            <span className="text-caption font-semibold">{tg("standard")}</span>
+          )}
+        </div>
+        <p className="text-caption text-ink/60">{tg("criteria")}</p>
+      </section>
 
       <section className="grid grid-cols-3 gap-2">
         <Stat label={t("rating")}>

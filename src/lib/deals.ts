@@ -41,7 +41,7 @@ export type Inspection = {
   photoUrls: string[];
 };
 
-export type ChatMessage = { id: string; sender_id: string; kind: "text" | "phone"; body: string; created_at: string };
+export type ChatMessage = { id: string; sender_id: string; kind: "text" | "phone" | "photo"; body: string; created_at: string };
 
 export type Claim = {
   id: string;

@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { uploadPhoto } from "@/lib/upload";
 import type { ChatMessage } from "@/lib/deals";
 import { createClient } from "@/lib/supabase/client";
 import { authorizeRealtime } from "@/lib/supabase/realtime";
@@ -28,6 +29,9 @@ export function DealChat({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  // 사진 메시지의 서명 URL (경로 → URL)
+  const [photoUrls, setPhotoUrls] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const supabase = createClient();
@@ -83,6 +87,42 @@ export function DealChat({
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight });
   }, [messages.length]);
 
+  // 새로 보인 사진 메시지의 서명 URL을 받아 온다 (거래 당사자만 읽을 수 있는 비공개 버킷)
+  useEffect(() => {
+    const missing = messages.filter((m) => m.kind === "photo" && !photoUrls[m.body]).map((m) => m.body);
+    if (missing.length === 0) return;
+    createClient()
+      .storage.from("chat-photos")
+      .createSignedUrls(missing, 3600)
+      .then(({ data }) => {
+        if (!data) return;
+        setPhotoUrls((prev) => {
+          const next = { ...prev };
+          for (const item of data) if (item.path && item.signedUrl) next[item.path] = item.signedUrl;
+          return next;
+        });
+      });
+  }, [messages, photoUrls]);
+
+  async function sendPhoto(file: File) {
+    setBusy(true);
+    setError(false);
+    try {
+      const path = await uploadPhoto("chat-photos", `${myId}/${dealId}`, file);
+      const { data, error } = await createClient()
+        .from("deal_messages")
+        .insert({ deal_id: dealId, sender_id: myId, kind: "photo", body: path })
+        .select("id, sender_id, kind, body, created_at")
+        .single();
+      if (error) throw error;
+      setPhotoUrls((prev) => ({ ...prev, [path]: URL.createObjectURL(file) }));
+      setMessages((prev) => (prev.some((m) => m.id === data.id) ? prev : [...prev, data as ChatMessage]));
+    } catch {
+      setError(true);
+    }
+    setBusy(false);
+  }
+
   async function send(event: FormEvent) {
     event.preventDefault();
     const body = text.trim();
@@ -137,6 +177,15 @@ export function DealChat({
                   <span className="block text-caption text-ink/60">{mine ? t("myPhoneSent") : t("theirPhone")}</span>
                   <span className="price font-bold text-steppe">📞 {m.body}</span>
                 </a>
+              ) : m.kind === "photo" ? (
+                photoUrls[m.body] ? (
+                  <a href={photoUrls[m.body]} target="_blank" rel="noreferrer" className="max-w-[70%]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={photoUrls[m.body]} alt={t("photoAlt")} className="max-h-56 rounded-2xl object-cover" />
+                  </a>
+                ) : (
+                  <span className="h-32 w-40 animate-pulse rounded-2xl bg-ink/10" />
+                )
               ) : (
                 <p
                   className={`max-w-[80%] rounded-2xl px-3 py-2 text-body whitespace-pre-line ${
@@ -153,6 +202,26 @@ export function DealChat({
 
       {open ? (
         <form onSubmit={send} className="flex gap-2 border-t border-ink/10 p-2">
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              e.target.value = "";
+              if (file) sendPhoto(file);
+            }}
+          />
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => fileRef.current?.click()}
+            aria-label={t("sendPhoto")}
+            className="h-11 w-11 shrink-0 rounded-lg border border-ink/15 text-subtitle disabled:opacity-40"
+          >
+            📷
+          </button>
           <input
             value={text}
             onChange={(e) => setText(e.target.value)}

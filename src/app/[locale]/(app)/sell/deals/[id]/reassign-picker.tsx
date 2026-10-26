@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { DealerProfileButton } from "@/components/dealer-profile";
+import { DealerGradeBadge, type DealerGrade } from "@/components/dealer-grade";
 import { Stars } from "@/components/stars";
 import { useRouter } from "@/i18n/navigation";
 import { formatDate } from "@/lib/datetime";
@@ -11,7 +12,17 @@ import { createClient } from "@/lib/supabase/client";
 import type { TopBid } from "../../auctions/[id]/result-picker";
 
 // 낙찰 딜러가 노쇼·딜러 사정으로 취소한 거래: 경매를 다시 하지 않고 남은 입찰 딜러 중에서 다시 고른다
-export function ReassignPicker({ auctionId, bids, until }: { auctionId: string; bids: TopBid[]; until: string }) {
+export function ReassignPicker({
+  auctionId,
+  bids,
+  until,
+  grades,
+}: {
+  auctionId: string;
+  bids: TopBid[];
+  until: string;
+  grades: Record<string, DealerGrade>;
+}) {
   const t = useTranslations("reassign");
   const ts = useTranslations("sellerAuction");
   const locale = useLocale();
@@ -59,6 +70,7 @@ export function ReassignPicker({ auctionId, bids, until }: { auctionId: string; 
                   <span className="price text-subtitle font-bold">{formatTenge(bid.amount)}</span>
                   <span className="flex flex-wrap items-center gap-x-2 text-caption text-ink/60">
                     <span className="font-semibold text-ink">{bid.dealer_name}</span>
+                    <DealerGradeBadge grade={grades[bid.dealer_id]} />
                     <Stars rating={bid.dealer_rating} />
                     <span>{ts("dealerDeals", { count: bid.completed_deals })}</span>
                   </span>

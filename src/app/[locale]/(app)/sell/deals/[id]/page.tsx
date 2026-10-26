@@ -16,6 +16,7 @@ import { Stars } from "@/components/stars";
 import { StatusBadge } from "@/components/status-badge";
 import { redirect } from "@/i18n/navigation";
 import { getCurrentUser } from "@/lib/auth";
+import { loadDealerGrades } from "@/lib/dealer-grades";
 import { loadDeal } from "@/lib/deals";
 import { formatTenge } from "@/lib/format";
 import { ClaimComment, DealActions, RatingForm } from "./deal-actions";
@@ -62,7 +63,9 @@ export default async function SellerDealPage({ params }: PageProps<"/[locale]/se
     const until = new Date(new Date(auction.ends_at).getTime() + 7 * 24 * 3600 * 1000).toISOString();
     if (until < new Date().toISOString()) return null;
     const { data: bids } = await supabase.rpc("reassign_candidates", { p_auction_id: deal.auction_id });
-    return { kind: "pick" as const, until, bids: (bids ?? []) as TopBid[] };
+    const candidates = (bids ?? []) as TopBid[];
+    const grades = await loadDealerGrades(supabase, candidates.map((b) => b.dealer_id));
+    return { kind: "pick" as const, until, bids: candidates, grades };
   }
 
   // 판매 결과 공유 카드에 넣을 경쟁 딜러 수
@@ -183,7 +186,7 @@ export default async function SellerDealPage({ params }: PageProps<"/[locale]/se
           {t("goToNextDeal")} →
         </Link>
       )}
-      {reassign?.kind === "pick" && <ReassignPicker auctionId={deal.auction_id} bids={reassign.bids} until={reassign.until} />}
+      {reassign?.kind === "pick" && <ReassignPicker auctionId={deal.auction_id} bids={reassign.bids} until={reassign.until} grades={reassign.grades} />}
       <DealActions dealId={deal.id} status={deal.status} />
       <ReportButton dealId={deal.id} />
       {deal.status === "completed" && deal.seller_rating === null && <RatingForm dealId={deal.id} />}

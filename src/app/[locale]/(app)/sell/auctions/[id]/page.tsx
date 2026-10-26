@@ -13,6 +13,7 @@ import { decisionDeadline } from "@/lib/auction-rules";
 import { getCurrentUser } from "@/lib/auth";
 import type { DamageMap, FrameDamage } from "@/lib/car-catalog";
 import { currentDeal } from "@/lib/supabase/rows";
+import { loadDealerGrades } from "@/lib/dealer-grades";
 import { createClient } from "@/lib/supabase/server";
 import { LiveAuction } from "./live-auction";
 import { LiveEdits } from "./live-edits";
@@ -101,6 +102,7 @@ export default async function SellerAuctionPage({ params }: PageProps<"/[locale]
       loadEvents(),
       loadEstimate(),
     ]);
+    const grades = await loadDealerGrades(supabase, ((top ?? []) as TopBid[]).map((b) => b.dealer_id));
     body = (
       <>
         <PriceChart events={events} startAt={auction.starts_at} endAt={auction.ends_at} />
@@ -110,6 +112,7 @@ export default async function SellerAuctionPage({ params }: PageProps<"/[locale]
         desiredPrice={car.desired_price}
         estimate={estimate}
         deadline={decisionDeadline(auction.ends_at)}
+        grades={grades}
         />
       </>
     );
