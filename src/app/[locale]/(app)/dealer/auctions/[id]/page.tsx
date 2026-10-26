@@ -6,6 +6,7 @@ import { AuctionQa } from "@/components/auction-qa";
 import { BidBlockNotice } from "@/components/bid-block-notice";
 import { ConditionSummary, type CarCondition } from "@/components/condition-summary";
 import { Countdown } from "@/components/countdown";
+import { DealerNote } from "@/components/dealer-note";
 import { FavoriteButton } from "@/components/favorite-button";
 import { PageHeader } from "@/components/page-header";
 import { PhotoGallery } from "@/components/photo-gallery";
@@ -57,7 +58,7 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
 
   // 서로 관계없는 조회는 한 번에 보낸다
   const supabase = await createClient();
-  const [{ data: auction }, { data: stats }, { data: rank }, { data: myBid }, { data: deal }, dealer, { data: fav }] =
+  const [{ data: auction }, { data: stats }, { data: rank }, { data: myBid }, { data: deal }, dealer, { data: fav }, { data: note }] =
     await Promise.all([
       supabase
         .from("auctions")
@@ -73,6 +74,7 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
       supabase.from("deals").select("id").eq("auction_id", id).eq("dealer_id", userId).maybeSingle(),
       getDealer(userId),
       supabase.from("dealer_favorites").select("auction_id").eq("dealer_id", userId).eq("auction_id", id).maybeSingle(),
+      supabase.from("dealer_notes").select("body").eq("dealer_id", userId).eq("auction_id", id).maybeSingle(),
       // 판매자에게 보여줄 "본 딜러 수" 기록 (진행 중 경매·승인 딜러만 DB에서 반영)
       supabase.rpc("record_auction_view", { p_auction_id: id }),
     ]);
@@ -162,6 +164,10 @@ export default async function DealerAuctionDetail({ params }: PageProps<"/[local
         <h2 className="mb-1 text-subtitle font-semibold">{t("sellerDefects")}</h2>
         <p className="text-body whitespace-pre-line">{car.defects || tf("defects.none")}</p>
       </section>
+
+      {!own && dealer && (
+        <DealerNote auctionId={id} dealerId={userId} initial={(note?.body as string | undefined) ?? ""} />
+      )}
 
       <AuctionQa auctionId={id} role="dealer" canAsk={isLive && !own && dealer?.status === "approved"} />
 

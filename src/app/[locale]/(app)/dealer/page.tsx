@@ -111,7 +111,7 @@ export default async function DealerAuctions({ params, searchParams }: PageProps
   const makes = [...new Set(all.map((a) => a.cars.make))].sort();
   const ids = auctions.map((a) => a.id);
 
-  const [{ data: myBids }, { data: counts }, thumbs] = await Promise.all([
+  const [{ data: myBids }, { data: counts }, thumbs, { data: noteRows }] = await Promise.all([
     supabase.from("bids").select("auction_id, amount").eq("dealer_id", user.id).in("auction_id", ids),
     supabase.rpc("auction_bid_counts", { p_auction_ids: ids }),
     signedUrlMap(
@@ -119,7 +119,9 @@ export default async function DealerAuctions({ params, searchParams }: PageProps
       "car-photos",
       auctions.flatMap((a) => a.cars.car_photos.filter((p) => p.slot === "front").map((p) => p.storage_path)),
     ),
+    supabase.from("dealer_notes").select("auction_id, body").eq("dealer_id", user.id).in("auction_id", ids),
   ]);
+  const notes = new Map((noteRows ?? []).map((n) => [n.auction_id as string, n.body as string]));
   const myBid = new Map((myBids ?? []).map((b) => [b.auction_id as string, b.amount as number]));
   const bidCount = new Map(
     ((counts ?? []) as { auction_id: string; bid_count: number }[]).map((c) => [c.auction_id, c.bid_count]),
@@ -232,6 +234,9 @@ export default async function DealerAuctions({ params, searchParams }: PageProps
                       <span className="text-ink/40">{t("notBidYet")}</span>
                     )}
                   </span>
+                  {notes.has(auction.id) && (
+                    <span className="col-span-2 truncate text-caption text-ink/70">📝 {notes.get(auction.id)}</span>
+                  )}
                 </div>
               </Link>
             </li>

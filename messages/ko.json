@@ -538,7 +538,8 @@
     "bidCount": "입찰",
     "winRate": "낙찰률",
     "avgWon": "평균 낙찰가",
-    "performanceHint": "최근 입찰 50건 중 결과가 난 {decided}건에서 {won}건 낙찰"
+    "performanceHint": "최근 입찰 50건 중 결과가 난 {decided}건에서 {won}건 낙찰",
+    "exportLedger": "매입 장부 내려받기 (CSV)"
   },
   "sellerAuction": {
     "back": "내 차 팔기",
@@ -1666,5 +1667,13 @@
       "profiles": "사용자",
       "deal_inspections": "점검표"
     }
+  },
+  "dealerNote": {
+    "title": "내 메모",
+    "private": "나만 볼 수 있어요",
+    "placeholder": "예: 앞범퍼 재도색 의심, 최대 3 200 000 ₸까지",
+    "save": "메모 저장",
+    "saved": "저장됨",
+    "failed": "저장하지 못했습니다. 다시 시도해 주세요."
   }
 }
