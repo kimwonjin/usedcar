@@ -507,11 +507,23 @@
       "cancelled": "취소된 경매입니다.",
       "expired": "24시간 안에 판매를 결정하지 않아 경매가 종료되었습니다."
     },
-    "relist": "같은 정보로 다시 경매 올리기",
+    "relist": "다시 48시간 경매 올리기",
     "relistFailed": "다시 올리지 못했습니다.",
     "decisionDeadline": "판매 결정 마감까지",
     "decisionDeadlineHint": "24시간 안에 결정하지 않으면 자동으로 종료됩니다",
-    "deadlinePassed": "결정 기한(24시간)이 지나 판매할 수 없습니다. 다시 경매에 올려 주세요."
+    "deadlinePassed": "결정 기한(24시간)이 지나 판매할 수 없습니다. 다시 경매에 올려 주세요.",
+    "lastTopBid": "지난 최고 입찰가",
+    "noBidsShort": "입찰 없음",
+    "bidCount": "입찰 {count}건",
+    "desiredShort": "내 희망가",
+    "marketShort": "비슷한 차 시세",
+    "gapHint": "최고 입찰가가 희망가보다 {amount} ({pct}%) 낮았어요. 희망가를 조정하면 이번엔 팔릴 가능성이 높아집니다.",
+    "noBidsHint": "입찰이 없었어요. 희망가를 낮추거나 비워 두면 딜러들이 입찰하기 쉬워집니다.",
+    "newDesired": "다시 올릴 때 희망가",
+    "desiredOptional": "비워 두면 희망가 없이 올립니다",
+    "useTopBid": "최고 입찰가 {amount}로",
+    "useMarket": "시세 {amount}로",
+    "clearDesired": "희망가 비우기"
   },
   "deal": {
     "backToActivity": "내 활동",
