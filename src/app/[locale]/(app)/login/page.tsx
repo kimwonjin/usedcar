@@ -10,9 +10,10 @@ const usePhoneLogin = process.env.NEXT_PUBLIC_AUTH_MODE === "phone";
 
 const allowedNext = ["/sell", "/dealer", "/admin"];
 
-// 로그인 후 이동할 곳. 다른 사이트로 보내지 못하도록 정해진 경로만 허용한다
-function safeNext(next: unknown): string {
-  if (typeof next !== "string") return "/sell";
+// 로그인 후 이동할 곳. 다른 사이트로 보내지 못하도록 정해진 경로만 허용한다.
+// 없으면(상단 "로그인") null → 로그인한 사람의 역할에 맞는 화면으로 보낸다
+function safeNext(next: unknown): string | null {
+  if (typeof next !== "string") return null;
   if (allowedNext.includes(next)) return next;
   // 시세 조회에서 넘어온 차량 등록 (제조사·모델·연식을 미리 채움)
   if (/^\/sell\/new(\?[A-Za-z0-9%=&.+_-]*)?$/.test(next)) return next;

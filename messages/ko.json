@@ -9,6 +9,7 @@
     "navSell": "내 차 팔기",
     "navDealer": "딜러",
     "navAdmin": "관리자",
+    "navLogin": "로그인",
     "account": "내 정보"
   },
   "landing": {
@@ -41,7 +42,14 @@
     "devNotice": "개발 기간에는 인증번호 없이 번호만으로 로그인합니다.",
     "start": "시작하기",
     "invalidPhone": "휴대폰 번호 10자리를 확인해 주세요. 예: 701 234-56-78",
-    "confirmEmailOn": "Supabase의 Confirm email 설정을 꺼야 로그인할 수 있습니다."
+    "confirmEmailOn": "Supabase의 Confirm email 설정을 꺼야 로그인할 수 있습니다.",
+    "sellTitle": "휴대폰 번호로 내 차 팔기 시작",
+    "dealerTitle": "딜러로 시작하기",
+    "firstTime": "처음이면 번호만 입력하면 바로 가입됩니다. 비밀번호는 없습니다.",
+    "sellPoint1": "번호는 내가 고른 딜러 한 곳에만 공개됩니다.",
+    "sellPoint2": "로그인하면 차량 번호부터 차례대로 등록합니다.",
+    "dealerPoint1": "로그인 후 사업자 정보(БИН)와 매장 사진을 올리면 운영팀이 1~2일 안에 승인합니다.",
+    "defaultPoint": "판매자는 내 차 팔기, 딜러는 딜러 화면으로 바로 이동합니다."
   },
   "seller": {
     "title": "내 차 팔기",

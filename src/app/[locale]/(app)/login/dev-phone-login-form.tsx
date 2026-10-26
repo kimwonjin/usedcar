@@ -7,6 +7,8 @@ import { useRouter } from "@/i18n/navigation";
 import { PhoneField } from "@/components/phone-field";
 import { normalizePhone } from "@/lib/phone";
 import { createClient } from "@/lib/supabase/client";
+import { homeFor } from "./home-for";
+import { LoginIntro } from "./login-intro";
 
 // 개발 기간용: 인증번호 없이 전화번호만으로 로그인한다.
 // 전화번호를 이메일·비밀번호 계정으로 바꿔 쓰므로 번호를 아는 사람은 누구나 그 계정에 들어갈 수 있다.
@@ -16,7 +18,7 @@ const devCredentials = (phone: string) => ({
   password: `satu-dev-${phone}`,
 });
 
-export function DevPhoneLoginForm({ next }: { next: string }) {
+export function DevPhoneLoginForm({ next }: { next: string | null }) {
   const t = useTranslations("login");
   const router = useRouter();
   const [phone, setPhone] = useState("");
@@ -50,13 +52,13 @@ export function DevPhoneLoginForm({ next }: { next: string }) {
     }
 
     await supabase.from("profiles").update({ phone: `+${normalized}` }).eq("id", session.user.id);
-    router.replace(next);
+    router.replace(next ?? (await homeFor(supabase, session.user.id)));
     router.refresh();
   }
 
   return (
     <form onSubmit={onSubmit} className="flex flex-1 flex-col gap-4 pt-6">
-      <h1 className="text-title font-bold text-navy">{t("title")}</h1>
+      <LoginIntro next={next} />
       <p className="text-caption text-ink/60">{t("devNotice")}</p>
 
       <PhoneField label={t("phone")} value={phone} onChange={setPhone} />

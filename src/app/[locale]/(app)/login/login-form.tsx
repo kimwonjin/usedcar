@@ -7,8 +7,10 @@ import { useRouter } from "@/i18n/navigation";
 import { PhoneField } from "@/components/phone-field";
 import { normalizePhone } from "@/lib/phone";
 import { createClient } from "@/lib/supabase/client";
+import { homeFor } from "./home-for";
+import { LoginIntro } from "./login-intro";
 
-export function LoginForm({ next }: { next: string }) {
+export function LoginForm({ next }: { next: string | null }) {
   const t = useTranslations("login");
   const router = useRouter();
   const [phone, setPhone] = useState("");
@@ -39,10 +41,10 @@ export function LoginForm({ next }: { next: string }) {
         setMessage(t("sent"));
       }
     } else {
-      const { error } = await supabase.auth.verifyOtp({ phone: e164, token: code, type: "sms" });
-      if (error) setMessage(t("error"));
+      const { data, error } = await supabase.auth.verifyOtp({ phone: e164, token: code, type: "sms" });
+      if (error || !data.user) setMessage(t("error"));
       else {
-        router.replace(next);
+        router.replace(next ?? (await homeFor(supabase, data.user.id)));
         router.refresh();
       }
     }
@@ -51,7 +53,7 @@ export function LoginForm({ next }: { next: string }) {
 
   return (
     <form onSubmit={onSubmit} className="flex flex-1 flex-col gap-4 pt-6">
-      <h1 className="text-title font-bold text-navy">{t("title")}</h1>
+      <LoginIntro next={next} />
 
       {step === "phone" ? (
         <PhoneField label={t("phone")} value={phone} onChange={setPhone} />

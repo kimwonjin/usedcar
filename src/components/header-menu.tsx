@@ -12,13 +12,17 @@ export function HeaderMenu() {
   const tn = useTranslations("notificationCenter");
   const locale = useLocale();
   const [userId, setUserId] = useState<string | null>(null);
+  const [ready, setReady] = useState(false); // 로그인 여부를 확인하기 전에는 "로그인"을 띄우지 않는다
   const [unread, setUnread] = useState(0);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     if (!isSupabaseConfigured) return;
     const supabase = createClient();
-    supabase.auth.getSession().then(({ data }) => setUserId(data.session?.user.id ?? null));
+    supabase.auth.getSession().then(({ data }) => {
+      setUserId(data.session?.user.id ?? null);
+      setReady(true);
+    });
     const { data } = supabase.auth.onAuthStateChange((_event, session) => setUserId(session?.user.id ?? null));
     return () => data.subscription.unsubscribe();
   }, []);
@@ -64,6 +68,11 @@ export function HeaderMenu() {
       ) : (
         <Link href="/dealer" className="text-white/90">
           {t("navDealer")}
+        </Link>
+      )}
+      {ready && !userId && (
+        <Link href="/login" className="font-semibold text-white">
+          {t("navLogin")}
         </Link>
       )}
       {userId && (
